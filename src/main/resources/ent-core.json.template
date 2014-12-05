@@ -37,21 +37,20 @@
           "poolsize": 32
             <% } %>
     }
-  },{
-    "name": "com.campudus~json-schema-validator~1.1.0",
-    "config": {
-      "address": "json.schema.validator",
-      "schemas": []
-    }
-  },{
-    "name": "io.vertx~mod-mysql-postgresql~0.3.0-WSE",
-    "config": {
-      "address" : "sql.persistor",
-      "username" : "web-education",
-      "password" : "We_1234",
-      "database" : "ong"
-    }
-  },{
+  },
+  <% if (sqlDbName != null && !sqlDbName.trim().isEmpty()) { %>
+  {
+      "name": "io.vertx~mod-mysql-postgresql~0.3.0-WSE",
+      "config": {
+        "address" : "sql.persistor",
+        "username" : "${sqlUsername}",
+        "password" : "${sqlPassword}",
+        "database" : "${sqlDbName}"
+      }
+    },
+  <% } %>
+  <% if (webdavHost != null && !webdavHost.trim().isEmpty()) { %>
+  {
     "name": "fr.wseduc~mod-webdav~0.1.0",
     "config": {
       "address" : "webdav"
@@ -65,8 +64,17 @@
         }
       }
       <% } %>
+      }
+    },
+  <% } %>
+    {
+      "name": "com.campudus~json-schema-validator~1.1.0",
+      "config": {
+        "address": "json.schema.validator",
+        "schemas": []
+      }
     }
-  }],
+  ],
   "external-modules": [
     {
       "name": "io.vertx~mod-mongo-persistor~2.0.2-final-WSE",
@@ -201,24 +209,29 @@
         "mode": "${mode}",
         "port": 8015,
         "address" : "wse.communication",
-        "initDefaultCommunicationRules" : {
-          "Structure-Personnel" : {
-            "users" : "BOTH", "communiqueWith" : ["Structure-Teacher", "Structure-Relative", "Structure-Student"]
-          },
-          "Structure-Teacher" : {
-            "users" : "BOTH", "communiqueWith" : ["Structure-Personnel", "Structure-Relative", "Structure-Student"]
-          },
-          "Structure-Student" : {"users" : "OUTGOING"},
-          "Structure-Relative" : {"users" : "OUTGOING"},
-          "Class-Personnel" : {"users" : "OUTGOING"},
-          "Class-Teacher" : {"users" : "OUTGOING"},
-          "Class-Student" : {
-            "users" : "BOTH", "communiqueWith" : ["Class-Personnel", "Class-Teacher"]
-          },
-          "Class-Relative" : {
-            "users" : "BOTH", "Relative-Student" : "INCOMING", "communiqueWith" : ["Class-Personnel", "Class-Student", "Class-Teacher"]
+        "initDefaultCommunicationRules" :
+        <% if (defaultCommunicationRules != null && !defaultCommunicationRules.trim().isEmpty()) { %>
+          ${defaultCommunicationRules}
+       <% } else { %>
+          {
+            "Structure-Personnel" : {
+              "users" : "BOTH", "communiqueWith" : ["Structure-Teacher", "Structure-Relative", "Structure-Student"]
+            },
+            "Structure-Teacher" : {
+              "users" : "BOTH", "communiqueWith" : ["Structure-Personnel", "Structure-Relative", "Structure-Student"]
+            },
+            "Structure-Student" : {"users" : "OUTGOING"},
+            "Structure-Relative" : {"users" : "OUTGOING"},
+            "Class-Personnel" : {"users" : "OUTGOING"},
+            "Class-Teacher" : {"users" : "OUTGOING"},
+            "Class-Student" : {
+              "users" : "BOTH", "communiqueWith" : ["Class-Personnel", "Class-Teacher"]
+            },
+            "Class-Relative" : {
+              "users" : "BOTH", "Relative-Student" : "INCOMING", "communiqueWith" : ["Class-Personnel", "Class-Student", "Class-Teacher"]
+            }
           }
-        }
+       <% } %>
       }
     },
     {
@@ -247,7 +260,11 @@
           {"name": "appRegistry", "url": "/appregistry/admin-console"},
           {"name": "communication", "url": "/communication/admin-console"}
         ],
-        "widgets": [{
+        "widgets": [
+         <% if (widgets != null && !widgets.trim().isEmpty()) { %>
+            ${widgets}
+         <% } else { %>
+          {
             "name": "notes",
             "path": "/public/template/notes.html",
             "js": "/public/js/notes.js"
@@ -256,38 +273,28 @@
             "name": "calendar",
             "path": "/public/template/calendar.html",
             "js": "/public/js/calendar.js"
-          },
-          {
-            "name": "actualites",
-            "path": "/actualites/public/template/last-infos-widget.html",
-            "js": "/actualites/public/js/last-infos-widget.js",
-            "i18n": "/actualites/i18n"
-          },
-          {
-            "name": "rss",
-            "path": "/rss/public/template/rss-widget.html",
-            "js": "/rss/public/js/rss-widget.js",
-            "i18n": "/rss/i18n"
-          },
-          {
-            "name": "bookmark",
-            "path": "/bookmark/public/template/bookmark-widget.html",
-            "js": "/bookmark/public/js/bookmark-widget.js",
-            "i18n": "/bookmark/i18n"
           }
+         <% } %>
         ],
-        "themes": [{
-                        "_id": "default",
-                        "displayName": "shore",
-                        "path": "/assets/themes/neo/default/"
-                  }, {
-                        "_id": "lounge",
-                        "displayName": "lounge",
-                        "path": "/assets/themes/neo/lounge/"
-                  }],
-                  "resources-applications": [
-                          "workspace", "blog", "actualites", "wiki", "pages"
-                  ]
+        "themes": [
+         <% if (themes != null && !themes.trim().isEmpty()) { %>
+            ${themes}
+         <% } else { %>
+            {
+              "_id": "default",
+              "displayName": "default",
+              "path": "/assets/themes/raw/default/"
+            }, {
+              "_id": "magenta",
+              "displayName": "magenta",
+              "path": "/assets/themes/raw/magenta/"
+
+            }
+         <% } %>
+            ],
+            "resources-applications": [
+              ${resourcesApplications}
+            ]
       }
     },
     {
@@ -352,57 +359,37 @@
           {
             "class" : "org.entcore.cas.services.EliotRegisteredService",
             "principalAttributeName" : "externalId",
-            "patterns" : [
-              "^(http|https):\\/\\/atoswse.int.axess-eliot.com\\/.*"
-            ]
+            "patterns" : [${patternEliotRegisteredService}]
           },
           {
             "class" : "org.entcore.cas.services.PronoteRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [
-              "^(http|https):\\/\\/atos\\\\.index-education\\\\.net\\/[pP]ronote\\/.*",
-              "^(http|https):\\/\\/[0-9]+[a-zA-Z]\\\\.index-education\\\\.net\\/[pP]ronote\\/.*",
-              "^(http|https):\\/\\/www\\\\.lp-sillac\\\\.ac-poitiers\\\\.fr[:0-9]*\\/[pP]ronote\\/.*",
-              "^(http|https):\\/\\/www\\\\.lyc-lisa\\\\.ac-poitiers\\\\.fr[:0-9]*\\/.*",
-              "^(http|https):\\/\\/www\\\\.lyc-stmaixentlecole\\\\.ac-poitiers\\\\.fr[:0-9]*\\/[pP]ronote\\/.*",
-              "^(http|https):\\/\\/pronote\\\\.formations-agrinature\\\\.com[:0-9]*\\/.*"
-            ]
+            "patterns" : [${patternPronoteRegisteredService}]
           },
           {
             "class" : "org.entcore.cas.services.KneRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [
-              "^(http|https):\\/\\/www\\\\.kiosque-edu\\\\.com\\/FrontOffice\\/.*"
-            ]
+            "patterns" : [${patternKneRegisteredService}]
           },
           {
             "class" : "org.entcore.cas.services.LeSiteTvRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [
-              "^(http|https):\\/\\/[a-zA-Z]+\\\\.lesite\\\\.tv\\/.*"
-            ]
+            "patterns" : [${patternLeSiteTvRegisteredService}]
           },
           {
             "class" : "org.entcore.cas.services.UniversalisRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [
-              "^(http|https):\\/\\/[a-zA-Z]+\\\\.universalis-edu\\\\.com\\/.*"
-            ]
+            "patterns" : [${patternUniversalisRegisteredService}]
           },
           {
             "class" : "org.entcore.cas.services.UidRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [
-              "^(http|https):\\/\\/[a-zA-Z]+\\\\.paraschool\\\\.com\\/soutien\\/.*",
-              "^(http|https):\\/\\/[a-zA-Z0-9]+\\\\.esidoc\\\\.fr\\/.*"
-            ]
+            "patterns" : [${patternUidRegisteredService}]
           },
 			{
 			  "class" : "org.entcore.cas.services.DefaultRegisteredService",
 			  "principalAttributeName" : "login",
-			  "patterns" : [
-				"^(http|https):\\/\\/.*"
-			  ]
+			  "patterns" : [${patternDefaultRegisteredService}]
 			}
         ]
       }
