@@ -97,7 +97,6 @@ class SpringboardPlugin implements Plugin<Project> {
 		if (!project.file("deployments")?.exists()) {
 			project.file("deployments").mkdir()
 		}
-		project.configurations.deployment.each { println it }
 		project.copy {
 			from {
 				project.configurations.deployment.collect { project.zipTree(it) }
@@ -176,13 +175,14 @@ class SpringboardPlugin implements Plugin<Project> {
 		FileUtils.copy(this.getClass().getClassLoader().getResourceAsStream("ent-core.json.template"),
 				entcoreJsonTemplate)
 
-		File confProperties = project.file("conf.properties")
-		FileUtils.copy(this.getClass().getClassLoader().getResourceAsStream("conf.properties"),
-				confProperties)
+		String filename = "conf.properties"
+		File confProperties = project.file(filename)
+		Map confMap = FileUtils.createOrAppendProperties(confProperties, filename)
 
-		File testProperties = project.file("test.properties")
-		FileUtils.copy(this.getClass().getClassLoader().getResourceAsStream("test.properties"),
-				testProperties)
+		String filenameTest = "test.properties"
+		File testProperties = project.file(filenameTest)
+		Map testMap = FileUtils.createOrAppendProperties(testProperties, filenameTest)
+
 
 		Map appliPort = [:]
 		project.file("deployments").eachDir {
@@ -193,19 +193,25 @@ class SpringboardPlugin implements Plugin<Project> {
 				}
 			}
 			it.eachFile(FileType.FILES) { file ->
-				if ("conf.json.template".equals(file.name)) {
-					File f = entcoreJsonTemplate
-					f.append(",\n")
-					f.append(file.text)
-					file.eachLine { line ->
-						def matcher = line =~ /\s*\t*\s*"port"\s*:\s*([0-9]+)[,]?\s*\t*\s*/
-						if (matcher.find()) {
-							appliPort.put(it.name, matcher.group(1))
+				File f
+				switch (file.name) {
+					case "conf.json.template":
+						f = entcoreJsonTemplate
+						f.append(",\n")
+						f.append(file.text)
+						file.eachLine { line ->
+							def matcher = line =~ /\s*\t*\s*"port"\s*:\s*([0-9]+)[,]?\s*\t*\s*/
+							if (matcher.find()) {
+								appliPort.put(it.name, matcher.group(1))
+							}
 						}
-					}
-				} else {
-					File f = project.file(file.name)
-					f.append(f.text)
+						break;
+					case "conf.properties" :
+						FileUtils.appendProperties(project, file, confMap)
+						break;
+					case "test.properties" :
+						FileUtils.appendProperties(project, file, testMap)
+						break;
 				}
 			}
 		}
@@ -231,8 +237,12 @@ class SpringboardPlugin implements Plugin<Project> {
 				"}"
 		)
 
-		confProperties.append("\nentcoreVersion=" + version)
-		testProperties.append("\nentcoreVersion=" + version)
+		if (!confMap.containsKey("entcoreVersion")) {
+			confProperties.append("\nentcoreVersion=" + version)
+		}
+		if (!testMap.containsKey("entcoreVersion")) {
+			testProperties.append("\nentcoreVersion=" + version)
+		}
 	}
 
 }

@@ -1,6 +1,7 @@
 package fr.wseduc.gradle.springboard
 
 import groovy.text.SimpleTemplateEngine
+import org.gradle.api.Project
 
 class FileUtils {
 
@@ -32,67 +33,38 @@ class FileUtils {
 		}
 	}
 
-//	static def copyFolder((Path source, Path target)) {
-//		// TODO Auto-generated method stub
-//		//java nio folder copy
-//		EnumSet options = EnumSet.of(FileVisitOption.FOLLOW_LINKS);
-//		//check first if source is a directory
-//		if(Files.isDirectory(source)){
-//			System.out.println("source is a directory");
-//
-//			walkFileTree(source, options, Integer.MAX_VALUE, new FileVisitor() {
-//
-//				@Override
-//				public FileVisitResult postVisitDirectory(Path dir,
-//														  IOException exc) throws IOException {
-//					// TODO Auto-generated method stub
-//					//System.out.println(source);
-//					return FileVisitResult.CONTINUE;
-//				}
-//
-//				@Override
-//				public FileVisitResult preVisitDirectory(Path dir,
-//														 BasicFileAttributes attrs)  {
-//					// TODO Auto-generated method stub
-//					CopyOption[] opt = new CopyOption[]{COPY_ATTRIBUTES,REPLACE_EXISTING};
-//					System.out.println("Source Directory "+dir);
-//					Path newDirectory = target.resolve(source.relativize(dir));
-//					System.out.println("Target Directory "+newDirectory);
-//					try{
-//						System.out.println("creating directory tree "+Files.copy(dir, newDirectory,opt));
-//					}
-//					catch(FileAlreadyExistsException x){
-//					}
-//					catch(IOException x){
-//						return FileVisitResult.SKIP_SUBTREE;
-//					}
-//
-//					return CONTINUE;
-//				}
-//
-//				@Override
-//				public FileVisitResult visitFile(Path file,
-//												 BasicFileAttributes attrs) throws IOException {
-//					// TODO Auto-generated method stub
-//					//System.out.println("results");
-//					System.out.println("Copying file:"+file);
-//					kopya(file, target.resolve(source.relativize(file)));
-//					return CONTINUE;
-//				}
-//
-//				@Override
-//				public FileVisitResult visitFileFailed(Path file,
-//													   IOException exc) throws IOException {
-//					// TODO -generated method stub
-//					return CONTINUE;
-//				}
-//			});
-//		}
-//
-//	}
-//	public static void kopya(Path source,Path target) throws IOException{
-//		CopyOption[] options = new CopyOption[]{REPLACE_EXISTING,COPY_ATTRIBUTES};
-//		System.out.println("Copied file "+Files.copy(source, target,options));
-//
-//	}
+	static def createOrAppendProperties(File confProperties, String filename) {
+		Boolean confExists = confProperties.exists()
+		Map confPropertiesMap = [:]
+		if (!confExists) {
+			copy(FileUtils.class.getClassLoader().getResourceAsStream(filename),
+					confProperties)
+		} else {
+			confProperties.eachLine {
+				String[] l = it.split("=", 2)
+				confPropertiesMap.put(l[0], l[1])
+			}
+			FileUtils.class.getClassLoader().getResourceAsStream(filename).eachLine {
+				String[] l = it.split("=", 2)
+				if (!confPropertiesMap.containsKey(l[0])) {
+					confProperties.append(it + "\n")
+				}
+				confPropertiesMap.put(l[0], l[1])
+			}
+		}
+		return confPropertiesMap
+	}
+
+	static def appendProperties(Project project, File file, confMap) {
+		File f
+		f = project.file(file.name)
+		f.eachLine {
+			String[] l = it.split("=", 2)
+			if (!confMap.containsKey(l[0])) {
+				f.append(it + "\n")
+			}
+			confMap.put(l[0], l[1])
+		}
+	}
+
 }
