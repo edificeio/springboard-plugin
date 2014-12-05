@@ -44,5 +44,3 @@ object IntegrationTestScenario {
     .group("Quota Scenario") {
     QuotaScenario.scn
   }
-
-}

@@ -206,6 +206,10 @@ class SpringboardPlugin implements Plugin<Project> {
 							}
 						}
 						break;
+					case "test.scala":
+						f = scn
+						f.append("\n" + file.text)
+						break;
 					case "conf.properties" :
 						FileUtils.appendProperties(project, file, confMap)
 						break;
@@ -236,6 +240,7 @@ class SpringboardPlugin implements Plugin<Project> {
 				"  ]\n" +
 				"}"
 		)
+		scn.append("\n}")
 
 		if (!confMap.containsKey("entcoreVersion")) {
 			confProperties.append("\nentcoreVersion=" + version)
