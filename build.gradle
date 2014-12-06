@@ -1,5 +1,5 @@
 apply plugin: 'groovy'
-apply plugin: 'maven'
+apply from: "gradle/maven.gradle"
 
 dependencies {
   compile gradleApi()
