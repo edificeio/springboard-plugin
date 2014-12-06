@@ -33,7 +33,7 @@
           "node_keys_indexable" : "externalId"
         }
         <% } else { %>
-          "server-uri": "http://localhost:7474/db/data/",
+          "server-uri": "${neo4jUri}/db/data/",
           "poolsize": 32
             <% } %>
     }
@@ -43,6 +43,8 @@
       "name": "io.vertx~mod-mysql-postgresql~0.3.0-WSE",
       "config": {
         "address" : "sql.persistor",
+        "host" : "${sqlHost}",
+        "port" : ${sqlPort},
         "username" : "${sqlUsername}",
         "password" : "${sqlPassword}",
         "database" : "${sqlDbName}"
@@ -82,8 +84,8 @@
         "worker": true,
         "multi-threaded": true,
         "address": "wse.mongodb.persistor",
-        "host": "localhost",
-        "port": 27017,
+        "host": "${mongoHost}",
+        "port": ${mongoPort},
         "db_name": "${dbName}",
         "pool_size": 10
       }
@@ -94,8 +96,8 @@
         "worker": true,
         "multi-threaded": true,
         "address": "wse.gridfs.persistor",
-        "host": "localhost",
-        "port": 27017,
+        "host": "${mongoHost}",
+        "port": ${mongoPort},
         "db_name": "${dbName}",
         "pool_size": 10
       }
@@ -106,8 +108,8 @@
         "multi-threaded": true,
         "address" : "wse.image.resizer",
         "gridfs" : {
-          "host": "localhost",
-          "port": 27017,
+          "host": "${mongoHost}",
+          "port": ${mongoPort},
           "db_name": "${dbName}",
           "pool_size": 10
         }
