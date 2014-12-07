@@ -243,8 +243,10 @@
         "auto-redeploy": false,
         "ssl" : $ssl,
         "mode": "${mode}",
-        "skin": "neo",
-        "assets-path": "../..",
+        "skin": "${skin}",
+        <% if (assetsPath != null && !assetsPath.trim().isEmpty()) { %>
+           "assetsPath": "${assetsPath}",
+        <% } %>
         "path-prefix": "",
                 "root-page": "/timeline/timeline",
         "urls": {
