@@ -221,7 +221,6 @@ class SpringboardPlugin implements Plugin<Project> {
 		}
 
 		InputStream httpProxy = this.getClass().getClassLoader().getResourceAsStream("http-proxy.json.template")
-		entcoreJsonTemplate.append(",\n")
 		entcoreJsonTemplate.append(httpProxy.text)
 		appliPort.each { k, v ->
 			entcoreJsonTemplate.append(
