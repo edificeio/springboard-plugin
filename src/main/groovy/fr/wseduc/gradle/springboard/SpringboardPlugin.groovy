@@ -243,10 +243,10 @@ class SpringboardPlugin implements Plugin<Project> {
 		scn.append("\n}")
 
 		if (!confMap.containsKey("entcoreVersion")) {
-			confProperties.append("\nentcoreVersion=" + version)
+			confProperties.append("entcoreVersion=" + version + "\n")
 		}
 		if (!testMap.containsKey("entcoreVersion")) {
-			testProperties.append("\nentcoreVersion=" + version)
+			testProperties.append("entcoreVersion=" + version + "\n")
 		}
 	}
 

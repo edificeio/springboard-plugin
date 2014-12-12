@@ -39,17 +39,22 @@ class FileUtils {
 		if (!confExists) {
 			copy(FileUtils.class.getClassLoader().getResourceAsStream(filename),
 					confProperties)
+			confProperties.append("\n")
 		} else {
 			confProperties.eachLine {
-				String[] l = it.split("=", 2)
-				confPropertiesMap.put(l[0], l[1])
+				if (!it.isEmpty()) {
+					String[] l = it.split("=", 2)
+					confPropertiesMap.put(l[0], l[1])
+				}
 			}
 			FileUtils.class.getClassLoader().getResourceAsStream(filename).eachLine {
-				String[] l = it.split("=", 2)
-				if (!confPropertiesMap.containsKey(l[0])) {
-					confProperties.append(it + "\n")
+				if (!it.isEmpty()) {
+					String[] l = it.split("=", 2)
+					if (!confPropertiesMap.containsKey(l[0])) {
+						confProperties.append(it + "\n")
+					}
+					confPropertiesMap.put(l[0], l[1])
 				}
-				confPropertiesMap.put(l[0], l[1])
 			}
 		}
 		return confPropertiesMap
