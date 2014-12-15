@@ -120,7 +120,7 @@ class SpringboardPlugin implements Plugin<Project> {
 		stopbat.write("wmic process where \"name like '%%java%%'\" delete")
 		stopsh.write(
 				"#!/bin/sh\n" +
-						"PID_ENT=\$(ps -ef | grep vertx | grep -v grep | sed 's/\\s\\+/ /g' | cut -d' ' -f2)\n" +
+						"PID_ENT=\$(ps -ef | grep \"org.entcore~infra\" | grep -v grep | sed 's/\\s\\+/ /g' | cut -d' ' -f2)\n" +
 						"kill \$PID_ENT"
 		)
 		String version = project.getProperties().get("entCoreVersion")
