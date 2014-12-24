@@ -245,7 +245,7 @@
         "mode": "${mode}",
         "skin": "${skin}",
         <% if (assetsPath != null && !assetsPath.trim().isEmpty()) { %>
-           "assetsPath": "${assetsPath}",
+           "assets-path": "${assetsPath}",
         <% } %>
         "path-prefix": "",
                 "root-page": "/timeline/timeline",
