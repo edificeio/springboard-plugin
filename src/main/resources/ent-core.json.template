@@ -90,6 +90,7 @@
         "pool_size": 10
       }
     },
+    <% if (swiftUri == null || swiftUri.isEmpty()) { %>
     {
       "name": "fr.wseduc~mod-gridfs-persistor~1.2.0",
       "config": {
@@ -101,18 +102,29 @@
         "db_name": "${dbName}",
         "pool_size": 10
       }
-    },{
-      "name" : "fr.wseduc~mod-image-resizer~1.1.0",
+    },
+     <% } %>
+    {
+      "name" : "fr.wseduc~mod-image-resizer~1.2-SNAPSHOT",
       "config" : {
         "worker": true,
         "multi-threaded": true,
         "address" : "wse.image.resizer",
+        <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
+        "swift" : {
+          "uri" : "${swiftUri}",
+          "container" : "${swiftContainer}",
+          "user" : "${swiftUser}",
+          "key" : "${swiftKey}"
+        }
+        <% } else { %>
         "gridfs" : {
           "host": "${mongoHost}",
           "port": ${mongoPort},
           "db_name": "${dbName}",
           "pool_size": 10
         }
+        <% } %>
       }
     },
     {
@@ -191,7 +203,16 @@
         "app-icon": "workspace-large",
         "port": 8011,
         "mongo-address" : "wse.mongodb.persistor",
+        <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
+        "swift" : {
+          "uri" : "${swiftUri}",
+          "container" : "${swiftContainer}",
+          "user" : "${swiftUser}",
+          "key" : "${swiftKey}"
+        }
+        <% } else { %>
         "gridfs-address" : "wse.gridfs.persistor"
+        <% } %>
       }
     },
     {
