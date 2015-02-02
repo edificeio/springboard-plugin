@@ -407,6 +407,11 @@
             "patterns" : [${patternUniversalisRegisteredService}]
           },
           {
+            "class" : "org.entcore.cas.services.WebclasseursRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : [${patternWebclasseursRegisteredService}]
+          },
+          {
             "class" : "org.entcore.cas.services.UidRegisteredService",
             "principalAttributeName" : "login",
             "patterns" : [${patternUidRegisteredService}]
