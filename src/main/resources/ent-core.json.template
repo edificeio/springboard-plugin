@@ -38,16 +38,16 @@
             <% } %>
     }
   },
-  <% if (sqlDbName != null && !sqlDbName.trim().isEmpty()) { %>
+  <% if (sqlUrl != null && !sqlUrl.trim().isEmpty()) { %>
   {
-      "name": "io.vertx~mod-mysql-postgresql~0.3.0-WSE",
+      "name": "fr.wseduc~mod-postgresql~0.1-SNAPSHOT",
       "config": {
         "address" : "sql.persistor",
-        "host" : "${sqlHost}",
-        "port" : ${sqlPort},
+        "worker" : true,
+        "multi-threaded" : true,
+        "url" : "${sqlUrl}",
         "username" : "${sqlUsername}",
-        "password" : "${sqlPassword}",
-        "database" : "${sqlDbName}"
+        "password" : "${sqlPassword}"
       }
     },
   <% } %>
