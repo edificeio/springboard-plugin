@@ -38,48 +38,8 @@
             <% } %>
     }
   },
-  <% if (sqlUrl != null && !sqlUrl.trim().isEmpty()) { %>
-  {
-      "name": "fr.wseduc~mod-postgresql~0.1-SNAPSHOT",
-      "config": {
-        "address" : "sql.persistor",
-        "worker" : true,
-        "multi-threaded" : true,
-        "url" : "${sqlUrl}",
-        "username" : "${sqlUsername}",
-        "password" : "${sqlPassword}"
-      }
-    },
-  <% } %>
-  <% if (webdavHost != null && !webdavHost.trim().isEmpty()) { %>
-  {
-    "name": "fr.wseduc~mod-webdav~0.1.0",
-    "config": {
-      "address" : "webdav"
-      <% if ("true".equals(webdavCredential)) { %>
-      ,
-      "credentials" : {
-        "${webdavHost}" : {
-          "username" : "${webdavUsername}",
-          "password" : "${webdavPassword}",
-          "insecure" : ${webdavInsecure}
-        }
-      }
-      <% } %>
-      }
-    },
-  <% } %>
     {
-      "name": "com.campudus~json-schema-validator~1.1.0",
-      "config": {
-        "address": "json.schema.validator",
-        "schemas": []
-      }
-    }
-  ],
-  "external-modules": [
-    {
-      "name": "io.vertx~mod-mongo-persistor~2.0.2-final-WSE",
+      "name": "io.vertx~mod-mongo-persistor~2.1.2-WSE",
       "config": {
         "worker": true,
         "multi-threaded": true,
@@ -87,6 +47,7 @@
         "host": "${mongoHost}",
         "port": ${mongoPort},
         "db_name": "${dbName}",
+        "use_mongo_types": true,
         "pool_size": 10
       }
     },
@@ -149,6 +110,46 @@
         "log-path": "${logDirectory}"
       }
     },
+  <% if (sqlUrl != null && !sqlUrl.trim().isEmpty()) { %>
+  {
+      "name": "fr.wseduc~mod-postgresql~0.1-SNAPSHOT",
+      "config": {
+        "address" : "sql.persistor",
+        "worker" : true,
+        "multi-threaded" : true,
+        "url" : "${sqlUrl}",
+        "username" : "${sqlUsername}",
+        "password" : "${sqlPassword}"
+      }
+    },
+  <% } %>
+  <% if (webdavHost != null && !webdavHost.trim().isEmpty()) { %>
+  {
+    "name": "fr.wseduc~mod-webdav~0.1.0",
+    "config": {
+      "address" : "webdav"
+      <% if ("true".equals(webdavCredential)) { %>
+      ,
+      "credentials" : {
+        "${webdavHost}" : {
+          "username" : "${webdavUsername}",
+          "password" : "${webdavPassword}",
+          "insecure" : ${webdavInsecure}
+        }
+      }
+      <% } %>
+      }
+    },
+  <% } %>
+    {
+      "name": "com.campudus~json-schema-validator~1.1.0",
+      "config": {
+        "address": "json.schema.validator",
+        "schemas": []
+      }
+    }
+  ],
+  "external-modules": [
     {
       "name": "org.entcore~auth~${entcoreVersion}",
       "config": {
