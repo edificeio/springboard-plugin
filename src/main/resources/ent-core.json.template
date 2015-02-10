@@ -164,6 +164,7 @@
           "loginCallback": "${host}",
           "logoutCallback": "${host}"
         },
+        "passwordRegex" : "${passwordRegex}",
         "host": "${host}"
       }
     },
