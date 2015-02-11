@@ -439,6 +439,16 @@
         "app-name" : "Archive",
         "app-address" : "/archive",
         "app-icon" : "archive-large",
-        "expected-exports" : ["workspace"]
+        "expected-exports" : ["workspace"],
+        <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
+        "swift" : {
+          "uri" : "${swiftUri}",
+          "container" : "${swiftContainer}",
+          "user" : "${swiftUser}",
+          "key" : "${swiftKey}"
+        }
+        <% } else { %>
+        "gridfs-address" : "wse.gridfs.persistor"
+        <% } %>
       }
     }
