@@ -189,7 +189,7 @@
         "mode": "${mode}",
         "ssl" : $ssl,
         "host": "${host}",
-        "neo4jPluginUri" : "${neo4jUri}",
+        "neo4jPlugin" : ${neo4jPlugin},
         "userbook-host": "${host}",
         "app-name": "Espace documentaire",
         "app-address": "/workspace/workspace",
@@ -336,9 +336,7 @@
         "address" : "entcore.feeder",
         "neo4j-address" : "wse.neo4j.persistor",
         "apply-communication-rules" : $applycommunication,
-        <% if ("true".equals(neo4jAAFPlugin)) { %>
-        "neo4j-aaf-extension-uri" : "${neo4jUri}",
-        <% } %>
+        "aafNeo4jPlugin" : ${neo4jAAFPlugin},
         "import-files" : "${importDirectory}",
         "feeder" : "${feeder}",
         "exporter" : "${exporter}",
