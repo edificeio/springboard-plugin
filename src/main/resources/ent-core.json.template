@@ -101,15 +101,6 @@
         "address": "entcore.zipper"
       }
     },
-    {
-      "name": "com.wse.tracer~tracer~1.0.0",
-      "config": {
-        "auto-redeploy": false,
-        "logger-name": "one.tracer",
-        "address": "log.address",
-        "log-path": "${logDirectory}"
-      }
-    },
   <% if (sqlUrl != null && !sqlUrl.trim().isEmpty()) { %>
   {
       "name": "fr.wseduc~mod-postgresql~0.1-SNAPSHOT",
