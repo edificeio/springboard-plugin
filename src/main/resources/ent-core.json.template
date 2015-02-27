@@ -20,7 +20,7 @@
   },
   "pre-required-modules": [
   {
-    "name": "fr.wseduc~mod-neo4j-persistor~1.5-SNAPSHOT",
+    "name": "fr.wseduc~mod-neo4j-persistor~1.5.0",
     "config": {
       "worker": true,
       "multi-threaded": true,
@@ -66,7 +66,7 @@
     },
      <% } %>
     {
-      "name" : "fr.wseduc~mod-image-resizer~1.2-SNAPSHOT",
+      "name" : "fr.wseduc~mod-image-resizer~1.2.0",
       "config" : {
         "worker": true,
         "multi-threaded": true,
@@ -103,7 +103,7 @@
     },
   <% if (sqlUrl != null && !sqlUrl.trim().isEmpty()) { %>
   {
-      "name": "fr.wseduc~mod-postgresql~0.1-SNAPSHOT",
+      "name": "fr.wseduc~mod-postgresql~0.1.0",
       "config": {
         "address" : "sql.persistor",
         "worker" : true,
