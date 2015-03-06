@@ -20,7 +20,7 @@
   },
   "pre-required-modules": [
   {
-    "name": "fr.wseduc~mod-neo4j-persistor~1.5.0",
+    "name": "fr.wseduc~mod-neo4j-persistor~1.6-SNAPSHOT",
     "config": {
       "worker": true,
       "multi-threaded": true,
@@ -30,7 +30,8 @@
         "neo4j" : {
           "allow_store_upgrade" : "true",
           "node_auto_indexing" : "true",
-          "node_keys_indexable" : "externalId"
+          "node_keys_indexable" : "externalId,firstName,lastName",
+          "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
         }
         <% } else { %>
           "server-uri": "${neo4jUri}/db/data/",
