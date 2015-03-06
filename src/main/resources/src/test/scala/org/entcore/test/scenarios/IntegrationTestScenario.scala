@@ -44,3 +44,6 @@ object IntegrationTestScenario {
     .group("Quota Scenario") {
     QuotaScenario.scn
   }
+    .group("Duplicate Scenario") {
+    DuplicateScenario.scn
+  }
