@@ -258,7 +258,7 @@
         "auto-redeploy": false,
         "ssl" : $ssl,
         "mode": "${mode}",
-        "skin": "${skin}",
+        "skins": ${skins},
         <% if (assetsPath != null && !assetsPath.trim().isEmpty()) { %>
            "assets-path": "${assetsPath}",
         <% } %>
