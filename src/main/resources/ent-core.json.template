@@ -152,10 +152,10 @@
         "mode": "${mode}",
         "email": "${senderEmail}",
         "authenticationServer": {
-          "loginURL": "${host}/auth/login",
-          "logoutURL": "${host}/auth/logout",
-          "loginCallback": "${host}",
-          "logoutCallback": "${host}"
+          "loginURL": "/auth/login",
+          "logoutURL": "/auth/logout",
+          "loginCallback": "",
+          "logoutCallback": ""
         },
         "passwordRegex" : "${passwordRegex}",
         "host": "${host}"
