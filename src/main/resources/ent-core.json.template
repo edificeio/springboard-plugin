@@ -151,7 +151,7 @@
         "ssl" : $ssl,
         "mode": "${mode}",
         "email": "${senderEmail}",
-        "activationAutoLogin" : true,
+        "activationAutoLogin" : $activationAutoLogin,
         "authenticationServer": {
           "loginURL": "/auth/login",
           "logoutURL": "/auth/logout",
