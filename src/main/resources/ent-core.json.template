@@ -20,7 +20,7 @@
   },
   "pre-required-modules": [
   {
-    "name": "fr.wseduc~mod-neo4j-persistor~1.6-SNAPSHOT",
+    "name": "fr.wseduc~mod-neo4j-persistor~1.5.1",
     "config": {
       "worker": true,
       "multi-threaded": true,
