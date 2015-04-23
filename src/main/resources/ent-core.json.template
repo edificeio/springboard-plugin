@@ -296,22 +296,6 @@
           }
          <% } %>
         ],
-        "themes": [
-         <% if (themes != null && !themes.trim().isEmpty()) { %>
-            ${themes}
-         <% } else { %>
-            {
-              "_id": "default",
-              "displayName": "default",
-              "path": "/assets/themes/raw/default/"
-            }, {
-              "_id": "magenta",
-              "displayName": "magenta",
-              "path": "/assets/themes/raw/magenta/"
-
-            }
-         <% } %>
-            ],
             "resources-applications": [
               ${resourcesApplications}
             ]
