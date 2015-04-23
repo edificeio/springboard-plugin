@@ -7,6 +7,16 @@
 <% if ("true".equals(neo4jEmbedded)) { %>
   "scripts-folder" : "${scriptsDirectory}",
 <% } %>
+  <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
+  "swift" : {
+    "uri" : "${swiftUri}",
+    "container" : "${swiftContainer}",
+    "user" : "${swiftUser}",
+    "key" : "${swiftKey}"
+  },
+  <% } else { %>
+  "gridfs-address" : "wse.gridfs.persistor",
+  <% } %>
   "app-registry": {
     "name": "org.entcore~app-registry~${entcoreVersion}",
     "config": {
@@ -197,17 +207,7 @@
         "app-address": "/workspace/workspace",
         "app-icon": "workspace-large",
         "port": 8011,
-        "mongo-address" : "wse.mongodb.persistor",
-        <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
-        "swift" : {
-          "uri" : "${swiftUri}",
-          "container" : "${swiftContainer}",
-          "user" : "${swiftUser}",
-          "key" : "${swiftKey}"
-        }
-        <% } else { %>
-        "gridfs-address" : "wse.gridfs.persistor"
-        <% } %>
+        "mongo-address" : "wse.mongodb.persistor"
       }
     },
     {
@@ -430,16 +430,6 @@
         "app-name" : "Archive",
         "app-address" : "/archive",
         "app-icon" : "archive-large",
-        "expected-exports" : ["workspace"],
-        <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
-        "swift" : {
-          "uri" : "${swiftUri}",
-          "container" : "${swiftContainer}",
-          "user" : "${swiftUser}",
-          "key" : "${swiftKey}"
-        }
-        <% } else { %>
-        "gridfs-address" : "wse.gridfs.persistor"
-        <% } %>
+        "expected-exports" : ["workspace"]
       }
     }
