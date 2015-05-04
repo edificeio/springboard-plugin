@@ -277,7 +277,7 @@
         },
         "admin-urls": [
           {"name": "directory", "url": "/directory/admin-console"},
-          {"name": "appRegistry", "url": "/appregistry/admin-console"},
+          {"name": "appRegistry", "url": "/appregistry/admin-console", "allowed": ["SUPER_ADMIN"]},
           {"name": "communication", "url": "/communication/admin-console"}
         ],
         "widgets": [
