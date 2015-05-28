@@ -4,6 +4,9 @@
   "mode": "${mode}",
   "auto-redeploy": false,
   "path-prefix": "infra",
+  <% if (signKey != null && !signKey.trim().isEmpty()) { %>
+  "key": "${signKey}",
+  <% } %>
 <% if ("true".equals(neo4jEmbedded)) { %>
   "scripts-folder" : "${scriptsDirectory}",
 <% } %>
