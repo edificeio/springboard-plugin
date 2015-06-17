@@ -175,6 +175,12 @@
         "mode": "${mode}",
         "email": "${senderEmail}",
         "activationAutoLogin" : $activationAutoLogin,
+        <% if (samlMetadataFolder != null && !samlMetadataFolder.trim().isEmpty()) { %>
+        "saml-metadata-folder" : "${samlMetadataFolder}",
+        "saml-private-key": "${samlPrivateKey}",
+        "loginUri":"${federationLoginUri}",
+        "callbackParam":"${federationCallBackParam}",
+        <% } %>
         "authenticationServer": {
           "loginURL": "/auth/login",
           "logoutURL": "/auth/logout",
