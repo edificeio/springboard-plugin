@@ -20,6 +20,9 @@
   <% } else { %>
   "gridfs-address" : "wse.gridfs.persistor",
   <% } %>
+  <% if (sharedConf != null && !sharedConf.trim().isEmpty()) { %>
+  "sharedConf": ${sharedConf},
+  <% } %>
   "app-registry": {
     "name": "org.entcore~app-registry~${entcoreVersion}",
     "config": {
