@@ -181,6 +181,7 @@
         <% if (samlMetadataFolder != null && !samlMetadataFolder.trim().isEmpty()) { %>
         "saml-metadata-folder" : "${samlMetadataFolder}",
         "saml-private-key": "${samlPrivateKey}",
+        "saml-services-providers" : ${samlServicesProviders},
         "loginUri":"${federationLoginUri}",
         "callbackParam":"${federationCallBackParam}",
         <% } %>
