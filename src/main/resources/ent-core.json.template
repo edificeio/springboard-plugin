@@ -390,6 +390,7 @@
         "aafNeo4jPlugin" : ${neo4jAAFPlugin},
         "import-files" : "${importDirectory}",
         "feeder" : "${feeder}",
+        "auto-export" : ${autoExport},
         "exporter" : "${exporter}",
         "export-path" : "${exportPath}",
         "export-destination" : "${exportDestination}"
