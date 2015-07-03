@@ -125,9 +125,6 @@ class SpringboardPlugin implements Plugin<Project> {
 		)
 		String version = project.getProperties().get("entCoreVersion")
 		runbat.write(
-				"SET PATH=%PATH%;tools\\vertx\\bin;tools\\gradle\\bin;tools\\jdk\\bin\n" +
-						"\n" +
-						"tasklist /nh /fi \"imagename eq mongod.exe\" | find /i \"mongod.exe\" > nul || (start cmd /k tools\\mongodb\\bin\\mongod.exe --dbpath tools\\mongodb-data)\n" +
 						"vertx runMod org.entcore~infra~" + version + " -conf ent-core.embedded.json"
 		)
 		runsh.write(
