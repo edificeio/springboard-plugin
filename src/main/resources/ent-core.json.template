@@ -177,6 +177,7 @@
         "ssl" : $ssl,
         "mode": "${mode}",
         "email": "${senderEmail}",
+        "mandatory": ${authMandatoryFields},
         "activationAutoLogin" : $activationAutoLogin,
         <% if (samlMetadataFolder != null && !samlMetadataFolder.trim().isEmpty()) { %>
         "saml-metadata-folder" : "${samlMetadataFolder}",
