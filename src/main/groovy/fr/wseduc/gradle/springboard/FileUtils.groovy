@@ -12,6 +12,13 @@ class FileUtils {
 		props.propertyNames().each{prop->
 			bindings[prop]=props.getProperty(prop)
 		}
+		def defaultProps = new Properties()
+		defaultProps.load(new FileInputStream(new File("default.properties")))
+		defaultProps.propertyNames().each { prop ->
+			if (!bindings.containsKey(prop)) {
+				bindings[prop] = defaultProps.getProperty(prop)
+			}
+		}
 		def engine = new SimpleTemplateEngine()
 		def templateFile = new File(templateFileName)
 		def output = engine.createTemplate(templateFile).make(bindings)

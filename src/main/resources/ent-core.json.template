@@ -7,6 +7,7 @@
   <% if (signKey != null && !signKey.trim().isEmpty()) { %>
   "key": "${signKey}",
   <% } %>
+  "cluster" : ${cluster},
 <% if ("true".equals(neo4jEmbedded)) { %>
   "scripts-folder" : "${scriptsDirectory}",
 <% } %>
@@ -60,9 +61,21 @@
           "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
         }
         <% } else { %>
+          <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
+          "server-uris": ${serverUris},
+          <% } %>
           "server-uri": "${neo4jUri}/db/data/",
           "poolsize": 32
             <% } %>
+    }
+  },
+  {
+    "name": "fr.wseduc~mod-webdav~0.1.0",
+    "config": {
+      "address" : "webdav"
+
+        ,
+      "credentials" : ${webdavCredentials}
     }
   },
     {
@@ -71,6 +84,9 @@
         "worker": true,
         "multi-threaded": true,
         "address": "wse.mongodb.persistor",
+        <% if (seeds != null && !seeds.trim().isEmpty()) { %>
+        "seeds": ${seeds},
+        <% } %>
         "host": "${mongoHost}",
         "port": ${mongoPort},
         "db_name": "${dbName}",
@@ -85,6 +101,9 @@
         "worker": true,
         "multi-threaded": true,
         "address": "wse.gridfs.persistor",
+        <% if (seeds != null && !seeds.trim().isEmpty()) { %>
+        "seeds": ${seeds},
+        <% } %>
         "host": "${mongoHost}",
         "port": ${mongoPort},
         "db_name": "${dbName}",
@@ -107,6 +126,9 @@
         }
         <% } else { %>
         "gridfs" : {
+          <% if (seeds != null && !seeds.trim().isEmpty()) { %>
+          "seeds": ${seeds},
+          <% } %>
           "host": "${mongoHost}",
           "port": ${mongoPort},
           "db_name": "${dbName}",

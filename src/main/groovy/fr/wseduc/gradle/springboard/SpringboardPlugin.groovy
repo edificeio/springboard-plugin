@@ -180,6 +180,9 @@ class SpringboardPlugin implements Plugin<Project> {
 		File testProperties = project.file(filenameTest)
 		Map testMap = FileUtils.createOrAppendProperties(testProperties, filenameTest)
 
+		String filenameDefault = "default.properties"
+		File defaultProperties = project.file(filenameDefault)
+		Map defaultMap = FileUtils.createOrAppendProperties(defaultProperties, filenameDefault)
 
 		Map appliPort = [:]
 		project.file("deployments").eachDir {
@@ -212,6 +215,9 @@ class SpringboardPlugin implements Plugin<Project> {
 						break;
 					case "test.properties" :
 						FileUtils.appendProperties(project, file, testMap)
+						break;
+					case "default.properties" :
+						FileUtils.appendProperties(project, file, defaultMap)
 						break;
 				}
 			}
