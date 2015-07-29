@@ -96,7 +96,7 @@
     },
     <% if (swiftUri == null || swiftUri.isEmpty()) { %>
     {
-      "name": "fr.wseduc~mod-gridfs-persistor~1.3-SNAPSHOT",
+      "name": "fr.wseduc~mod-gridfs-persistor~1.3.0",
       "config": {
         "worker": true,
         "multi-threaded": true,
@@ -112,7 +112,7 @@
     },
      <% } %>
     {
-      "name" : "fr.wseduc~mod-image-resizer~1.3-SNAPSHOT",
+      "name" : "fr.wseduc~mod-image-resizer~1.3.0",
       "config" : {
         "worker": true,
         "multi-threaded": true,
@@ -152,7 +152,7 @@
     },
   <% if (sqlUrl != null && !sqlUrl.trim().isEmpty()) { %>
   {
-      "name": "fr.wseduc~mod-postgresql~0.2-SNAPSHOT",
+      "name": "fr.wseduc~mod-postgresql~0.1.1",
       "config": {
         "address" : "sql.persistor",
         "worker" : true,
