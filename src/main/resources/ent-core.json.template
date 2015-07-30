@@ -238,6 +238,12 @@
           "hobbies": ["sport","cinema", "animals", "music", "places", "books"]
         },
         "publicConf": {
+          <% if (federatedAddress != null && !federatedAddress.trim().isEmpty()) { %>
+          "federatedAddress" : ${federatedAddress}
+          <% } %>
+          <% if (federatedAddress != null && !federatedAddress.trim().isEmpty() && "true".equals(xitiSwitch)) { %>
+            ,
+          <% } %>
           <% if ("true".equals(xitiSwitch)) { %>
             "xiti": {
               "ID_SERVICE": {
