@@ -187,6 +187,13 @@
         "address": "json.schema.validator",
         "schemas": []
       }
+    },
+    {
+      "name": "fr.wseduc~pdf-generator~0.1.0",
+      "config": {
+    	"main":"fr.wseduc.pdfgenerator.PDFGenerator",
+        "worker": true
+      }
     }
   ],
   "external-modules": [
