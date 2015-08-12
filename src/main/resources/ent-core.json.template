@@ -509,6 +509,11 @@
             "principalAttributeName" : "login",
             "patterns" : [${patternProEPSRegisteredService}]
           },
+          {
+            "class" : "org.entcore.cas.services.EducagriRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : [${patternEducagriRegisteredService}]
+          },
 			{
 			  "class" : "org.entcore.cas.services.DefaultRegisteredService",
 			  "principalAttributeName" : "login",
