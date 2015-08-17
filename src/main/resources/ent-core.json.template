@@ -247,6 +247,7 @@
         "workspace-url": "localhost",
         "workspace-port":8011,
         "workspace-prefix" : "/workspace",
+        "activation-welcome-message" : $activationWelcomeMessage,
         "user-book-data":{
           "default-theme":"default",
           "default-avatar": "no-avatar.jpg",
