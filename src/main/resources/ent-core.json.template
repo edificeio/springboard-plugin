@@ -217,6 +217,7 @@
         "email": "${senderEmail}",
         "mandatory": ${authMandatoryFields},
         "activationAutoLogin" : $activationAutoLogin,
+        "teacherForgotPasswordEmail" : $teacherForgotPasswordEmail,
         <% if (samlMetadataFolder != null && !samlMetadataFolder.trim().isEmpty()) { %>
         "saml-metadata-folder" : "${samlMetadataFolder}",
         "saml-private-key": "${samlPrivateKey}",
@@ -248,6 +249,8 @@
         "workspace-port":8011,
         "workspace-prefix" : "/workspace",
         "activation-welcome-message" : $activationWelcomeMessage,
+        "createdUserEmail" : $createdUserEmail,
+        "classDefaultRoles" : $classDefaultRoles,
         "user-book-data":{
           "default-theme":"default",
           "default-avatar": "no-avatar.jpg",
