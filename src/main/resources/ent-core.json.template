@@ -193,7 +193,8 @@
      "name": "fr.wseduc~mod-sms-proxy~0.1.0",
      "config": {
        "main":"fr.wseduc.smsproxy.Sms",
-       "worker": true
+       "worker": true,
+       "providers" : ${smsProviders}
      }
     },
     <% } %>
