@@ -190,18 +190,20 @@
     },
     <% if (sharedConf != null && sharedConf.contains("smsProvider")) { %>
     {
-     "name": "fr.wseduc~mod-sms-proxy~0.1.0",
+     "name": "fr.wseduc~mod-sms-proxy~0.1.1",
      "config": {
        "main":"fr.wseduc.smsproxy.Sms",
        "worker": true,
+       "address" : "entcore.sms",
        "providers" : ${smsProviders}
      }
     },
     <% } %>
     {
-      "name": "fr.wseduc~mod-pdf-generator~0.1.1",
+      "name": "fr.wseduc~mod-pdf-generator~0.1.2",
       "config": {
     	"main":"fr.wseduc.pdfgenerator.PDFGenerator",
+    	"address" : "entcore.pdf.generator",
         "worker": true
       }
     }
