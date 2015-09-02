@@ -521,6 +521,11 @@
             "principalAttributeName" : "login",
             "patterns" : [${patternEducagriRegisteredService}]
           },
+          {
+            "class" : "org.entcore.cas.services.EduMediaRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : [${patternEduMediaRegisteredService}]
+          },
 			{
 			  "class" : "org.entcore.cas.services.DefaultRegisteredService",
 			  "principalAttributeName" : "login",
