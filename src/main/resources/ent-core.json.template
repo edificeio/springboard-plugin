@@ -96,7 +96,7 @@
     },
     <% if (swiftUri == null || swiftUri.isEmpty()) { %>
     {
-      "name": "fr.wseduc~mod-gridfs-persistor~1.3.0",
+      "name": "fr.wseduc~mod-gridfs-persistor~1.4-SNAPSHOT",
       "config": {
         "worker": true,
         "multi-threaded": true,
