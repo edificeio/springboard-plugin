@@ -525,6 +525,11 @@
             "class" : "org.entcore.cas.services.EduMediaRegisteredService",
             "principalAttributeName" : "login",
             "patterns" : [${patternEduMediaRegisteredService}]
+          }, 
+          {
+            "class" : "org.entcore.cas.services.GepiRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : [${patternGepiRegisteredService}]
           },
 			{
 			  "class" : "org.entcore.cas.services.DefaultRegisteredService",
