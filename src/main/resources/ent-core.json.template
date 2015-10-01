@@ -528,7 +528,7 @@
           },
           {
             "class" : "org.entcore.cas.services.GepiRegisteredService",
-            "principalAttributeName" : "externalId",
+            "principalAttributeName" : "login",
             "patterns" : [${patternGepiRegisteredService}]
           },
 			{
