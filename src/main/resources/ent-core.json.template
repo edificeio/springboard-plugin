@@ -532,6 +532,11 @@
             "principalAttributeName" : "externalId",
             "patterns" : [${patternGepiRegisteredService}]
           },
+          {
+            "class" : "org.entcore.cas.services.MSELRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : [${patternMSELRegisteredService}]
+          },
 			{
 			  "class" : "org.entcore.cas.services.DefaultRegisteredService",
 			  "principalAttributeName" : "login",
