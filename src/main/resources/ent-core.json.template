@@ -489,7 +489,7 @@
           },
           {
             "class" : "org.entcore.cas.services.KneRegisteredService",
-            "principalAttributeName" : "login",
+            "principalAttributeName" : "externalId",
             "patterns" : [${patternKneRegisteredService}]
           },
           {
