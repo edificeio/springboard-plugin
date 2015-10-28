@@ -70,15 +70,6 @@
             <% } %>
     }
   },
-  {
-    "name": "fr.wseduc~mod-webdav~0.1.0",
-    "config": {
-      "address" : "webdav"
-
-        ,
-      "credentials" : ${webdavCredentials}
-    }
-  },
     {
       "name": "io.vertx~mod-mongo-persistor~2.1.2-WSE",
       "config": {
