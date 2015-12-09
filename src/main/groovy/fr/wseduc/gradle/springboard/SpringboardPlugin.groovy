@@ -1,9 +1,11 @@
 package fr.wseduc.gradle.springboard
 
 import groovy.io.FileType
+import java.io.*;
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.process.ExecResult
+import java.util.zip.*
 
 class SpringboardPlugin implements Plugin<Project> {
 
@@ -21,9 +23,14 @@ class SpringboardPlugin implements Plugin<Project> {
 			extractDeployments(project)
 		}
 
+		project.task("extractTheme") << {
+			extractTheme(project)
+		}
+
 		project.task("init") << {
 			extractDeployments(project)
 			initFiles(project)
+			extractTheme(project)
 		}
 
 		project.task(dependsOn: ['runEnt', 'compileTestScala'], "integrationTest") << {
@@ -91,6 +98,13 @@ class SpringboardPlugin implements Plugin<Project> {
 			}
 		}
 		project.logger.lifecycle(" ---- Done executing all Gatling scenarios ----")
+	}
+
+	private void extractTheme(Project project){
+		project.copy {
+			from "deployments/assets/themes"
+			into "assets/themes"
+		}
 	}
 
 	private void extractDeployments(Project project) {
