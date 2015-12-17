@@ -30,7 +30,6 @@ class SpringboardPlugin implements Plugin<Project> {
 		project.task("init") << {
 			extractDeployments(project)
 			initFiles(project)
-			extractTheme(project)
 		}
 
 		project.task(dependsOn: ['runEnt', 'compileTestScala'], "integrationTest") << {
