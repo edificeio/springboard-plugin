@@ -217,6 +217,8 @@
         "saml-metadata-folder" : "${samlMetadataFolder}",
         "saml-private-key": "${samlPrivateKey}",
         "saml-services-providers" : ${samlServicesProviders},
+        "saml-issuer": "${samlIssuer}",
+        "slo": ${samlSLO},
         "loginUri":"${federationLoginUri}",
         "callbackParam":"${federationCallBackParam}",
         <% } %>
