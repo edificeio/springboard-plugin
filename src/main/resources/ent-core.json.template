@@ -533,7 +533,7 @@
           {
             "class" : "org.entcore.cas.services.GRRRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [${patternGRRRegisteredService}]
+            "patterns" : []
           },
 			{
 			  "class" : "org.entcore.cas.services.DefaultRegisteredService",
