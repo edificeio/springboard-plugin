@@ -381,6 +381,9 @@
           <% if ("true".equals(xitiSwitch)) { %>
           ,{"name": "xiti", "url": "/xiti/admin-console", "allowed": ["SUPER_ADMIN"]}
           <% } %>
+          <% if ("true".equals(keyring)) { %>
+          ,{"name": "keyring", "url": "/sso/keyring/admin-console", "allowed": ["SUPER_ADMIN"]}
+          <% } %>
         ],
         "widgets": [
          <% if (widgets != null && !widgets.trim().isEmpty()) { %>
