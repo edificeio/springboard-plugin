@@ -144,7 +144,7 @@
     },
   <% if (sqlUrl != null && !sqlUrl.trim().isEmpty()) { %>
   {
-      "name": "fr.wseduc~mod-postgresql~0.1.1",
+      "name": "fr.wseduc~mod-postgresql~0.2-SNAPSHOT",
       "config": {
         "address" : "sql.persistor",
         "worker" : true,
