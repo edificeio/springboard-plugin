@@ -468,6 +468,7 @@
         "ssl" : $ssl,
         "auto-redeploy": false,
         "userbook-host": "${host}",
+        "external-login-uri" : "${casExternalLoginUri}",
         "integration-mode" : "HTTP",
         "app-registry.port" : 8012,
         "mode" : "${mode}",
