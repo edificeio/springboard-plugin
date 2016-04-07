@@ -377,7 +377,8 @@
         "admin-urls": [
           {"name": "directory", "url": "/directory/admin-console"},
           {"name": "appRegistry", "url": "/appregistry/admin-console"},
-          {"name": "communication", "url": "/communication/admin-console"}
+          {"name": "communication", "url": "/communication/admin-console"},
+          {"name": "timeline", "url": "/timeline/admin-console", "allowed": ["SUPER_ADMIN"]}
           <% if ("true".equals(xitiSwitch)) { %>
           ,{"name": "xiti", "url": "/xiti/admin-console", "allowed": ["SUPER_ADMIN"]}
           <% } %>
