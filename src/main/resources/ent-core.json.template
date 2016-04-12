@@ -242,6 +242,7 @@
         "host": "${host}",
         "port": 8003,
         "email": "${senderEmail}",
+        "app-name": "Directory",
         "workspace-url": "localhost",
         "workspace-port":8011,
         "workspace-prefix" : "/workspace",
