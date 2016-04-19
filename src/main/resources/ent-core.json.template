@@ -25,6 +25,14 @@
   <% if (sharedConf != null && !sharedConf.trim().isEmpty()) { %>
   "sharedConf": ${sharedConf},
   <% } %>
+  <% if (emailConfig != null && !emailConfig.trim().isEmpty()) { %>
+  "emailConfig": ${emailConfig},
+  <% } else { %>
+  "emailConfig": {
+    "email": "${senderEmail}",
+    "host": "${host}"
+  },
+  <% } %>
   "app-registry": {
     "name": "org.entcore~app-registry~${entcoreVersion}",
     "config": {
@@ -455,6 +463,7 @@
         "address" : "wse.timeline",
         "auto-redeploy": false,
         "ssl" : $ssl,
+        "host": "${host}",
         "mode": "${mode}"
       }
     },
