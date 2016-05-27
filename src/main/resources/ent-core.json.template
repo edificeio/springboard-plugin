@@ -428,6 +428,8 @@
         "port": 8019,
         "app-name" : "Messagerie",
         "app-icon" : "conversation-large",
+        "sql": true,
+        "db-schema": "conversation",
         "publicConf": {
           <% if ("true".equals(xitiSwitch)) { %>
             "xiti": {
