@@ -19,6 +19,11 @@
     "user" : "${swiftUser}",
     "key" : "${swiftKey}"
   },
+  <% } else if (fsStoragePath != null && !fsStoragePath.trim().isEmpty()) { %>
+  "file-system" : {
+    "path" : "${fsStoragePath}",
+    "flat" : ${flatFsStorage}
+  },
   <% } else { %>
   "gridfs-address" : "wse.gridfs.persistor",
   <% } %>
@@ -112,11 +117,12 @@
     },
      <% } %>
     {
-      "name" : "fr.wseduc~mod-image-resizer~1.3.0",
+      "name" : "fr.wseduc~mod-image-resizer~1.4-SNAPSHOT",
       "config" : {
         "worker": true,
         "multi-threaded": true,
         "address" : "wse.image.resizer",
+        "fs-flat" : $flatFsStorage,
         <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
         "swift" : {
           "uri" : "${swiftUri}",
