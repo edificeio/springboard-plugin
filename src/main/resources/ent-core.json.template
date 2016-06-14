@@ -426,6 +426,7 @@
       "config": {
         "main":"org.entcore.conversation.Conversation",
         "host": "${host}",
+        "mode": "${mode}",
         "ssl" : $ssl,
         "auto-redeploy": false,
         "userbook-host": "${host}",
