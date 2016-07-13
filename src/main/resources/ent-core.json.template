@@ -393,6 +393,7 @@
           {"name": "communication", "url": "/communication/admin-console"},
           {"name": "wizard", "url": "/directory/wizard"},
           {"name": "timeline", "url": "/timeline/admin-console", "allowed": ["SUPER_ADMIN"]}
+          {"name": "welcomeMessage", "url": "/auth/admin-welcome-message", "allowed": ["SUPER_ADMIN"]}
           <% if ("true".equals(xitiSwitch)) { %>
           ,{"name": "xiti", "url": "/xiti/admin-console", "allowed": ["SUPER_ADMIN"]}
           <% } %>
