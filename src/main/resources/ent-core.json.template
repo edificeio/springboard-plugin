@@ -559,6 +559,11 @@
             "principalAttributeName" : "login",
             "patterns" : []
           },
+          {
+            "class" : "org.entcore.cas.services.LabomepRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : []
+          },
 			{
 			  "class" : "org.entcore.cas.services.DefaultRegisteredService",
 			  "principalAttributeName" : "login",
