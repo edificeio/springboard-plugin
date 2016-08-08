@@ -61,7 +61,7 @@
   },
   "pre-required-modules": [
   {
-    "name": "fr.wseduc~mod-neo4j-persistor~1.6-SNAPSHOT",
+    "name": "fr.wseduc~mod-neo4j-persistor~1.6.0",
     "config": {
       "worker": true,
       "multi-threaded": true,
@@ -117,7 +117,7 @@
     },
      <% } %>
     {
-      "name" : "fr.wseduc~mod-image-resizer~1.4-SNAPSHOT",
+      "name" : "fr.wseduc~mod-image-resizer~1.4.0",
       "config" : {
         "worker": true,
         "multi-threaded": true,
