@@ -9,6 +9,7 @@
   "key": "${signKey}",
   <% } %>
   "cluster" : ${cluster},
+  "skins": ${skins},
 <% if ("true".equals(neo4jEmbedded)) { %>
   "scripts-folder" : "${scriptsDirectory}",
 <% } %>
@@ -371,7 +372,6 @@
         "auto-redeploy": false,
         "ssl" : $ssl,
         "mode": "${mode}",
-        "skins": ${skins},
         <% if (assetsPath != null && !assetsPath.trim().isEmpty()) { %>
            "assets-path": "${assetsPath}",
         <% } %>
