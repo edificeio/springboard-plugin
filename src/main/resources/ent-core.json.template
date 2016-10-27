@@ -471,6 +471,8 @@
         "main":"org.entcore.timeline.Timeline",
         "port": 8016,
         "address" : "wse.timeline",
+        "sql": true,
+        "db-schema": "flashmsg",
         "auto-redeploy": false,
         "ssl" : $ssl,
         "host": "${host}",
