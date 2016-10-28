@@ -228,6 +228,10 @@
         "mandatory": ${authMandatoryFields},
         "activationAutoLogin" : $activationAutoLogin,
         "teacherForgotPasswordEmail" : $teacherForgotPasswordEmail,
+        <% if (openidconnect-federate != null && !openidconnect-federate.trim().isEmpty()) { %>
+        "openid-federate" : ${openidconnect-federate},
+        "slo": ${samlSLO},
+        <% } %>
         <% if (samlMetadataFolder != null && !samlMetadataFolder.trim().isEmpty()) { %>
         "saml-metadata-folder" : "${samlMetadataFolder}",
         "saml-private-key": "${samlPrivateKey}",
