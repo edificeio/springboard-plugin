@@ -228,8 +228,8 @@
         "mandatory": ${authMandatoryFields},
         "activationAutoLogin" : $activationAutoLogin,
         "teacherForgotPasswordEmail" : $teacherForgotPasswordEmail,
-        <% if (openidconnect-federate != null && !openidconnect-federate.trim().isEmpty()) { %>
-        "openid-federate" : ${openidconnect-federate},
+        <% if (openidconnectFederate != null && !openidconnectFederate.trim().isEmpty()) { %>
+        "openid-federate" : ${openidconnectFederate},
         "slo": ${samlSLO},
         <% } %>
         <% if (samlMetadataFolder != null && !samlMetadataFolder.trim().isEmpty()) { %>
