@@ -237,6 +237,7 @@
         "saml-private-key": "${samlPrivateKey}",
         "saml-services-providers" : ${samlServicesProviders},
         "saml-issuer": "${samlIssuer}",
+        "check-federated-login" : true,
         "slo": ${samlSLO},
         "loginUri":"${federationLoginUri}",
         "callbackParam":"${federationCallBackParam}",
