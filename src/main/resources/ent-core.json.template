@@ -468,7 +468,14 @@
         "auto-export" : ${autoExport},
         "exporter" : "${exporter}",
         "export-path" : "${exportPath}",
-        "export-destination" : "${exportDestination}"
+        "export-destination" : "${exportDestination}",
+        "quotaTeacher" : $quotaTeacher,
+        "quotaPersonnel" : $quotaPersonnel,
+        "quotaRelative" : $quotaRelative,
+        "quotaStudent" : $quotaStudent,
+        "quotaGuest" : $quotaGuest,
+        "quotaProfileMax" : $quotaProfileMax,
+        "quotaStructure" : $quotaStructure
       }
     },
     {
