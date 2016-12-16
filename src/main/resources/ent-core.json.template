@@ -407,6 +407,9 @@
           <% if ("true".equals(keyring)) { %>
           ,{"name": "keyring", "url": "/sso/keyring/admin-console", "allowed": ["SUPER_ADMIN"]}
           <% } %>
+          <% if ("true".equals(edtudt)) { %>
+          ,{"name": "edtudt", "url": "/directory/timetable"}
+          <% } %>
         ],
         "widgets": [
          <% if (widgets != null && !widgets.trim().isEmpty()) { %>
