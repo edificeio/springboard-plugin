@@ -462,6 +462,7 @@
       "name": "org.entcore~feeder~${entcoreVersion}",
       "config": {
         "worker": true,
+        "mode": "${mode}",
         "address" : "entcore.feeder",
         "neo4j-address" : "wse.neo4j.persistor",
         "apply-communication-rules" : $applycommunication,
