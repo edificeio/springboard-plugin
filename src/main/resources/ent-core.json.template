@@ -85,7 +85,7 @@
     }
   },
     {
-      "name": "io.vertx~mod-mongo-persistor~2.1.2-WSE",
+      "name": "io.vertx~mod-mongo-persistor~2.2.0-WSE",
       "config": {
         "worker": true,
         "multi-threaded": true,
