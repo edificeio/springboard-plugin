@@ -469,6 +469,12 @@
         "aafNeo4jPlugin" : ${neo4jAAFPlugin},
         "import-files" : "${importDirectory}",
         "feeder" : "${feeder}",
+        <% if (edt != null && !edt.trim().isEmpty()) { %>
+        "edt": ${edt},
+        <% } %>
+        <% if (udt != null && !udt.trim().isEmpty()) { %>
+        "udt": ${udt},
+        <% } %>
         "auto-export" : ${autoExport},
         "exporter" : "${exporter}",
         "export-path" : "${exportPath}",
