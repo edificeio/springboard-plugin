@@ -4,6 +4,7 @@
   "mode": "${mode}",
   "auto-redeploy": false,
   "path-prefix": "infra",
+  "ssl" : $ssl,
   "sql": true,
   <% if (signKey != null && !signKey.trim().isEmpty()) { %>
   "key": "${signKey}",
