@@ -181,6 +181,17 @@ class SpringboardPlugin implements Plugin<Project> {
 		FileUtils.copy(is1, i1)
 		FileUtils.copy(is2, i2)
 
+		File gulpfile = project.file("gulpfile.js")
+		InputStream gulpfileStream = this.getClass().getClassLoader()
+				.getResourceAsStream("gulpfile.js")
+		FileUtils.copy(gulpfileStream, gulpfile)
+
+		File packageJson = project.file("package.json")
+		InputStream packageJsonStream = this.getClass().getClassLoader()
+				.getResourceAsStream("package.json")
+		FileUtils.copy(packageJsonStream, packageJson)
+
+
 		File entcoreJsonTemplate = project.file("ent-core.json.template")
 		FileUtils.copy(this.getClass().getClassLoader().getResourceAsStream("ent-core.json.template"),
 				entcoreJsonTemplate)
