@@ -9,6 +9,9 @@
   <% if (signKey != null && !signKey.trim().isEmpty()) { %>
   "key": "${signKey}",
   <% } %>
+  <% if (contentSecurityPolicy != null && !contentSecurityPolicy.trim().isEmpty()) { %>
+  "content-security-policy": "${contentSecurityPolicy}",
+  <% } %>
   "cluster" : ${cluster},
   "skins": ${skins},
 <% if ("true".equals(neo4jEmbedded)) { %>
