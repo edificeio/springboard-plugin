@@ -5,6 +5,7 @@
   "auto-redeploy": false,
   "path-prefix": "infra",
   "ssl" : $ssl,
+  "csrf-token" : $csrfToken,
   "sql": true,
   <% if (signKey != null && !signKey.trim().isEmpty()) { %>
   "key": "${signKey}",
@@ -48,6 +49,7 @@
     "config": {
       "main":"org.entcore.registry.AppRegistry",
       "auto-redeploy": false,
+      "csrf-token" : $csrfToken,
       "mode": "${mode}",
       "ssl" : $ssl,
       "address" : "wse.app.registry",
@@ -227,6 +229,7 @@
         "port": 8009,
         "auto-redeploy": false,
         "ssl" : $ssl,
+        "csrf-token" : $csrfToken,
         "mode": "${mode}",
         "email": "${senderEmail}",
         "mandatory": ${authMandatoryFields},
@@ -262,6 +265,7 @@
         "main":"org.entcore.directory.Directory",
         "auto-redeploy": false,
         "ssl" : $ssl,
+        "csrf-token" : $csrfToken,
         "mode": "${mode}",
         "host": "${host}",
         "port": 8003,
@@ -302,6 +306,7 @@
         "main":"org.entcore.workspace.Workspace",
         "auto-redeploy": false,
         "mode": "${mode}",
+        "csrf-token" : $csrfToken,
         "ssl" : $ssl,
         "host": "${host}",
         "neo4jPlugin" : ${neo4jPlugin},
@@ -336,6 +341,7 @@
         "main":"org.entcore.communication.Communication",
         "auto-redeploy": false,
         "ssl" : $ssl,
+        "csrf-token" : $csrfToken,
         "mode": "${mode}",
         "port": 8015,
         "address" : "wse.communication",
@@ -380,6 +386,7 @@
         "port": 8017,
         "auto-redeploy": false,
         "ssl" : $ssl,
+        "csrf-token" : $csrfToken,
         "mode": "${mode}",
         <% if (assetsPath != null && !assetsPath.trim().isEmpty()) { %>
            "assets-path": "${assetsPath}",
@@ -443,6 +450,7 @@
         "main":"org.entcore.conversation.Conversation",
         "host": "${host}",
         "mode": "${mode}",
+        "csrf-token" : $csrfToken,
         "ssl" : $ssl,
         "auto-redeploy": false,
         "userbook-host": "${host}",
@@ -468,6 +476,7 @@
       "config": {
         "worker": true,
         "mode": "${mode}",
+        "csrf-token" : $csrfToken,
         "address" : "entcore.feeder",
         "neo4j-address" : "wse.neo4j.persistor",
         "apply-communication-rules" : $applycommunication,
@@ -507,6 +516,7 @@
       "config": {
         "main" : "org.entcore.cas.Cas",
         "port" : 8023,
+        "csrf-token" : $csrfToken,
         "app-name" : "Cas",
         "app-address" : "/cas",
         "app-icon" : "cas-large",
@@ -603,6 +613,7 @@
       "config": {
         "main":"org.entcore.archive.Archive",
         "port": 8004,
+        "csrf-token" : $csrfToken,
         "mode": "${mode}",
         "host": "${host}",
         "ssl" : $ssl,
