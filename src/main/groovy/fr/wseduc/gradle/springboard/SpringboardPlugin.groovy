@@ -133,8 +133,9 @@ class SpringboardPlugin implements Plugin<Project> {
 		stopbat.write("wmic process where \"name like '%%java%%'\" delete")
 		stopsh.write(
 				"#!/bin/sh\n" +
-						"PID_ENT=\$(ps -ef | grep \"org.entcore~infra\" | grep -v grep | sed 's/\\s\\+/ /g' | cut -d' ' -f2)\n" +
-						"kill \$PID_ENT"
+				"docker-compose stop neo4j\n" +
+				"PID_ENT=\$(ps -ef | grep \"org.entcore~infra\" | grep -v grep | sed 's/\\s\\+/ /g' | cut -d' ' -f2)\n" +
+				"kill \$PID_ENT"
 		)
 		String version = project.getProperties().get("entCoreVersion")
 		runbat.write(
@@ -142,21 +143,18 @@ class SpringboardPlugin implements Plugin<Project> {
 		)
 		runsh.write(
 				"#!/bin/bash\n" +
-						"vertx runMod org.entcore~infra~" + version + " -conf ent-core.embedded.json &"
+				"docker-compose up -d neo4j > /dev/null &\n" +
+				"sleep 10\n" +
+				"vertx runMod org.entcore~infra~" + version + " -conf ent-core.embedded.json > /dev/null &"
 		)
 
 		runsh.setExecutable(true, true)
 		stopsh.setExecutable(true, true)
 
-		project.file("scripts")?.mkdir()
 		project.file("sample-be1d/Ecole primaire Emile Zola")?.mkdirs()
-		project.file("data/tests")?.mkdirs()
+		project.file("neo4j-conf")?.mkdirs()
 		project.file("src/test/scala/org/entcore/test/scenarios")?.mkdirs()
 		project.file("src/test/scala/org/entcore/test/simulations")?.mkdir()
-
-		File schema = project.file("scripts/schema.cypher")
-		InputStream is = this.getClass().getClassLoader().getResourceAsStream("scripts/schema.cypher")
-		FileUtils.copy(is, schema)
 
 		File scn = project.file("src/test/scala/org/entcore/test/scenarios/IntegrationTestScenario.scala")
 		InputStream scnis = this.getClass().getClassLoader()
@@ -180,6 +178,16 @@ class SpringboardPlugin implements Plugin<Project> {
 		FileUtils.copy(is0, i0)
 		FileUtils.copy(is1, i1)
 		FileUtils.copy(is2, i2)
+
+		File neo4jConf = project.file("neo4j-conf/neo4j.conf")
+		InputStream neo4jConfStream = this.getClass().getClassLoader()
+				.getResourceAsStream("neo4j-conf/neo4j.conf")
+		FileUtils.copy(neo4jConfStream, neo4jConf)
+
+		File dockerCompose = project.file("docker-compose.yml")
+		InputStream dockerComposeStream = this.getClass().getClassLoader()
+				.getResourceAsStream("docker-compose.yml")
+		FileUtils.copy(dockerComposeStream, dockerCompose)
 
 		File gulpfile = project.file("gulpfile.js")
 		InputStream gulpfileStream = this.getClass().getClassLoader()

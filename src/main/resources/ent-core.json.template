@@ -15,9 +15,6 @@
   <% } %>
   "cluster" : ${cluster},
   "skins": ${skins},
-<% if ("true".equals(neo4jEmbedded)) { %>
-  "scripts-folder" : "${scriptsDirectory}",
-<% } %>
   <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
   "swift" : {
     "uri" : "${swiftUri}",
@@ -44,6 +41,15 @@
     "host": "${host}"
   },
   <% } %>
+  "neo4jConfig" : {
+    <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
+    "server-uris": ${serverUris},
+    <% } else { %>
+    "server-uri": "${neo4jUri}/db/data/",
+    <% } %>
+    "slave-readonly": $neo4jSlaveReadOnly,
+    "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
+  },
   "app-registry": {
     "name": "org.entcore~app-registry~${entcoreVersion}",
     "config": {
@@ -67,29 +73,6 @@
     }
   },
   "pre-required-modules": [
-  {
-    "name": "fr.wseduc~mod-neo4j-persistor~1.6.0",
-    "config": {
-      "worker": true,
-      "multi-threaded": true,
-      "address": "wse.neo4j.persistor",
-      <% if ("true".equals(neo4jEmbedded)) { %>
-        "datastore-path": "${neo4jDatastore}",
-        "neo4j" : {
-          "allow_store_upgrade" : "true",
-          "node_auto_indexing" : "true",
-          "node_keys_indexable" : "externalId,firstName,lastName",
-          "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
-        }
-        <% } else { %>
-          <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
-          "server-uris": ${serverUris},
-          <% } %>
-          "server-uri": "${neo4jUri}/db/data/",
-          "poolsize": 32
-            <% } %>
-    }
-  },
     {
       "name": "io.vertx~mod-mongo-persistor~2.2.0-WSE",
       "config": {
