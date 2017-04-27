@@ -6,6 +6,7 @@ var autoprefixer = require('gulp-autoprefixer');
 var merge = require('merge2');
 var rev = require('gulp-rev');
 var revReplace = require('gulp-rev-replace');
+var odeSassImports = require('gulp-ode-sass-imports');
 
 var themeConf = require('./theme-conf').conf;
 
@@ -100,6 +101,18 @@ gulp.task('override-theme', ['version-fonts'], function () {
                     .pipe(gulp.dest('./assets/themes/' + overriding.child + '/' + override))
             );
         });
+
+        streams.push(
+            gulp.src(['./assets/themes/' + overriding.parent + '/css/modules/_modules.scss'])
+                .pipe(odeSassImports(overriding.parent))
+                .pipe(gulp.dest('./assets/themes/' + overriding.parent + '/css/modules'))
+        );
+
+        streams.push(
+            gulp.src(['./assets/themes/' + overriding.child + '/css/modules/_modules.scss'])
+                .pipe(odeSassImports(overriding.parent))
+                .pipe(gulp.dest('./assets/themes/' + overriding.child + '/css/modules'))
+        );
     })
     
     return merge(streams);
