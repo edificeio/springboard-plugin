@@ -466,6 +466,7 @@
         "aafNeo4jPlugin" : ${neo4jAAFPlugin},
         "import-files" : "${importDirectory}",
         "feeder" : "${feeder}",
+	"mongodb" : true,
         <% if (edt != null && !edt.trim().isEmpty()) { %>
         "edt": ${edt},
         <% } %>
