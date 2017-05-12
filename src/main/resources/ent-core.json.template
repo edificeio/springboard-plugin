@@ -612,4 +612,19 @@
         "app-icon" : "archive-large",
         "expected-exports" : ["workspace"]
       }
+    },
+    {
+      "name": "org.entcore~admin~${entcoreVersion}",
+      "config": {
+        "main":"org.entcore.admin.Admin",
+        "port": 8089,
+        "csrf-token" : $csrfToken,
+        "ssl" : $ssl,
+        "mode": "${mode}",
+        "auto-redeploy": false,
+        "host" : "${host}",
+        "app-name" : "Admin",
+        "app-address" : "/admin",
+        "app-icon" : "admin-large"
+      }
     }

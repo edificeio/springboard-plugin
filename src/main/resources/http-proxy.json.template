@@ -51,4 +51,8 @@
           {
             "location": "/archive",
             "proxy_pass": "http://localhost:8004"
+          },
+          {
+            "location": "/admin",
+            "proxy_pass": "http://localhost:8089"
           }
