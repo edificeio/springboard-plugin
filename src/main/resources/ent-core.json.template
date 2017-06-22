@@ -189,7 +189,7 @@
     },
     <% if (sharedConf != null && sharedConf.contains("smsProvider")) { %>
     {
-     "name": "fr.wseduc~mod-sms-proxy~0.1.1",
+     "name": "fr.wseduc~mod-sms-proxy~0.1.2",
      "config": {
        "main":"fr.wseduc.smsproxy.Sms",
        "worker": true,
