@@ -396,6 +396,9 @@
           {"name": "welcomeMessage", "url": "/auth/admin-welcome-message", "allowed": ["SUPER_ADMIN"]},
           {"name": "flashMessage", "url": "/timeline/flashmsg/admin", "allowed": ["SUPER_ADMIN"]},
           {"name": "embed", "url": "/infra/embed/admin", "allowed": ["SUPER_ADMIN"]}
+          <% if ("true".equals(directoryCalendarSwitch)) { %>
+          ,{"name": "calendar", "url": "/directory/calendar"}
+          <% } %>
           <% if ("true".equals(xitiSwitch)) { %>
           ,{"name": "xiti", "url": "/xiti/admin-console", "allowed": ["SUPER_ADMIN"]}
           <% } %>
