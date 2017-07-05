@@ -45,7 +45,7 @@ gulp.task('bower', ['clean'], () => {
 gulp.task('update', ['bower'], function () {
     var themes = gulp.src(themesSources(), { base: './bower_components' })
         .pipe(gulp.dest('./assets/themes'));
-    
+
     var widgets = gulp.src(widgetsSources(), { base: './bower_components' })
         .pipe(gulp.dest('./assets/widgets'));
 
@@ -87,12 +87,12 @@ gulp.task('copy-local', function () {
                 .pipe(gulp.dest('./assets/widgets'))
         )
     }
-    
+
     return merge(streams);
 });
 
 gulp.task('override-theme', ['version-fonts'], function () {
-    var overrides = ['img', 'js', 'fonts', 'template', 'skins', 'i18n'];
+    var overrides = ['img', 'js', 'fonts', 'template', 'css', 'i18n'];
     var streams = [];
     themeConf.overriding.forEach((overriding) => {
         overrides.forEach((override) => {
@@ -114,7 +114,7 @@ gulp.task('override-theme', ['version-fonts'], function () {
                 .pipe(gulp.dest('./assets/themes/' + overriding.child + '/css/modules'))
         );
     })
-    
+
     return merge(streams);
 });
 
