@@ -41,6 +41,9 @@
     "host": "${host}"
   },
   <% } %>
+  "eventConfig": {
+   "user-blacklist" : []
+  },
   "neo4jConfig" : {
     <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
     "server-uris": ${serverUris},
