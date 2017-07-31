@@ -292,6 +292,7 @@
         "main":"org.entcore.workspace.Workspace",
         "auto-redeploy": false,
         "mode": "${mode}",
+		"wsPort" : 6502,
         "csrf-token" : $csrfToken,
         "ssl" : $ssl,
         "host": "${host}",
