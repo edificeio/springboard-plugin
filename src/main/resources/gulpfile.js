@@ -94,6 +94,12 @@ gulp.task('copy-local', function () {
 gulp.task('override-theme', ['version-fonts'], function () {
     var overrides = ['img', 'js', 'fonts', 'template', 'css', 'i18n'];
     var streams = [];
+
+    streams.push(
+        gulp.src(['./theme-conf.js'])
+            .pipe(gulp.dest('./assets'))
+    );
+
     themeConf.overriding.forEach((overriding) => {
         overrides.forEach((override) => {
             streams.push(
