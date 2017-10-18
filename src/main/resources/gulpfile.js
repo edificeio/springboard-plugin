@@ -119,7 +119,13 @@ gulp.task('override-theme', ['version-fonts'], function () {
                 .pipe(odeSassImports(overriding.parent))
                 .pipe(gulp.dest('./assets/themes/' + overriding.child + '/css/modules'))
         );
-    })
+    });
+
+    streams.push(
+        gulp.src('./mods/**/view/*.html')
+            .pipe(odeSassImports())
+            .pipe(gulp.dest('./mods'))
+    );
 
     return merge(streams);
 });
