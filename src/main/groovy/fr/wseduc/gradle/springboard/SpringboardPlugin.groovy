@@ -72,14 +72,15 @@ class SpringboardPlugin implements Plugin<Project> {
 	}
 
 	private void gatling(Project project) {
-		def simulations = new File(project.sourceSets.test.output.classesDir.getPath() + File.separator + 'org' + File.separator + 'entcore' + File.separator + 'test' + File.separator + 'simulations')
+		def classesDir = project.sourceSets.test.output.classesDir.getPath().replace("java", "scala")
+		def simulations = new File(classesDir + File.separator + 'org' + File.separator + 'entcore' + File.separator + 'test' + File.separator + 'simulations')
 
 		project.logger.lifecycle(" ---- Executing all Gatling scenarios from: ${simulations} ----")
 		simulations.eachFileRecurse { file ->
 			if (file.isFile()) {
 				//Remove the full path, .class and replace / with a .
 				project.logger.debug("Tranformed file ${file} into")
-				def gatlingScenarioClass = (file.getPath() - (project.sourceSets.test.output.classesDir.getPath() + File.separator) - '.class')
+				def gatlingScenarioClass = (file.getPath() - (classesDir + File.separator) - '.class')
 						.replace(File.separator, '.')
 
 				project.logger.debug("Tranformed file ${file} into scenario class ${gatlingScenarioClass}")
@@ -87,8 +88,8 @@ class SpringboardPlugin implements Plugin<Project> {
 				project.javaexec {
 					main = 'io.gatling.app.Gatling'
 					classpath = project.sourceSets.test.output + project.sourceSets.test.runtimeClasspath
-					args '-rbf',
-							project.sourceSets.test.output.classesDir,
+					args '-bf',
+							classesDir,
 							'-s',
 							gatlingScenarioClass,
 							'-rf',
@@ -134,7 +135,7 @@ class SpringboardPlugin implements Plugin<Project> {
 		stopsh.write(
 				"#!/bin/sh\n" +
 				"docker-compose stop neo4j\n" +
-				"PID_ENT=\$(ps -ef | grep \"org.entcore~infra\" | grep -v grep | sed 's/\\s\\+/ /g' | cut -d' ' -f2)\n" +
+				"PID_ENT=\$(ps -ef | grep \"vertx\" | grep -v grep | sed 's/\\s\\+/ /g' | cut -d' ' -f2)\n" +
 				"kill \$PID_ENT"
 		)
 		String version = project.getProperties().get("entCoreVersion")
@@ -145,7 +146,15 @@ class SpringboardPlugin implements Plugin<Project> {
 				"#!/bin/bash\n" +
 				"docker-compose up -d neo4j > /dev/null &\n" +
 				"sleep 10\n" +
-				"vertx runMod org.entcore~infra~" + version + " -conf ent-core.embedded.json > /dev/null &"
+				"if [ ! -e vertx-service-launcher-1.0-SNAPSHOT-fat.jar ]\n" +
+				"then\n"+
+				"wget -O vertx-service-launcher-1.0-SNAPSHOT-fat.jar https://maven.opendigitaleducation.com/nexus/content/repositories/snapshots/com/opendigitaleducation/vertx-service-launcher/1.0-SNAPSHOT/vertx-service-launcher-1.0-20180117.110921-1-fat.jar\n" +
+				"fi\n" +
+				"if [ ! -e mods ]\n" +
+				"then\n"+
+				"mkdir mods\n" +
+				"fi\n" +
+				"java -jar vertx-service-launcher-1.0-SNAPSHOT-fat.jar -Dvertx.services.path=mods -Dvertx.disableFileCaching=true -conf ent-core.embedded.json > /dev/null &"
 		)
 
 		runsh.setExecutable(true, true)

@@ -1,11 +1,121 @@
 {
-  "main": "org.entcore.infra.Starter",
+  "assets-path": "${assetsPath}",
+"services" : [
+{
+  "name": "io.vertx~mod-mongo-persistor~3.0-SNAPSHOT",
+  "waitDeploy" : true,
+  "worker": true,
+  "multi-threaded": true,
+  "config":{
+    "address": "wse.mongodb.persistor",
+    <% if (seeds != null && !seeds.trim().isEmpty()) { %>
+    "seeds": ${seeds},
+    <% } %>
+    "host": "${mongoHost}",
+    "port": ${mongoPort},
+    "db_name": "${dbName}",
+    "use_mongo_types": true,
+    "pool_size": 10
+  }
+},
+{
+  "name" : "fr.wseduc~mod-image-resizer~2.0-SNAPSHOT",
+  "worker": true,
+  "multi-threaded": true,
+  "waitDeploy" : true,
+  "config":{
+    "address" : "wse.image.resizer",
+    "fs-flat" : $flatFsStorage,
+    <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
+    "swift" : {
+      "uri" : "${swiftUri}",
+      "container" : "${swiftContainer}",
+      "user" : "${swiftUser}",
+      "key" : "${swiftKey}"
+    }
+    <% } else { %>
+    "gridfs" : {
+      <% if (seeds != null && !seeds.trim().isEmpty()) { %>
+      "seeds": ${seeds},
+      <% } %>
+      "host": "${mongoHost}",
+      "port": ${mongoPort},
+      "db_name": "${dbName}",
+      "pool_size": 10
+    }
+    <% } %>
+  }
+},
+{
+  "name": "fr.wseduc~mod-zip~2.0-SNAPSHOT",
+  "waitDeploy" : true,
+  "worker": true,
+  "config":{
+    "address": "entcore.zipper"
+  }
+},
+{
+  "name": "fr.wseduc~mod-postgresql~1.0-SNAPSHOT",
+  "waitDeploy" : true,
+  "worker": true,
+  "multi-threaded" : true,
+  "config":{
+    "address" : "sql.persistor",
+    "url" : "${sqlUrl}",
+    "username" : "${sqlUsername}",
+    "password" : "${sqlPassword}"
+  }
+},
+{
+  "name": "com.opendigitaleducation~mod-json-schema-validator~1.0-SNAPSHOT",
+  "waitDeploy" : true,
+  "worker": true,
+  "multi-threaded" : true,
+  "config":{
+  }
+},
+<% if (webdavHost != null && !webdavHost.trim().isEmpty()) { %>
+{
+  "name": "fr.wseduc~mod-webdav~0.1.0",
+  "config": {
+    "address" : "webdav"
+    <% if ("true".equals(webdavCredential)) { %>
+    ,
+    "credentials" : {
+      "${webdavHost}" : {
+        "username" : "${webdavUsername}",
+        "password" : "${webdavPassword}",
+        "insecure" : ${webdavInsecure}
+      }
+    }
+    <% } %>
+    }
+  },
+<% } %>
+{
+  "name": "fr.wseduc~mod-sms-proxy~1.0-SNAPSHOT",
+  "waitDeploy" : true,
+  "worker": true,
+  "config":{
+    "address" : "entcore.sms",
+    "providers" : ${smsProviders}
+  }
+},
+{
+  "name": "fr.wseduc~mod-pdf-generator~1.0-SNAPSHOT",
+  "waitDeploy" : true,
+  "worker": true,
+  "config":{
+    "address" : "entcore.pdf.generator"
+  }
+},
+{ "name": "org.entcore~infra~${entcoreVersion}",
+"waitDeploy" : true,
+"config" : {
   "port": 8001,
   "mode": "${mode}",
   "auto-redeploy": false,
   "path-prefix": "infra",
-  "ssl" : $ssl,
-  "csrf-token" : $csrfToken,
   "sql": true,
   <% if (signKey != null && !signKey.trim().isEmpty()) { %>
   "key": "${signKey}",
@@ -16,46 +126,49 @@
   "cluster" : ${cluster},
   "skins": ${skins},
   <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
-  "swift" : {
-    "uri" : "${swiftUri}",
-    "container" : "${swiftContainer}",
-    "user" : "${swiftUser}",
-    "key" : "${swiftKey}"
-  },
-  <% } else if (fsStoragePath != null && !fsStoragePath.trim().isEmpty()) { %>
-  "file-system" : {
-    "path" : "${fsStoragePath}",
-    "flat" : ${flatFsStorage}
-  },
-  <% } else { %>
-  "gridfs-address" : "wse.gridfs.persistor",
-  <% } %>
-  <% if (sharedConf != null && !sharedConf.trim().isEmpty()) { %>
-  "sharedConf": ${sharedConf},
-  <% } %>
-  <% if (emailConfig != null && !emailConfig.trim().isEmpty()) { %>
-  "emailConfig": ${emailConfig},
-  <% } else { %>
-  "emailConfig": {
-    "email": "${senderEmail}",
-    "host": "${host}"
-  },
-  <% } %>
-  "eventConfig": {
-   "user-blacklist" : []
-  },
-  "neo4jConfig" : {
-    <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
-    "server-uris": ${serverUris},
+    "swift" : {
+      "uri" : "${swiftUri}",
+      "container" : "${swiftContainer}",
+      "user" : "${swiftUser}",
+      "key" : "${swiftKey}"
+    },
+    <% } else if (fsStoragePath != null && !fsStoragePath.trim().isEmpty()) { %>
+    "file-system" : {
+      "path" : "${fsStoragePath}",
+      "flat" : ${flatFsStorage}
+    },
     <% } else { %>
-    "server-uri": "${neo4jUri}/db/data/",
+    "gridfs-address" : "wse.gridfs.persistor",
     <% } %>
-    "slave-readonly": $neo4jSlaveReadOnly,
-    "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
-  },
-  "app-registry": {
+    <% if (sharedConf != null && !sharedConf.trim().isEmpty()) { %>
+    "sharedConf": ${sharedConf},
+    <% } %>
+    <% if (emailConfig != null && !emailConfig.trim().isEmpty()) { %>
+    "emailConfig": ${emailConfig},
+    <% } else { %>
+    "emailConfig": {
+      "email": "${senderEmail}",
+      "host": "${host}"
+    },
+    <% } %>
+    "eventConfig": {
+     "user-blacklist" : []
+    },
+    "neo4jConfig" : {
+      <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
+      "server-uris": ${serverUris},
+      <% } else { %>
+      "server-uri": "${neo4jUri}/db/data/",
+      <% } %>
+      "slave-readonly": $neo4jSlaveReadOnly,
+      "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
+    }
+  }},
+
+  {
     "name": "org.entcore~app-registry~${entcoreVersion}",
-    "config": {
+    "waitDeploy" : true,
+    "config":{
       "main":"org.entcore.registry.AppRegistry",
       "auto-redeploy": false,
       "csrf-token" : $csrfToken,
@@ -75,147 +188,21 @@
       }
     }
   },
-  "pre-required-modules": [
     {
-      "name": "io.vertx~mod-mongo-persistor~2.2.0-WSE",
-      "config": {
-        "worker": true,
-        "multi-threaded": true,
-        "address": "wse.mongodb.persistor",
-        <% if (seeds != null && !seeds.trim().isEmpty()) { %>
-        "seeds": ${seeds},
-        <% } %>
-        "host": "${mongoHost}",
-        "port": ${mongoPort},
-        "db_name": "${dbName}",
-        "use_mongo_types": true,
-        "pool_size": 10
+      "name": "org.entcore~session~${entcoreVersion}",
+      "worker": true,
+      "config":{
+        "session_timeout": 10800000,
+        "address" : "wse.session"
       }
     },
-    <% if (swiftUri == null || swiftUri.isEmpty()) { %>
-    {
-      "name": "fr.wseduc~mod-gridfs-persistor~1.4.0",
-      "config": {
-        "worker": true,
-        "multi-threaded": true,
-        "address": "wse.gridfs.persistor",
-        <% if (seeds != null && !seeds.trim().isEmpty()) { %>
-        "seeds": ${seeds},
-        <% } %>
-        "host": "${mongoHost}",
-        "port": ${mongoPort},
-        "db_name": "${dbName}",
-        "pool_size": 10
-      }
-    },
-     <% } %>
-    {
-      "name" : "fr.wseduc~mod-image-resizer~1.5.0",
-      "config" : {
-        "worker": true,
-        "multi-threaded": true,
-        "address" : "wse.image.resizer",
-        "fs-flat" : $flatFsStorage,
-        <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
-        "swift" : {
-          "uri" : "${swiftUri}",
-          "container" : "${swiftContainer}",
-          "user" : "${swiftUser}",
-          "key" : "${swiftKey}"
-        }
-        <% } else { %>
-        "gridfs" : {
-          <% if (seeds != null && !seeds.trim().isEmpty()) { %>
-          "seeds": ${seeds},
-          <% } %>
-          "host": "${mongoHost}",
-          "port": ${mongoPort},
-          "db_name": "${dbName}",
-          "pool_size": 10
-        }
-        <% } %>
-      }
-    },
-    {
-      "name": "io.vertx~mod-mailer~2.0.0-final",
-      "config": {
-        "address": "wse.email",
-        "content_type": "text/html"
-      }
-    },
-    {
-      "name": "fr.wseduc~mod-zip~1.0.1",
-      "config": {
-        "address": "entcore.zipper"
-      }
-    },
-  <% if (sqlUrl != null && !sqlUrl.trim().isEmpty()) { %>
-  {
-      "name": "fr.wseduc~mod-postgresql~0.1.2",
-      "config": {
-        "address" : "sql.persistor",
-        "worker" : true,
-        "multi-threaded" : true,
-        "url" : "${sqlUrl}",
-        "username" : "${sqlUsername}",
-        "password" : "${sqlPassword}"
-      }
-    },
-  <% } %>
-  <% if (webdavHost != null && !webdavHost.trim().isEmpty()) { %>
-  {
-    "name": "fr.wseduc~mod-webdav~0.1.0",
-    "config": {
-      "address" : "webdav"
-      <% if ("true".equals(webdavCredential)) { %>
-      ,
-      "credentials" : {
-        "${webdavHost}" : {
-          "username" : "${webdavUsername}",
-          "password" : "${webdavPassword}",
-          "insecure" : ${webdavInsecure}
-        }
-      }
-      <% } %>
-      }
-    },
-  <% } %>
-    {
-      "name": "com.campudus~json-schema-validator~1.1.0",
-      "config": {
-        "address": "json.schema.validator",
-        "schemas": []
-      }
-    },
-    <% if (sharedConf != null && sharedConf.contains("smsProvider")) { %>
-    {
-     "name": "fr.wseduc~mod-sms-proxy~0.1.2",
-     "config": {
-       "main":"fr.wseduc.smsproxy.Sms",
-       "worker": true,
-       "address" : "entcore.sms",
-       "providers" : ${smsProviders}
-     }
-    },
-    <% } %>
-    {
-      "name": "fr.wseduc~mod-pdf-generator~0.1.2",
-      "config": {
-    	"main":"fr.wseduc.pdfgenerator.PDFGenerator",
-    	"address" : "entcore.pdf.generator",
-        "worker": true
-      }
-    }
-  ],
-  "external-modules": [
     {
       "name": "org.entcore~auth~${entcoreVersion}",
-      "config": {
-        "main":"org.entcore.auth.Auth",
+      "config":{
+        "path-prefix": "auth",
         "port": 8009,
         "auto-redeploy": false,
         "ssl" : $ssl,
-        "csrf-token" : $csrfToken,
         "mode": "${mode}",
         "email": "${senderEmail}",
         "mandatory": ${authMandatoryFields},
@@ -247,13 +234,13 @@
     },
     {
       "name": "org.entcore~directory~${entcoreVersion}",
-      "config": {
-        "main":"org.entcore.directory.Directory",
+      "config":{
+        "path-prefix": "directory",
         "auto-redeploy": false,
         "ssl" : $ssl,
-        "csrf-token" : $csrfToken,
         "mode": "${mode}",
         "host": "${host}",
+        "csrf-token" : $csrfToken,
         "port": 8003,
         "email": "${senderEmail}",
         "app-name": "Directory",
@@ -270,30 +257,29 @@
           "hobbies": ["sport","cinema", "animals", "music", "places", "books"]
         },
         "publicConf": {
-          "feeders" : $wizardFeeders
-          <% if (federatedAddress != null && !federatedAddress.trim().isEmpty()) { %>
-          ,"federatedAddress" : ${federatedAddress}
-          <% } %>
-          <% if ("true".equals(xitiSwitch)) { %>
-            ,"xiti": {
-              "ID_SERVICE": {
-                "default": 10,
-                "/userbook/mon-compte": "",
-                "/admin-console": ""
-              }
-            }
-          <% } %>
+           "feeders" : $wizardFeeders
+           <% if (federatedAddress != null && !federatedAddress.trim().isEmpty()) { %>
+           ,"federatedAddress" : ${federatedAddress}
+           <% } %>
+           <% if ("true".equals(xitiSwitch)) { %>
+             ,"xiti": {
+               "ID_SERVICE": {
+                 "default": 10,
+                 "/userbook/mon-compte": "",
+                 "/admin-console": ""
+               }
+             }
+           <% } %>
         }
       }
     },
     {
       "name": "org.entcore~workspace~${entcoreVersion}",
-      "config": {
+      "config":{
         "main":"org.entcore.workspace.Workspace",
         "auto-redeploy": false,
-        "mode": "${mode}",
-		"wsPort" : 6502,
         "csrf-token" : $csrfToken,
+        "mode": "${mode}",
         "ssl" : $ssl,
         "host": "${host}",
         "neo4jPlugin" : ${neo4jPlugin},
@@ -302,6 +288,7 @@
         "app-address": "/workspace/workspace",
         "app-icon": "workspace-large",
         "port": 8011,
+        "wsPort" : 6502,
         "mongo-address" : "wse.mongodb.persistor",
         "publicConf": {
           <% if ("true".equals(xitiSwitch)) { %>
@@ -315,16 +302,8 @@
       }
     },
     {
-      "name": "org.entcore~session~${entcoreVersion}",
-      "config": {
-        "session_timeout": 10800000,
-        "worker": true,
-        "address" : "wse.session"
-      }
-    },
-    {
       "name": "org.entcore~communication~${entcoreVersion}",
-      "config": {
+      "config":{
         "main":"org.entcore.communication.Communication",
         "auto-redeploy": false,
         "ssl" : $ssl,
@@ -333,43 +312,43 @@
         "port": 8015,
         "address" : "wse.communication",
         "initDefaultCommunicationRules" :
-        <% if (defaultCommunicationRules != null && !defaultCommunicationRules.trim().isEmpty()) { %>
-          ${defaultCommunicationRules}
-       <% } else { %>
-          {
-            "Structure-Personnel" : {
-              "users" : "BOTH", "communiqueWith" : ["Structure-Teacher", "Structure-Relative", "Structure-Student"]
-            },
-            "Structure-Teacher" : {
-              "users" : "BOTH", "communiqueWith" : ["Structure-Personnel", "Structure-Relative", "Structure-Student"]
-            },
-            "Structure-Student" : {"users" : "OUTGOING"},
-            "Structure-Relative" : {"users" : "OUTGOING"},
-            "Class-Personnel" : {"users" : "OUTGOING"},
-            "Class-Teacher" : {"users" : "OUTGOING"},
-            "Class-Student" : {
-              "users" : "BOTH", "communiqueWith" : ["Class-Personnel", "Class-Teacher"]
-            },
-            "Class-Relative" : {
-              "users" : "BOTH", "Relative-Student" : "INCOMING", "communiqueWith" : ["Class-Personnel", "Class-Student", "Class-Teacher"]
+         <% if (defaultCommunicationRules != null && !defaultCommunicationRules.trim().isEmpty()) { %>
+            ${defaultCommunicationRules}
+         <% } else { %>
+            {
+              "Structure-Personnel" : {
+                "users" : "BOTH", "communiqueWith" : ["Structure-Teacher", "Structure-Relative", "Structure-Student"]
+              },
+              "Structure-Teacher" : {
+                "users" : "BOTH", "communiqueWith" : ["Structure-Personnel", "Structure-Relative", "Structure-Student"]
+              },
+              "Structure-Student" : {"users" : "OUTGOING"},
+              "Structure-Relative" : {"users" : "OUTGOING"},
+              "Class-Personnel" : {"users" : "OUTGOING"},
+              "Class-Teacher" : {"users" : "OUTGOING"},
+              "Class-Student" : {
+                "users" : "BOTH", "communiqueWith" : ["Class-Personnel", "Class-Teacher"]
+              },
+              "Class-Relative" : {
+                "users" : "BOTH", "Relative-Student" : "INCOMING", "communiqueWith" : ["Class-Personnel", "Class-Student", "Class-Teacher"]
+              }
             }
-          }
-       <% } %>,
+         <% } %>,
        "publicConf": {
          <% if ("true".equals(xitiSwitch)) { %>
-           "xiti": {
-             "ID_SERVICE": {
-               "default": "",
-               "/admin-console": ""
-             }
-           }
-         <% } %>
+            "xiti": {
+              "ID_SERVICE": {
+                "default": "",
+                "/admin-console": ""
+              }
+            }
+          <% } %>
         }
       }
     },
     {
       "name": "org.entcore~portal~${entcoreVersion}",
-      "config": {
+      "config":{
         "port": 8017,
         "auto-redeploy": false,
         "ssl" : $ssl,
@@ -409,22 +388,23 @@
           <% if ("true".equals(edtudt)) { %>
           ,{"name": "edtudt", "url": "/directory/timetable"}
           <% } %>
+
         ],
         "widgets": [
-         <% if (widgets != null && !widgets.trim().isEmpty()) { %>
-            ${widgets}
-         <% } else { %>
-          {
-            "name": "notes",
-            "path": "/public/template/notes.html",
-            "js": "/public/js/notes.js"
-          },
-          {
-            "name": "calendar",
-            "path": "/public/template/calendar.html",
-            "js": "/public/js/calendar.js"
-          }
-         <% } %>
+          <% if (widgets != null && !widgets.trim().isEmpty()) { %>
+             ${widgets}
+          <% } else { %>
+           {
+             "name": "notes",
+             "path": "/public/template/notes.html",
+             "js": "/public/js/notes.js"
+           },
+           {
+             "name": "calendar",
+             "path": "/public/template/calendar.html",
+             "js": "/public/js/calendar.js"
+           }
+          <% } %>
         ],
             "resources-applications": [
               ${resourcesApplications}
@@ -433,7 +413,7 @@
     },
     {
       "name": "org.entcore~conversation~${entcoreVersion}",
-      "config": {
+      "config":{
         "main":"org.entcore.conversation.Conversation",
         "host": "${host}",
         "mode": "${mode}",
@@ -460,17 +440,14 @@
     },
     {
       "name": "org.entcore~feeder~${entcoreVersion}",
-      "config": {
-        "worker": true,
-        "mode": "${mode}",
-        "csrf-token" : $csrfToken,
+      "worker": true,
+      "config":{
         "address" : "entcore.feeder",
         "neo4j-address" : "wse.neo4j.persistor",
         "apply-communication-rules" : $applycommunication,
-        "aafNeo4jPlugin" : ${neo4jAAFPlugin},
         "import-files" : "${importDirectory}",
         "feeder" : "${feeder}",
-	"mongodb" : true,
+        "mode" : "${mode}",
         <% if (edt != null && !edt.trim().isEmpty()) { %>
         "edt": ${edt},
         <% } %>
@@ -478,6 +455,7 @@
         "udt": ${udt},
         <% } %>
         "auto-export" : ${autoExport},
+        "exclude-mark-duplicates-by-source" : ["CSV"],
         "exporter" : "${exporter}",
         "export-path" : "${exportPath}",
         "export-destination" : "${exportDestination}"
@@ -485,26 +463,26 @@
     },
     {
       "name": "org.entcore~timeline~${entcoreVersion}",
-      "config": {
+      "config":{ "csrf-token": true,
         "main":"org.entcore.timeline.Timeline",
         "port": 8016,
         "app-name": "Timeline",
         "app-address": "/timeline/timeline",
         "address" : "wse.timeline",
-        "sql": true,
-        "db-schema": "flashmsg",
         "auto-redeploy": false,
         "ssl" : $ssl,
         "host": "${host}",
+        "antiFloodClear": 60000,
+        "sql": true,
+        "db-schema": "flashmsg",
         "mode": "${mode}"
       }
     },
     {
       "name": "org.entcore~cas~${entcoreVersion}",
-      "config": {
+      "config":{
         "main" : "org.entcore.cas.Cas",
         "port" : 8023,
-        "csrf-token" : $csrfToken,
         "app-name" : "Cas",
         "app-address" : "/cas",
         "app-icon" : "cas-large",
@@ -521,62 +499,62 @@
           {
             "class" : "org.entcore.cas.services.EliotRegisteredService",
             "principalAttributeName" : "externalId",
-            "patterns" : [${patternEliotRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.PronoteRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [${patternPronoteRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.KneRegisteredService",
             "principalAttributeName" : "externalId",
-            "patterns" : [${patternKneRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.LeSiteTvRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [${patternLeSiteTvRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.UniversalisRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [${patternUniversalisRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.WebclasseursRegisteredService",
             "principalAttributeName" : "externalId",
-            "patterns" : [${patternWebclasseursRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.UidRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [${patternUidRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.ProEPSRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [${patternProEPSRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.EducagriRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [${patternEducagriRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.EduMediaRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [${patternEduMediaRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.GepiRegisteredService",
             "principalAttributeName" : "externalId",
-            "patterns" : [${patternGepiRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.MSELRegisteredService",
             "principalAttributeName" : "login",
-            "patterns" : [${patternMSELRegisteredService}]
+            "patterns" : []
           },
           {
             "class" : "org.entcore.cas.services.GRRRegisteredService",
@@ -588,20 +566,19 @@
             "principalAttributeName" : "externalId",
             "patterns" : []
           },
-			{
-			  "class" : "org.entcore.cas.services.DefaultRegisteredService",
-			  "principalAttributeName" : "login",
-			  "patterns" : [${patternDefaultRegisteredService}]
-			}
+          {
+            "class" : "org.entcore.cas.services.DefaultRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : [${patternDefaultRegisteredService}]
+          }
         ]
       }
     },
     {
       "name": "org.entcore~archive~${entcoreVersion}",
-      "config": {
+      "config":{
         "main":"org.entcore.archive.Archive",
         "port": 8004,
-        "csrf-token" : $csrfToken,
         "mode": "${mode}",
         "host": "${host}",
         "ssl" : $ssl,

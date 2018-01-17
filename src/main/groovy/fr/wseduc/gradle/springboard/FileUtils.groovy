@@ -10,7 +10,11 @@ class FileUtils {
 		props.load(new FileInputStream(new File(propertiesFile)))
 		def bindings = [:]
 		props.propertyNames().each{prop->
-			bindings[prop]=props.getProperty(prop)
+			if ("assetsPath".equals(prop) &&  !props.getProperty(prop).startsWith(File.separator)) {
+				bindings[prop] = new File(props.getProperty(prop)).absolutePath
+			} else {
+				bindings[prop] = props.getProperty(prop)
+			}
 		}
 		def defaultProps = new Properties()
 		defaultProps.load(new FileInputStream(new File("default.properties")))
