@@ -1,8 +1,31 @@
+vertx:
+  image: opendigitaleducation/vertx-service-launcher:1.0-SNAPSHOT
+  user: "1000:1000"
+  ports:
+    - "8090:8090"
+  volumes:
+    - ./assets:/srv/springboard/assets
+    - ./mods:/srv/springboard/mods
+    - ./ent-core.json:/srv/springboard/conf/vertx.conf
+#    - /home/dboissin/.m2:/home/vertx/.m2
+  links:
+    - neo4j
+    - postgres
+    - mongo
+
 neo4j:
   image: neo4j:3.1
-  ports:
-    - "17474:7474"
+#  ports:
+#    - "17474:7474"
   volumes:
     - ./neo4j-conf:/conf
-#    - ./data/tests:/data
 
+postgres:
+  image: postgres:9.5
+  environment:
+    POSTGRES_PASSWORD: We_1234
+    POSTGRES_USER: web-education
+    POSTGRES_DB: ong
+
+mongo:
+  image: mongo:3.6

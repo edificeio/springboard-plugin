@@ -15,10 +15,6 @@ class SpringboardPlugin implements Plugin<Project> {
 			FileUtils.createFile("conf.properties", "ent-core.json.template", "ent-core.json")
 		}
 
-		project.task("generateTestConf") << {
-			FileUtils.createFile("test.properties", "ent-core.json.template", "ent-core.embedded.json")
-		}
-
 		project.task("extractDeployments") << {
 			extractDeployments(project)
 		}
@@ -37,7 +33,7 @@ class SpringboardPlugin implements Plugin<Project> {
 			stopEnt(project)
 		}
 
-		project.task(dependsOn: 'generateTestConf', "runEnt") << {
+		project.task(dependsOn: 'generateConf', "runEnt") << {
 			runEnt(project)
 		}
 
@@ -134,9 +130,7 @@ class SpringboardPlugin implements Plugin<Project> {
 		stopbat.write("wmic process where \"name like '%%java%%'\" delete")
 		stopsh.write(
 				"#!/bin/sh\n" +
-				"docker-compose stop neo4j\n" +
-				"PID_ENT=\$(ps -ef | grep \"vertx\" | grep -v grep | sed 's/\\s\\+/ /g' | cut -d' ' -f2)\n" +
-				"kill \$PID_ENT"
+				"docker-compose stop vertx\n"
 		)
 		String version = project.getProperties().get("entCoreVersion")
 		runbat.write(
@@ -144,22 +138,18 @@ class SpringboardPlugin implements Plugin<Project> {
 		)
 		runsh.write(
 				"#!/bin/bash\n" +
-				"docker-compose up -d neo4j > /dev/null &\n" +
-				"sleep 10\n" +
-				"if [ ! -e vertx-service-launcher-1.0-SNAPSHOT-fat.jar ]\n" +
-				"then\n"+
-				"wget -O vertx-service-launcher-1.0-SNAPSHOT-fat.jar https://maven.opendigitaleducation.com/nexus/content/repositories/snapshots/com/opendigitaleducation/vertx-service-launcher/1.0-SNAPSHOT/vertx-service-launcher-1.0-20180117.110921-1-fat.jar\n" +
-				"fi\n" +
 				"if [ ! -e mods ]\n" +
 				"then\n"+
 				"mkdir mods\n" +
 				"fi\n" +
-				"java -jar vertx-service-launcher-1.0-SNAPSHOT-fat.jar -Dvertx.services.path=mods -Dvertx.disableFileCaching=true -conf ent-core.embedded.json > /dev/null &"
+				"docker-compose up -d vertx > /dev/null &\n" +
+				"sleep 10\n"
 		)
 
 		runsh.setExecutable(true, true)
 		stopsh.setExecutable(true, true)
 
+		project.file("mods")?.mkdirs()
 		project.file("sample-be1d/EcoleprimaireEmileZola")?.mkdirs()
 		project.file("neo4j-conf")?.mkdirs()
 		project.file("src/test/scala/org/entcore/test/scenarios")?.mkdirs()
@@ -217,10 +207,6 @@ class SpringboardPlugin implements Plugin<Project> {
 		File confProperties = project.file(filename)
 		Map confMap = FileUtils.createOrAppendProperties(confProperties, filename)
 
-		String filenameTest = "test.properties"
-		File testProperties = project.file(filenameTest)
-		Map testMap = FileUtils.createOrAppendProperties(testProperties, filenameTest)
-
 		String filenameDefault = "default.properties"
 		File defaultProperties = project.file(filenameDefault)
 		Map defaultMap = FileUtils.createOrAppendProperties(defaultProperties, filenameDefault)
@@ -254,9 +240,6 @@ class SpringboardPlugin implements Plugin<Project> {
 					case "conf.properties" :
 						FileUtils.appendProperties(project, file, confMap)
 						break;
-					case "test.properties" :
-						FileUtils.appendProperties(project, file, testMap)
-						break;
 					case "default.properties" :
 						FileUtils.appendProperties(project, file, defaultMap)
 						break;
@@ -287,9 +270,6 @@ class SpringboardPlugin implements Plugin<Project> {
 
 		if (!confMap.containsKey("entcoreVersion")) {
 			confProperties.append("entcoreVersion=" + version + "\n")
-		}
-		if (!testMap.containsKey("entcoreVersion")) {
-			testProperties.append("entcoreVersion=" + version + "\n")
 		}
 	}
 
