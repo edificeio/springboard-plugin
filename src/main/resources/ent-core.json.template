@@ -110,7 +110,7 @@
     },
      <% } %>
     {
-      "name" : "fr.wseduc~mod-image-resizer~1.5-SNAPSHOT",
+      "name" : "fr.wseduc~mod-image-resizer~1.5.0",
       "config" : {
         "worker": true,
         "multi-threaded": true,
