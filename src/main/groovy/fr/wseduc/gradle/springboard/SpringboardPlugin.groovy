@@ -28,43 +28,10 @@ class SpringboardPlugin implements Plugin<Project> {
 			initFiles(project)
 		}
 
-		project.task(dependsOn: ['runEnt', 'compileTestScala'], "integrationTest") << {
+		project.task(dependsOn: ['compileTestScala'], "integrationTest") << {
 			gatling(project)
-			stopEnt(project)
 		}
 
-		project.task(dependsOn: 'generateConf', "runEnt") << {
-			runEnt(project)
-		}
-
-		project.task("stopEnt") << {
-			stopEnt(project)
-		}
-
-	}
-
-	private ExecResult runEnt(Project project) {
-		project.exec {
-			workingDir '.'
-
-			if (System.env.OS != null && System.env.OS.contains('Windows')) {
-				commandLine 'cmd', '/c', 'run.bat'
-			} else {
-				commandLine './run.sh'
-			}
-		}
-	}
-
-	private ExecResult stopEnt(Project project) {
-		project.exec {
-			workingDir '.'
-
-			if (System.env.OS != null && System.env.OS.contains('Windows')) {
-				commandLine 'cmd', '/c', 'stop.bat'
-			} else {
-				commandLine './stop.sh'
-			}
-		}
 	}
 
 	private void gatling(Project project) {
@@ -123,32 +90,6 @@ class SpringboardPlugin implements Plugin<Project> {
 	}
 
 	def initFiles(Project project) {
-		File runsh = project.file("run.sh")
-		File runbat = project.file("run.bat")
-		File stopsh = project.file("stop.sh")
-		File stopbat = project.file("stop.bat")
-		stopbat.write("wmic process where \"name like '%%java%%'\" delete")
-		stopsh.write(
-				"#!/bin/sh\n" +
-				"docker-compose stop vertx\n"
-		)
-		String version = project.getProperties().get("entCoreVersion")
-		runbat.write(
-						"vertx runMod org.entcore~infra~" + version + " -conf ent-core.embedded.json"
-		)
-		runsh.write(
-				"#!/bin/bash\n" +
-				"if [ ! -e mods ]\n" +
-				"then\n"+
-				"mkdir mods\n" +
-				"fi\n" +
-				"docker-compose up -d vertx > /dev/null &\n" +
-				"sleep 10\n"
-		)
-
-		runsh.setExecutable(true, true)
-		stopsh.setExecutable(true, true)
-
 		project.file("mods")?.mkdirs()
 		project.file("sample-be1d/EcoleprimaireEmileZola")?.mkdirs()
 		project.file("neo4j-conf")?.mkdirs()

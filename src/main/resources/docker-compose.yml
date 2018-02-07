@@ -8,7 +8,7 @@ vertx:
     - ./assets:/srv/springboard/assets
     - ./mods:/srv/springboard/mods
     - ./ent-core.json:/srv/springboard/conf/vertx.conf
-#    - /home/dboissin/.m2:/home/vertx/.m2
+#    - ~/.m2:/home/vertx/.m2
   links:
     - neo4j
     - postgres
@@ -16,8 +16,6 @@ vertx:
 
 neo4j:
   image: neo4j:3.1
-#  ports:
-#    - "17474:7474"
   volumes:
     - ./neo4j-conf:/conf
 
@@ -30,3 +28,18 @@ postgres:
 
 mongo:
   image: mongo:3.6
+
+gradle:
+  image: gradle:4.5-alpine
+  working_dir: /home/gradle/project
+  volumes:
+    - ./:/home/gradle/project
+    - ~/.m2:/home/gradle/.m2
+    - ~/.gradle:/home/gradle/.gradle
+
+node:
+  image: opendigitaleducation/node
+  working_dir: /home/node/app
+  volumes:
+    - ./:/home/node/app
+    - ~/.npm:/.npm
