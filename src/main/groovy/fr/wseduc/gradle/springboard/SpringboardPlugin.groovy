@@ -4,8 +4,6 @@ import groovy.io.FileType
 import java.io.*;
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.process.ExecResult
-import java.util.zip.*
 
 class SpringboardPlugin implements Plugin<Project> {
 
@@ -19,12 +17,17 @@ class SpringboardPlugin implements Plugin<Project> {
 			extractDeployments(project)
 		}
 
+		project.task("extractHelps") << {
+			extractHelps(project)
+		}
+
 		project.task("extractTheme") << {
 			extractTheme(project)
 		}
 
 		project.task("init") << {
 			extractDeployments(project)
+			extractHelps(project)
 			initFiles(project)
 		}
 
@@ -87,6 +90,18 @@ class SpringboardPlugin implements Plugin<Project> {
 		project.file("deployments/META-INF")?.deleteDir()
 		project.file("deployments/org")?.deleteDir()
 		project.file("deployments/git-hash")?.delete()
+	}
+
+	private void extractHelps(Project project) {
+		if (!project.file("static/help")?.exists()) {
+			project.file("static/help").mkdirs()
+		}
+		project.copy {
+			from {
+				project.configurations.help.collect { project.tarTree(it) }
+			}
+			into "static/help/"
+		}
 	}
 
 	def initFiles(Project project) {

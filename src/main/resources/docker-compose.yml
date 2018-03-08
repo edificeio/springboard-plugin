@@ -13,6 +13,8 @@ vertx:
     - neo4j
     - postgres
     - mongo
+#environment:
+#  MAVEN_REPOSITORIES: ''
 
 neo4j:
   image: neo4j:3.1
