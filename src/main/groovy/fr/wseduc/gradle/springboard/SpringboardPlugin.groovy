@@ -21,6 +21,10 @@ class SpringboardPlugin implements Plugin<Project> {
 			extractHelps(project)
 		}
 
+		project.task("extractTranslations") << {
+			extractTranslations(project)
+		}
+
 		project.task("extractTheme") << {
 			extractTheme(project)
 		}
@@ -28,6 +32,7 @@ class SpringboardPlugin implements Plugin<Project> {
 		project.task("init") << {
 			extractDeployments(project)
 			extractHelps(project)
+			extractTranslations(project)
 			initFiles(project)
 		}
 
@@ -101,6 +106,18 @@ class SpringboardPlugin implements Plugin<Project> {
 				project.configurations.help.collect { project.tarTree(it) }
 			}
 			into "static/help/"
+		}
+	}
+
+	private void extractTranslations(Project project) {
+		if (!project.file("i18n")?.exists()) {
+			project.file("i18n").mkdirs()
+		}
+		project.copy {
+			from {
+				project.configurations.i18n.collect { project.tarTree(it) }
+			}
+			into "i18n"
 		}
 	}
 
