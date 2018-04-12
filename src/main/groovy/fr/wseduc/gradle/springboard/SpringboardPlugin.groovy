@@ -122,6 +122,7 @@ class SpringboardPlugin implements Plugin<Project> {
 	}
 
 	def initFiles(Project project) {
+		String version = project.getProperties().get("entCoreVersion")
 		project.file("mods")?.mkdirs()
 		project.file("sample-be1d/EcoleprimaireEmileZola")?.mkdirs()
 		project.file("neo4j-conf")?.mkdirs()
