@@ -1,6 +1,6 @@
 <% if ("true".equals(httpProxy)) { %>
     ,{
-      "name": "fr.wseduc~http-proxy~2.0-SNAPSHOT",
+      "name": "fr.wseduc~http-proxy~2.0.0",
       "config": {
         "port": 8090,
         "proxies": [

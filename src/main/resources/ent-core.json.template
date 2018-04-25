@@ -2,7 +2,7 @@
   "assets-path": "${assetsPath}",
 "services" : [
 {
-  "name": "io.vertx~mod-mongo-persistor~3.0-SNAPSHOT",
+  "name": "io.vertx~mod-mongo-persistor~3.0.0",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded": true,
@@ -19,7 +19,7 @@
   }
 },
 {
-  "name" : "fr.wseduc~mod-image-resizer~2.0-SNAPSHOT",
+  "name" : "fr.wseduc~mod-image-resizer~2.0.0",
   "worker": true,
   "multi-threaded": true,
   "waitDeploy" : true,
@@ -47,7 +47,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-zip~2.0-SNAPSHOT",
+  "name": "fr.wseduc~mod-zip~2.0.0",
   "waitDeploy" : true,
   "worker": true,
   "config":{
@@ -55,7 +55,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-postgresql~1.0-SNAPSHOT",
+  "name": "fr.wseduc~mod-postgresql~1.0.0",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded" : true,
@@ -67,7 +67,7 @@
   }
 },
 {
-  "name": "com.opendigitaleducation~mod-json-schema-validator~1.0-SNAPSHOT",
+  "name": "com.opendigitaleducation~mod-json-schema-validator~1.0.0",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded" : true,
@@ -76,7 +76,7 @@
 },
 <% if (webdavHost != null && !webdavHost.trim().isEmpty()) { %>
 {
-  "name": "fr.wseduc~mod-webdav~0.1.0",
+  "name": "fr.wseduc~mod-webdav~1.0.0",
   "config": {
     "address" : "webdav"
     <% if ("true".equals(webdavCredential)) { %>
@@ -93,7 +93,7 @@
   },
 <% } %>
 {
-  "name": "fr.wseduc~mod-sms-proxy~1.0-SNAPSHOT",
+  "name": "fr.wseduc~mod-sms-proxy~1.0.0",
   "waitDeploy" : true,
   "worker": true,
   "config":{
@@ -102,7 +102,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-pdf-generator~1.0-SNAPSHOT",
+  "name": "fr.wseduc~mod-pdf-generator~1.0.0",
   "waitDeploy" : true,
   "worker": true,
   "config":{
