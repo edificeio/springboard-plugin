@@ -8,6 +8,7 @@ vertx:
     - ./assets:/srv/springboard/assets
     - ./mods:/srv/springboard/mods
     - ./ent-core.json:/srv/springboard/conf/vertx.conf
+    - ./aaf-duplicates-test:/home/wse/aaf
 #    - ~/.m2:/home/vertx/.m2
   links:
     - neo4j
