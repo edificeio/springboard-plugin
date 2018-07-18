@@ -7,6 +7,7 @@ var merge = require('merge2');
 var rev = require('gulp-rev');
 var revReplace = require('gulp-rev-replace');
 var odeSassImports = require('gulp-ode-sass-imports');
+var mergeJson = require('gulp-merge-json');
 
 var themeConf = require('./theme-conf').conf;
 
@@ -107,6 +108,15 @@ gulp.task('override-theme', ['version-fonts'], function () {
                     .pipe(gulp.dest('./assets/themes/' + overriding.child + '/' + override))
             );
         });
+        // Merge template/override.json from parent and child theme
+        gulp.src([
+            './assets/themes/' + overriding.parent + '/template/override.json',
+            './assets/themes/' + overriding.child + '/overrides/template/override.json'
+        ])
+        .pipe(mergeJson({
+            fileName: 'override.json',
+        }))
+        .pipe(gulp.dest('./assets/themes/' + overriding.child + '/template'));
 
         streams.push(
             gulp.src(['./assets/themes/' + overriding.parent + '/css/modules/_modules.scss'])
