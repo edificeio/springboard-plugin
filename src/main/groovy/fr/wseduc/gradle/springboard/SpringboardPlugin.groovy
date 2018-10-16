@@ -105,7 +105,7 @@ class SpringboardPlugin implements Plugin<Project> {
 			from {
 				project.configurations.help.collect { project.tarTree(it) }
 			}
-			into "static/help/"
+			into "static/"
 		}
 	}
 
