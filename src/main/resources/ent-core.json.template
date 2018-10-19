@@ -74,6 +74,17 @@
   "config":{
   }
 },
+<% if (modSftp != null && !modSftp.trim().isEmpty()) { %>
+{
+  "name": "fr.cgi~mod-sftp~1.0.0",
+  "waitDeploy": true,
+  "config": {
+    "main" : "fr.cgi.sftp.Sftp",
+    "worker" : true,
+    "address" : "sftp"
+  }
+},
+<% } %>
 <% if (webdavHost != null && !webdavHost.trim().isEmpty()) { %>
 {
   "name": "fr.wseduc~mod-webdav~1.0.0",
@@ -217,6 +228,9 @@
         "saml-private-key": "${samlPrivateKey}",
         "saml-services-providers" : ${samlServicesProviders},
         "saml-issuer": "${samlIssuer}",
+        "saml-entng-idp-nq": "${samlEntngIdpNq}",
+        "saml-public-key": "${samlPublicKey}",
+        "idp-metadata-mapping": "${idpMetadataMapping}",
         "check-federated-login" : true,
         "slo": ${samlSLO},
         "loginUri":"${federationLoginUri}",
