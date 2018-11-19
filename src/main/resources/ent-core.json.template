@@ -2,7 +2,7 @@
   "assets-path": "${assetsPath}",
 "services" : [
 {
-  "name": "io.vertx~mod-mongo-persistor~3.0.0",
+  "name": "io.vertx~mod-mongo-persistor~3.0.1",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded": true,
