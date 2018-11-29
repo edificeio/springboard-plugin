@@ -48,14 +48,13 @@ node:
   volumes:
     - ./:/home/node/app
     - ~/.npm:/.npm
+
 # help-1d:
 #   image: nginx
 #   volumes:
-#   - ./static/help-1d:/usr/share/nginx/html/help-1d/:ro
-
-
+#   - ./static/help-1d:/usr/share/nginx/html/help-1d:ro
 
 # help-2d:
 #   image: nginx
 #   volumes:
-#   - ./static/help-2d:/usr/share/nginx/html/help-2d/:ro
+#   - ./static/help-2d:/usr/share/nginx/html/help-2d:ro
