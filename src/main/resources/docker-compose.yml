@@ -14,6 +14,8 @@ vertx:
     - neo4j
     - postgres
     - mongo
+  # - help-1d
+  # - help-2d
 #environment:
 #  MAVEN_REPOSITORIES: ''
 
@@ -46,3 +48,16 @@ node:
   volumes:
     - ./:/home/node/app
     - ~/.npm:/.npm
+# help-1d:
+#   image: nginx
+#   expose: 
+#     - 80
+#   volumes:
+#   - ./static:/usr/share/nginx/html:ro
+
+# help-2d:
+#   image: nginx
+#   expose:
+#     - 80
+#   volumes:
+#   - ./static:/usr/share/nginx/html:ro
