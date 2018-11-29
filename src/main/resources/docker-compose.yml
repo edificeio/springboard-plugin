@@ -50,14 +50,12 @@ node:
     - ~/.npm:/.npm
 # help-1d:
 #   image: nginx
-#   expose: 
-#     - 80
 #   volumes:
-#   - ./static:/usr/share/nginx/html:ro
+#   - ./static/help-1d:/usr/share/nginx/html/help-1d/:ro
+
+
 
 # help-2d:
 #   image: nginx
-#   expose:
-#     - 80
 #   volumes:
-#   - ./static:/usr/share/nginx/html:ro
+#   - ./static/help-2d:/usr/share/nginx/html/help-2d/:ro
