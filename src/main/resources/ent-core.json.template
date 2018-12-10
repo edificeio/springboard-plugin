@@ -601,7 +601,7 @@
         "app-name" : "Archive",
         "app-address" : "/archive",
         "app-icon" : "archive-large",
-        "expected-exports" : ["workspace"]
+        "expected-exports" : ["rack","workspace"]
       }
     },
     {
