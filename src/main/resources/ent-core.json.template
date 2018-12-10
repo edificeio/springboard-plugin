@@ -402,7 +402,9 @@
           <% if ("true".equals(edtudt)) { %>
           ,{"name": "edtudt", "url": "/directory/timetable"}
           <% } %>
-
+          <% if ("true".equals(directoryCalendarSwitch)) { %>
+          ,{"name": "calendar", "url": "/directory/calendar"}
+          <% } %>
         ],
         "widgets": [
           <% if (widgets != null && !widgets.trim().isEmpty()) { %>
