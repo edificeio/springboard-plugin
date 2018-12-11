@@ -2,7 +2,7 @@ vertx:
   image: opendigitaleducation/vertx-service-launcher:1.0.0
   user: "1000:1000"
   ports:
-    - "8090:8090"
+    - "8080:8090"
 #    - "5000:5000"
   volumes:
     - ./assets:/srv/springboard/assets
