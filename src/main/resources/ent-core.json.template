@@ -405,6 +405,9 @@
           <% if ("true".equals(directoryCalendarSwitch)) { %>
           ,{"name": "calendar", "url": "/directory/calendar"}
           <% } %>
+          <% if ("true".equals(adminZimbra)) { %>
+          ,{"name": "zimbra", "url":"/zimbra/admin-console"}
+          <% } %>
         ],
         "widgets": [
           <% if (widgets != null && !widgets.trim().isEmpty()) { %>
