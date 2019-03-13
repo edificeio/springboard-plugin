@@ -186,6 +186,7 @@
       "mode": "${mode}",
       "ssl" : $ssl,
       "address" : "wse.app.registry",
+      "app-type": "SYSTEM",
       "port" : 8012,
       "publicConf": {
         <% if ("true".equals(xitiSwitch)) { %>
@@ -211,6 +212,7 @@
       "name": "org.entcore~auth~${entcoreVersion}",
       "config":{
         "path-prefix": "auth",
+        "app-type": "SYSTEM",
         "port": 8009,
         "auto-redeploy": false,
         "ssl" : $ssl,
@@ -258,6 +260,7 @@
         "port": 8003,
         "email": "${senderEmail}",
         "app-name": "Directory",
+        "app-type": "SYSTEM",
         "workspace-url": "localhost",
         "workspace-port":8011,
         "workspace-prefix" : "/workspace",
@@ -301,6 +304,7 @@
         "app-name": "Espace documentaire",
         "app-address": "/workspace/workspace",
         "app-icon": "workspace-large",
+        "app-type": "END_USER",
         "port": 8011,
         "wsPort" : 6502,
         "mongo-address" : "wse.mongodb.persistor",
@@ -325,6 +329,7 @@
         "mode": "${mode}",
         "port": 8015,
         "address" : "wse.communication",
+        "app-type": "SYSTEM",
         "initDefaultCommunicationRules" :
          <% if (defaultCommunicationRules != null && !defaultCommunicationRules.trim().isEmpty()) { %>
             ${defaultCommunicationRules}
@@ -364,6 +369,7 @@
       "name": "org.entcore~portal~${entcoreVersion}",
       "config":{
         "port": 8017,
+        "app-type": "SYSTEM",
         "auto-redeploy": false,
         "ssl" : $ssl,
         "csrf-token" : $csrfToken,
@@ -444,6 +450,7 @@
         "port": 8019,
         "app-name" : "Messagerie",
         "app-icon" : "conversation-large",
+        "app-type": "END_USER",
         "sql": true,
         "db-schema": "conversation",
         "publicConf": {
@@ -488,6 +495,7 @@
         "app-name": "Timeline",
         "app-address": "/timeline/timeline",
         "address" : "wse.timeline",
+        "app-type": "SYSTEM",
         "auto-redeploy": false,
         "ssl" : $ssl,
         "host": "${host}",
@@ -505,6 +513,7 @@
         "app-name" : "Cas",
         "app-address" : "/cas",
         "app-icon" : "cas-large",
+        "app-type": "SYSTEM",
         "host": "${host}",
         "ssl" : $ssl,
         "auto-redeploy": false,
@@ -606,6 +615,7 @@
         "app-name" : "Archive",
         "app-address" : "/archive",
         "app-icon" : "archive-large",
+        "app-type": "END_USER",
         "expected-exports" : ["rack","workspace"]
       }
     },
@@ -621,6 +631,7 @@
         "host" : "${host}",
         "app-name" : "Admin",
         "app-address" : "/admin",
-        "app-icon" : "admin-large"
+        "app-icon" : "admin-large",
+        "app-type": "END_USER"
       }
     }
