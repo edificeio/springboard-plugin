@@ -10,6 +10,7 @@ vertx:
     - ./ent-core.json:/srv/springboard/conf/vertx.conf
     - ./aaf-duplicates-test:/home/wse/aaf
 #    - ~/.m2:/home/vertx/.m2
+#    - ./avatars:/srv/storage/avatars
   links:
     - neo4j
     - postgres

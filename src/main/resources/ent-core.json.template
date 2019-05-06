@@ -267,6 +267,8 @@
         "activation-welcome-message" : $activationWelcomeMessage,
         "createdUserEmail" : $createdUserEmail,
         "classDefaultRoles" : $classDefaultRoles,
+        "avatar-path": "${fsAvatarPath}",
+        "avatar-flat": ${flatAvatarStorage},
         "user-book-data":{
           "default-theme":"default",
           "default-avatar": "no-avatar.jpg",
