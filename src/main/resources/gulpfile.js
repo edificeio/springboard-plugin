@@ -15,7 +15,7 @@ var sourceDependency = [];
 
 function widgetsSources() {
     var sources = [];
-    for(var widget in themeConf.dependencies.widgets){
+    for (var widget in themeConf.dependencies.widgets) {
         sources.push('./bower_components/' + widget + '/**/*');
     }
     return sources;
@@ -23,13 +23,13 @@ function widgetsSources() {
 
 function themesSources() {
     var sources = [];
-    for(var theme in themeConf.dependencies.themes){
+    for (var theme in themeConf.dependencies.themes) {
         sources.push('./bower_components/' + theme + '/**/*');
     }
     return sources;
 }
 
-gulp.task('clean', function(){
+gulp.task('clean', function () {
     var delPaths = ['./assets/themes/*', './bower_components'];
     themeConf.overriding.forEach((overriding) => {
         delPaths.push('!./assets/themes/' + overriding.child);
@@ -40,14 +40,14 @@ gulp.task('clean', function(){
 });
 
 gulp.task('bower', ['clean'], () => {
-    return bower({ cwd: '.' });
+    return bower({cwd: '.'});
 });
 
 gulp.task('update', ['bower'], function () {
-    var themes = gulp.src(themesSources(), { base: './bower_components' })
+    var themes = gulp.src(themesSources(), {base: './bower_components'})
         .pipe(gulp.dest('./assets/themes'));
 
-    var widgets = gulp.src(widgetsSources(), { base: './bower_components' })
+    var widgets = gulp.src(widgetsSources(), {base: './bower_components'})
         .pipe(gulp.dest('./assets/widgets'));
 
     return merge([themes, widgets]);
@@ -75,14 +75,14 @@ gulp.task('version-fonts', ['fill-theme'], function(){
 
 gulp.task('copy-local', function () {
     var streams = [];
-    for(var theme in themeConf.dependencies.themes){
+    for (var theme in themeConf.dependencies.themes) {
         streams.push(
             gulp.src(themeConf.dependencies.themes[theme], {base: '../'})
                 .pipe(gulp.dest('./assets/themes'))
         )
     }
 
-    for(var widget in themeConf.dependencies.widgets){
+    for (var widget in themeConf.dependencies.widgets) {
         streams.push(
             gulp.src(themeConf.dependencies.widgets[widget], {base: '../'})
                 .pipe(gulp.dest('./assets/widgets'))
@@ -93,7 +93,7 @@ gulp.task('copy-local', function () {
 });
 
 gulp.task('override-theme', ['version-fonts'], function () {
-    var overrides = ['img', 'js', 'fonts', 'template', 'css', 'i18n'];
+        var overrides = ['img', 'js', 'fonts', 'template', 'css', 'i18n'];
     var streams = [];
 
     streams.push(
@@ -113,26 +113,22 @@ gulp.task('override-theme', ['version-fonts'], function () {
             './assets/themes/' + overriding.parent + '/template/override.json',
             './assets/themes/' + overriding.child + '/overrides/template/override.json'
         ])
-        .pipe(mergeJson({
-            fileName: 'override.json',
-        }))
-        .pipe(gulp.dest('./assets/themes/' + overriding.child + '/template'));
+            .pipe(mergeJson({
+                fileName: 'override.json',
+            }))
+            .pipe(gulp.dest('./assets/themes/' + overriding.child + '/template'));
 
         streams.push(
-            gulp.src(['./assets/themes/' + overriding.parent + '/css/modules/_modules.scss'])
+            gulp.src(
+                ['./assets/themes/@(' + overriding.parent + '|' + overriding.child + ')/css/modules/_modules.scss'],
+                {base: './'})
                 .pipe(odeSassImports(overriding.parent))
-                .pipe(gulp.dest('./assets/themes/' + overriding.parent + '/css/modules'))
-        );
-
-        streams.push(
-            gulp.src(['./assets/themes/' + overriding.child + '/css/modules/_modules.scss'])
-                .pipe(odeSassImports(overriding.parent))
-                .pipe(gulp.dest('./assets/themes/' + overriding.child + '/css/modules'))
+                .pipe(gulp.dest('./'))
         );
     });
 
     streams.push(
-        gulp.src('./mods/**/view/*.html')
+        gulp.src('./mods/*/view/*.html')
             .pipe(odeSassImports())
             .pipe(gulp.dest('./mods'))
     );
@@ -147,9 +143,9 @@ gulp.task('compile-sass', ['override-theme'], function () {
         overriding.skins.forEach((skin) => {
             streams.push(
                 gulp.src('./assets/themes/' + overriding.child + '/skins/' + skin + '/theme.scss')
-                    .pipe(sass({ outputStyle: 'compressed' }))
+                    .pipe(sass({outputStyle: 'compressed'}))
                     .pipe(autoprefixer())
-                    .pipe(revReplace({manifest: gulp.src("./rev-manifest.json") }))
+                    .pipe(revReplace({manifest: gulp.src("./rev-manifest.json")}))
                     .pipe(gulp.dest('./assets/themes/' + overriding.child + '/skins/' + skin))
             );
         })
@@ -159,11 +155,12 @@ gulp.task('compile-sass', ['override-theme'], function () {
 });
 
 
-gulp.task('build-local', function(){
+gulp.task('build-local', function () {
     sourceDependency.push('copy-local')
     return gulp.start('compile-sass')
 });
-gulp.task('build', function(){
+gulp.task('build', function () {
     sourceDependency.push('update');
     return gulp.start('compile-sass');
 });
+
