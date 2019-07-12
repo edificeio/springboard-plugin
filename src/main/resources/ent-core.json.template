@@ -562,6 +562,11 @@
             "patterns" : []
           },
           {
+            "class" : "org.entcore.cas.services.UuidRegisteredService",
+            "principalAttributeName" : "userId",
+            "patterns" : []
+          },
+          {
             "class" : "org.entcore.cas.services.ProEPSRegisteredService",
             "principalAttributeName" : "login",
             "patterns" : []
