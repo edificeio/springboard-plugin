@@ -65,7 +65,7 @@ gulp.task('fill-theme', sourceDependency, function () {
 });
 
 gulp.task('version-fonts', ['fill-theme'], function(){
-    var fonts = ['./assets/themes/generic-icons/**/*-icons.{woff,ttf,svg}'];
+    var fonts = ['./assets/themes/generic-icons/**/*.woff', './assets/themes/generic-icons/**/*.ttf', './assets/themes/generic-icons/**/*.svg'];
     return gulp.src(fonts)
         .pipe(rev())
         .pipe(gulp.dest('./assets/themes/generic-icons'))
