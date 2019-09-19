@@ -188,6 +188,16 @@
       "address" : "wse.app.registry",
       "app-type": "SYSTEM",
       "port" : 8012,
+      <% if ("true".equals(bprEnabled)) { %>
+        "library-enabled": true,
+        "library-api-url": "${bprUrl}",
+        "library-token": "${bprToken}",
+        "node-pdf-generator" : {
+          "pdf-connector-id": "exportpdf",
+          "auth": "${nodePdfToken}",
+          "url" : "${nodePdfUri}"
+         },
+      <% } %>
       "publicConf": {
         <% if ("true".equals(xitiSwitch)) { %>
           "xiti": {
