@@ -1,3 +1,16 @@
+plugins {
+  id 'maven'
+  id 'maven-publish'
+  id 'com.github.johnrengelman.shadow' version '2.0.1'
+}
+
+if (!hasProperty('odeUsername')) {
+  ext.odeUsername = ''
+}
+if (!hasProperty('odePassword')) {
+  ext.odePassword = ''
+}
+
 apply plugin: 'groovy'
 apply from: "gradle/maven.gradle"
 
@@ -5,3 +18,55 @@ dependencies {
   compile gradleApi()
   compile localGroovy()
 }
+
+
+repositories {
+  mavenLocal()
+    maven {
+      url "https://maven.opendigitaleducation.com/nexus/content/groups/public"
+    }
+  mavenCentral()
+    maven {
+      url "https://oss.sonatype.org/content/repositories/iovertx-3720/"
+    }
+    maven {
+      url "https://oss.sonatype.org/content/repositories/snapshots"
+    }
+}
+
+
+configurations.all {
+  resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+publishing {
+  repositories {
+    if (version.endsWith("SNAPSHOT")) {
+      maven {
+        name 'Snapshots'
+          url 'https://maven.opendigitaleducation.com/nexus/content/repositories/snapshots/'
+          credentials {
+            username "${odeUsername}"
+              password "${odePassword}"
+          }
+      }
+    } else {
+      maven {
+        name 'Releases'
+          url 'https://maven.opendigitaleducation.com/nexus/content/repositories/releases/'
+          credentials {
+            username "${odeUsername}"
+              password "${odePassword}"
+          }
+      }
+    }
+  }
+  publications {
+    maven(MavenPublication) {
+      groupId "${group}"
+      artifactId "${archivesBaseName}"
+      artifact jar
+    }
+  }
+}
+
