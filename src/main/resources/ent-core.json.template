@@ -127,6 +127,13 @@
   "mode": "${mode}",
   "auto-redeploy": false,
   "path-prefix": "infra",
+  <% if ("true".equals(pdfEnabled)) { %>
+  "node-pdf-generator" : {
+    "pdf-connector-id": "exportpdf",
+    "auth": "${nodePdfToken}",
+    "url" : "${nodePdfUri}"
+    },
+<% } %>
   "sql": true,
   <% if (signKey != null && !signKey.trim().isEmpty()) { %>
   "key": "${signKey}",
@@ -192,11 +199,6 @@
         "library-enabled": true,
         "library-api-url": "${bprUrl}",
         "library-token": "${bprToken}",
-        "node-pdf-generator" : {
-          "pdf-connector-id": "exportpdf",
-          "auth": "${nodePdfToken}",
-          "url" : "${nodePdfUri}"
-         },
       <% } %>
       "publicConf": {
         <% if ("true".equals(xitiSwitch)) { %>
