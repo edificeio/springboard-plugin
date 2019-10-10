@@ -93,7 +93,7 @@ gulp.task('copy-local', function () {
 });
 
 gulp.task('override-theme', ['version-fonts'], function () {
-    var overrides = ['img', 'js', 'fonts', 'template', 'css', 'i18n'];
+    var overrides = ['img', 'js', 'fonts', 'template', 'css' /*, 'i18n'*/];
     var streams = [];
 
     streams.push(
@@ -108,6 +108,31 @@ gulp.task('override-theme', ['version-fonts'], function () {
                     .pipe(gulp.dest('./assets/themes/' + overriding.child + '/' + override))
             );
         });
+
+        // Merging i18n key by key
+        gulp.src('./assets/themes/' + overriding.child + '/i18n/*')
+            .pipe(flatmap(function (stream, file) {
+                const appname = file.path.replace(file.base, "");
+                // console.log(file.base, file.path, appname);
+                gulp.src('./assets/themes/' + overriding.child + '/i18n/' + appname + '/*')
+                    .pipe(flatmap(function (streamLang, fileLang) {
+                        const langname = fileLang.path.replace(fileLang.base, "");
+                        // console.log("   ", fileLang.base, fileLang.path, langname);
+                        // console.log("   =>", './assets/themes/' + overriding.child + '/i18n/' + appname + '/' + langname);
+                        gulp.src([
+                            './assets/themes/' + overriding.child + '/i18n/' + appname + '/' + langname,
+                            './assets/themes/' + overriding.child + '/overrides/i18n/' + appname + '/' + langname
+                        ])
+                            .pipe(mergeJson({
+                                fileName: langname
+                            }))
+                            .pipe(gulp.dest('./assets/themes/' + overriding.child + '/i18n/' + appname + '/'))
+                        return streamLang;
+                    }))
+                return stream;
+            }))
+        // End merging i18n key by key
+
         // Merge template/override.json from parent and child theme
         gulp.src([
             './assets/themes/' + overriding.parent + '/template/override.json',
