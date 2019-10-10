@@ -8,6 +8,7 @@ var rev = require('gulp-rev');
 var revReplace = require('gulp-rev-replace');
 var odeSassImports = require('gulp-ode-sass-imports');
 var mergeJson = require('gulp-merge-json');
+var flatmap = require("gulp-flatmap");
 
 var themeConf = require('./theme-conf').conf;
 
@@ -15,7 +16,7 @@ var sourceDependency = [];
 
 function widgetsSources() {
     var sources = [];
-    for(var widget in themeConf.dependencies.widgets){
+    for (var widget in themeConf.dependencies.widgets) {
         sources.push('./bower_components/' + widget + '/**/*');
     }
     return sources;
@@ -23,13 +24,13 @@ function widgetsSources() {
 
 function themesSources() {
     var sources = [];
-    for(var theme in themeConf.dependencies.themes){
+    for (var theme in themeConf.dependencies.themes) {
         sources.push('./bower_components/' + theme + '/**/*');
     }
     return sources;
 }
 
-gulp.task('clean', function(){
+gulp.task('clean', function () {
     var delPaths = ['./assets/themes/*', './bower_components'];
     themeConf.overriding.forEach((overriding) => {
         delPaths.push('!./assets/themes/' + overriding.child);
@@ -64,7 +65,7 @@ gulp.task('fill-theme', sourceDependency, function () {
     return merge(streams);
 });
 
-gulp.task('version-fonts', ['fill-theme'], function(){
+gulp.task('version-fonts', ['fill-theme'], function () {
     var fonts = ['./assets/themes/generic-icons/**/*.woff', './assets/themes/generic-icons/**/*.ttf', './assets/themes/generic-icons/**/*.svg'];
     return gulp.src(fonts)
         .pipe(rev())
@@ -75,16 +76,16 @@ gulp.task('version-fonts', ['fill-theme'], function(){
 
 gulp.task('copy-local', function () {
     var streams = [];
-    for(var theme in themeConf.dependencies.themes){
+    for (var theme in themeConf.dependencies.themes) {
         streams.push(
-            gulp.src(themeConf.dependencies.themes[theme], {base: '../'})
+            gulp.src(themeConf.dependencies.themes[theme], { base: '../' })
                 .pipe(gulp.dest('./assets/themes'))
         )
     }
 
-    for(var widget in themeConf.dependencies.widgets){
+    for (var widget in themeConf.dependencies.widgets) {
         streams.push(
-            gulp.src(themeConf.dependencies.widgets[widget], {base: '../'})
+            gulp.src(themeConf.dependencies.widgets[widget], { base: '../' })
                 .pipe(gulp.dest('./assets/widgets'))
         )
     }
@@ -93,7 +94,7 @@ gulp.task('copy-local', function () {
 });
 
 gulp.task('override-theme', ['version-fonts'], function () {
-    var overrides = ['img', 'js', 'fonts', 'template', 'css' /*, 'i18n'*/];
+    var overrides = ['img', 'js', 'fonts', 'template', 'css'/*, 'i18n'*/];
     var streams = [];
 
     streams.push(
@@ -118,7 +119,10 @@ gulp.task('override-theme', ['version-fonts'], function () {
                     .pipe(flatmap(function (streamLang, fileLang) {
                         const langname = fileLang.path.replace(fileLang.base, "");
                         // console.log("   ", fileLang.base, fileLang.path, langname);
-                        // console.log("   =>", './assets/themes/' + overriding.child + '/i18n/' + appname + '/' + langname);
+                        // console.log(" => Merge :",
+                        //     './assets/themes/' + overriding.child + '/i18n/' + appname + '/' + langname,
+                        //     '\n            ./assets/themes/' + overriding.child + '/overrides/i18n/' + appname + '/' + langname
+                        // );
                         gulp.src([
                             './assets/themes/' + overriding.child + '/i18n/' + appname + '/' + langname,
                             './assets/themes/' + overriding.child + '/overrides/i18n/' + appname + '/' + langname
@@ -133,15 +137,16 @@ gulp.task('override-theme', ['version-fonts'], function () {
             }))
         // End merging i18n key by key
 
+
         // Merge template/override.json from parent and child theme
         gulp.src([
             './assets/themes/' + overriding.parent + '/template/override.json',
             './assets/themes/' + overriding.child + '/overrides/template/override.json'
         ])
-        .pipe(mergeJson({
-            fileName: 'override.json',
-        }))
-        .pipe(gulp.dest('./assets/themes/' + overriding.child + '/template'));
+            .pipe(mergeJson({
+                fileName: 'override.json',
+            }))
+            .pipe(gulp.dest('./assets/themes/' + overriding.child + '/template'));
 
         streams.push(
             gulp.src(['./assets/themes/' + overriding.parent + '/css/modules/_modules.scss'])
@@ -174,7 +179,7 @@ gulp.task('compile-sass', ['override-theme'], function () {
                 gulp.src('./assets/themes/' + overriding.child + '/skins/' + skin + '/theme.scss')
                     .pipe(sass({ outputStyle: 'compressed' }))
                     .pipe(autoprefixer())
-                    .pipe(revReplace({manifest: gulp.src("./rev-manifest.json") }))
+                    .pipe(revReplace({ manifest: gulp.src("./rev-manifest.json") }))
                     .pipe(gulp.dest('./assets/themes/' + overriding.child + '/skins/' + skin))
             );
         })
@@ -184,11 +189,11 @@ gulp.task('compile-sass', ['override-theme'], function () {
 });
 
 
-gulp.task('build-local', function(){
+gulp.task('build-local', function () {
     sourceDependency.push('copy-local')
     return gulp.start('compile-sass')
 });
-gulp.task('build', function(){
+gulp.task('build', function () {
     sourceDependency.push('update');
     return gulp.start('compile-sass');
 });
