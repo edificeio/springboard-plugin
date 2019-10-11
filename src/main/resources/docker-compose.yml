@@ -15,8 +15,14 @@ vertx:
     - neo4j
     - postgres
     - mongo
+    - pdf
 #environment:
 #  MAVEN_REPOSITORIES: ''
+
+pdf:
+  image: opendigitaleducation/node-pdf-generator:1.0.0
+  ports:
+    - "3000:3000"
 
 neo4j:
   image: neo4j:3.1
