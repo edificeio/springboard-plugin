@@ -111,17 +111,19 @@ gulp.task('override-theme', ['version-fonts'], function () {
         });
 
         // Merging i18n key by key
-        gulp.src('./assets/themes/' + overriding.child + '/i18n/*')
+        // console.log("Merging i18n...");
+        // console.log("child theme:", overriding.child);
+        gulp.src('./assets/themes/' + overriding.child + '/overrides/i18n/*')
             .pipe(flatmap(function (stream, file) {
                 const appname = file.path.replace(file.base, "");
-                // console.log(file.base, file.path, appname);
-                gulp.src('./assets/themes/' + overriding.child + '/i18n/' + appname + '/*')
+                // console.log("App", appname/*, file.base*/, file.path);
+                gulp.src('./assets/themes/' + overriding.child + '/overrides/i18n/' + appname + '/*')
                     .pipe(flatmap(function (streamLang, fileLang) {
                         const langname = fileLang.path.replace(fileLang.base, "");
-                        // console.log("   ", fileLang.base, fileLang.path, langname);
-                        // console.log(" => Merge :",
+                        // console.log("    Lang", langname/*, fileLang.base*/, fileLang.path);
+                        // console.log("    => Merge :",
                         //     './assets/themes/' + overriding.child + '/i18n/' + appname + '/' + langname,
-                        //     '\n            ./assets/themes/' + overriding.child + '/overrides/i18n/' + appname + '/' + langname
+                        //     '\n               ./assets/themes/' + overriding.child + '/overrides/i18n/' + appname + '/' + langname
                         // );
                         gulp.src([
                             './assets/themes/' + overriding.child + '/i18n/' + appname + '/' + langname,
@@ -135,6 +137,7 @@ gulp.task('override-theme', ['version-fonts'], function () {
                     }))
                 return stream;
             }))
+        // console.log("Merging i18n ok.");
         // End merging i18n key by key
 
 
