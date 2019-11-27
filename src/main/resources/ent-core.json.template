@@ -47,7 +47,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-zip~2.0.0",
+  "name": "fr.wseduc~mod-zip~2.0.1",
   "waitDeploy" : true,
   "worker": true,
   "config":{
