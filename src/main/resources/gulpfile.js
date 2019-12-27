@@ -9,6 +9,9 @@ var revReplace = require('gulp-rev-replace');
 var odeSassImports = require('gulp-ode-sass-imports');
 var mergeJson = require('gulp-merge-json');
 var flatmap = require("gulp-flatmap");
+var postcss = require('postcss');
+var gulppostcss = require('gulp-postcss');
+var rename = require("gulp-rename");
 
 var themeConf = require('./theme-conf').conf;
 
@@ -178,13 +181,52 @@ gulp.task('compile-sass', ['override-theme'], function () {
 
     themeConf.overriding.forEach((overriding) => {
         overriding.skins.forEach((skin) => {
-            streams.push(
-                gulp.src('./assets/themes/' + overriding.child + '/skins/' + skin + '/theme.scss')
-                    .pipe(sass({ outputStyle: 'compressed' }))
-                    .pipe(autoprefixer())
-                    .pipe(revReplace({ manifest: gulp.src("./rev-manifest.json") }))
-                    .pipe(gulp.dest('./assets/themes/' + overriding.child + '/skins/' + skin))
-            );
+            var stream = gulp.src('./assets/themes/' + overriding.child + '/skins/' + skin + '/theme.scss')
+            .pipe(sass({ outputStyle: 'compressed' }))
+            .pipe(autoprefixer())
+            .pipe(revReplace({ manifest: gulp.src("./rev-manifest.json") }))
+            .pipe(gulp.dest('./assets/themes/' + overriding.child + '/skins/' + skin));
+            if(themeConf.emitWrapper){
+                stream = stream.pipe(gulppostcss(function(file) {
+                    return {
+                        plugins: [
+                            postcss.plugin('postcss-prepend-selector', function (opts) {
+                                opts = opts || { selector: ".ode-theme-v1"};
+                                return function (css) {
+                                    css.walkRules(function (rule) {
+                                        rule.selectors = rule.selectors.map( function (selector) {
+                                            function removeBody(sel){
+                                                if(sel && sel.indexOf("body")>-1){
+                                                    sel = sel.replace(/^\s*body([\.\s])/,"$1").replace(/\s+body\s*$/," ")
+                                                    sel = sel.replace(/([^a-zA-Z0-9\.\#])body([^a-zA-Z0-9])/, "$1$2")
+                                                    if(sel.trim()=="body"){
+                                                        sel = "";
+                                                    }
+                                                }
+                                                return sel;
+                                            }
+                                            if(/^([0-9]*[.])?[0-9]+\%$|^from$|^to$/.test(selector)) {
+                                                // This is part of a keyframe
+                                                return removeBody(selector);
+                                            }
+                            
+                                            if (selector.startsWith(opts.selector.trim())) {
+                                                return removeBody(selector);
+                                            }
+                            
+                                            return opts.selector + " " +removeBody(selector);
+                                        });
+                                    });
+                                };
+                            })
+                        ],
+                        options: {}
+                    }
+                }))
+                .pipe(rename('wrapped.theme.css'))
+                .pipe(gulp.dest('./assets/themes/' + overriding.child + '/skins/' + skin))
+            }
+            streams.push(stream);
         })
     });
 
