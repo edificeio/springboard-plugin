@@ -1,5 +1,5 @@
 vertx:
-  image: opendigitaleducation/vertx-service-launcher:1.0.0
+  image: opendigitaleducation/vertx-service-launcher:1.1-theme-SNAPSHOT
   user: "1000:1000"
   ports:
     - "8090:8090"
