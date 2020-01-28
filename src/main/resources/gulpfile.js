@@ -34,7 +34,10 @@ function themesSources() {
 }
 
 gulp.task('clean', function () {
-    var delPaths = ['./assets/themes/*', './bower_components'];
+    var delPaths = ['./bower_components'];
+    for(var i in themeConf.dependencies.themes){
+        delPaths.push('./assets/themes/' +i + '/*');
+    }
     themeConf.overriding.forEach((overriding) => {
         delPaths.push('!./assets/themes/' + overriding.child);
         delPaths.push('./assets/themes/' + overriding.child + '/*');
