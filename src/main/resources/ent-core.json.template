@@ -47,7 +47,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-zip~2.0.1",
+  "name": "fr.wseduc~mod-zip~2.0.2",
   "waitDeploy" : true,
   "worker": true,
   "config":{
@@ -120,6 +120,7 @@
     "address" : "entcore.pdf.generator"
   }
 },
+
 { "name": "org.entcore~infra~${entcoreVersion}",
 "waitDeploy" : true,
 "config" : {
@@ -182,7 +183,6 @@
       "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
     }
   }},
-
   {
     "name": "org.entcore~app-registry~${entcoreVersion}",
     "waitDeploy" : true,
