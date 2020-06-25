@@ -615,6 +615,11 @@
             "patterns" : []
           },
           {
+            "class" : "org.entcore.cas.services.PearltreesRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
             "class" : "org.entcore.cas.services.DefaultRegisteredService",
             "principalAttributeName" : "login",
             "patterns" : [${patternDefaultRegisteredService}]
