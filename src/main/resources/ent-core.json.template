@@ -620,6 +620,11 @@
             "patterns" : []
           },
           {
+            "class" : "org.entcore.cas.services.ExplorateurDeMetiersRegisteredService",
+            "principalAttributeName" : "id",
+            "patterns" : []
+          },
+          {
             "class" : "org.entcore.cas.services.DefaultRegisteredService",
             "principalAttributeName" : "login",
             "patterns" : [${patternDefaultRegisteredService}]
