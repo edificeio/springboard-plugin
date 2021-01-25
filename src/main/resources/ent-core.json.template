@@ -55,7 +55,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-postgresql~1.1.0",
+  "name": "fr.wseduc~mod-postgresql~1.1-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded" : true,
