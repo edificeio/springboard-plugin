@@ -635,6 +635,11 @@
             "patterns" : []
           },
           {
+            "class" : "org.entcore.cas.services.IjboxRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : []
+          },
+          {
             "class" : "org.entcore.cas.services.DefaultRegisteredService",
             "principalAttributeName" : "login",
             "patterns" : [${patternDefaultRegisteredService}]
