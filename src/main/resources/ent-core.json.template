@@ -645,6 +645,11 @@
             "patterns" : []
           },
           {
+            "class" : "org.entcore.cas.services.EnseignoRegisteredService",
+            "principalAttributeName" : "id",
+            "patterns" : []
+          },
+          {
             "class" : "org.entcore.cas.services.DefaultRegisteredService",
             "principalAttributeName" : "login",
             "patterns" : [${patternDefaultRegisteredService}]
