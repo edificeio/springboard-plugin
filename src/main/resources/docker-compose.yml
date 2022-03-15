@@ -16,6 +16,7 @@ vertx:
     - postgres
     - mongo
     - pdf
+    - elasticsearch
 #environment:
 #  MAVEN_REPOSITORIES: ''
 
@@ -28,6 +29,9 @@ neo4j:
   image: neo4j:3.1
   volumes:
     - ./neo4j-conf:/conf
+
+elasticsearch:
+  image: docker.elastic.co/elasticsearch/elasticsearch-oss:7.9.3
 
 postgres:
   image: postgres:9.5
@@ -53,3 +57,4 @@ node:
   volumes:
     - ./:/home/node/app
     - ~/.npm:/.npm
+
