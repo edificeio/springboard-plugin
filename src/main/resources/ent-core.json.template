@@ -178,6 +178,17 @@
       "ttlInSeconds": 600,
       "retryNumber": 5,
       "waitInSeconds": 10
+	},
+    "explorerConfig": {
+      "postgres": true
+    },
+    "postgresConfig":{
+        "host": "${sqlIp}",
+        "database": "${sqlDb}",
+        "port": 5432,
+        "user": "${sqlUsername}",
+        "password": "${sqlPassword}",
+        "pool-size": 50
     },
     "neo4jConfig" : {
       <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
