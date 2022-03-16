@@ -576,6 +576,11 @@
             "patterns" : []
           },
           {
+            "class":"org.entcore.cas.services.AtNormandieRegisteredService",
+            "principalAttributeName":"id",
+            "patterns":[]
+          },
+          {
             "class" : "org.entcore.cas.services.WebclasseursRegisteredService",
             "principalAttributeName" : "externalId",
             "patterns" : []
