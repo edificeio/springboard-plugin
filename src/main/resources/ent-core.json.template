@@ -182,6 +182,14 @@
     "explorerConfig": {
       "postgres": true
     },
+    "mongoConfig" : {
+      "hosts" : [ {
+        "host": "${mongoHost}",
+        "port": ${mongoPort},
+      }],
+      "db_name": "${dbName}",
+      "use_mongo_types" : true
+    },
     "postgresConfig":{
         "host": "${sqlIp}",
         "database": "${sqlDb}",
