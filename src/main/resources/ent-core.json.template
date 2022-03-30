@@ -185,7 +185,7 @@
     "mongoConfig" : {
       "hosts" : [ {
         "host": "${mongoHost}",
-        "port": ${mongoPort},
+        "port": ${mongoPort}
       }],
       "db_name": "${dbName}",
       "use_mongo_types" : true
