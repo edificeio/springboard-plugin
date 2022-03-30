@@ -111,7 +111,8 @@ gulp.task('override-theme', ['version-fonts'], function () {
     themeConf.overriding.forEach((overriding) => {
         overrides.forEach((override) => {
             streams.push(
-                gulp.src(['./assets/themes/' + overriding.child + '/overrides/' + override + '/**/*'])
+                gulp.src(['./assets/themes/' + overriding.child + '/overrides/' + override + '/**/*',
+                '!./assets/themes/' + overriding.child + '/overrides/template/override.json'])
                     .pipe(gulp.dest('./assets/themes/' + overriding.child + '/' + override))
             );
         });
@@ -148,14 +149,16 @@ gulp.task('override-theme', ['version-fonts'], function () {
 
 
         // Merge template/override.json from parent and child theme
-        gulp.src([
-            './assets/themes/' + overriding.parent + '/template/override.json',
-            './assets/themes/' + overriding.child + '/overrides/template/override.json'
-        ])
+        streams.push(
+            gulp.src([
+                './assets/themes/' + overriding.parent + '/template/override.json',
+                './assets/themes/' + overriding.child + '/overrides/template/override.json'
+            ])
             .pipe(mergeJson({
                 fileName: 'override.json',
             }))
-            .pipe(gulp.dest('./assets/themes/' + overriding.child + '/template'));
+            .pipe(gulp.dest('./assets/themes/' + overriding.child + '/template'))
+        );
 
         streams.push(
             gulp.src(['./assets/themes/' + overriding.parent + '/css/modules/_modules.scss'])
