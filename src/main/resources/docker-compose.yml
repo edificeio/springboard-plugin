@@ -53,3 +53,6 @@ node:
   volumes:
     - ./:/home/node/app
     - ~/.npm:/.npm
+    # - ../entcore-css-lib:/home/node/entcore-css-lib
+    # - ../generic-icons:/home/node/generic-icons
+    # - ../my-theme:/home/node/my-theme
