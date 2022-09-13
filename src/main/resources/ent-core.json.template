@@ -66,6 +66,20 @@
     "password" : "${sqlPassword}"
   }
 },
+<% if (pgAdminUser != null && !pgAdminUser.trim().isEmpty()) { %>
+{
+  "name": "fr.wseduc~mod-postgresql~1.2.0",
+  "waitDeploy" : true,
+  "worker": true,
+  "multi-threaded" : true,
+  "config":{
+    "address" : "sql.persistor.admin",
+    "url" : "${sqlUrl}",
+    "username" : "${pgAdminUser}",
+    "password" : "${pgAdminPwd}"
+  }
+},
+<% } %>
 {
   "name": "com.opendigitaleducation~mod-json-schema-validator~1.0.1",
   "waitDeploy" : true,
