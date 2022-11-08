@@ -2,7 +2,7 @@
   "assets-path": "${assetsPath}",
 "services" : [
 {
-  "name": "io.vertx~mod-mongo-persistor~3.1.2",
+  "name": "io.vertx~mod-mongo-persistor~3.2-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded": true,
@@ -193,9 +193,10 @@
       "retryNumber": 5,
       "waitInSeconds": 10
 	},
-    "explorerConfig": {
-      "postgres": true
-    },
+      "explorerConfig": {
+          "enabled": true,
+          "postgres": true
+      },
     "mongoConfig" : {
       "hosts" : [ {
         "host": "${mongoHost}",
