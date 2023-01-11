@@ -173,6 +173,12 @@
     "eventConfig": {
      "user-blacklist" : []
     },
+    "emailValidationConfig": {
+      "active": false,
+      "ttlInSeconds": 600,
+      "retryNumber": 5,
+      "waitInSeconds": 10
+    },
     "neo4jConfig" : {
       <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
       "server-uris": ${serverUris},
