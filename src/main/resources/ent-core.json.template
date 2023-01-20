@@ -694,6 +694,11 @@
             "patterns" : []
           },
           {
+              "class": "org.entcore.cas.services.ElmsRegisteredService",
+              "principalAttributeName": "login",
+              "patterns": []
+          },
+          {
             "class" : "org.entcore.cas.services.DefaultRegisteredService",
             "principalAttributeName" : "login",
             "patterns" : [${patternDefaultRegisteredService}]
