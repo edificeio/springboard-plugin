@@ -1,5 +1,5 @@
 vertx:
-  image: opendigitaleducation/vertx-service-launcher:1.4.0
+  image: opendigitaleducation/vertx-service-launcher:1.4.2
   user: "1000:1000"
   ports:
     - "8090:8090"
@@ -31,7 +31,7 @@ neo4j:
     - ./neo4j-conf:/conf
 
 elasticsearch:
-  image: opensearchproject/opensearch:1.0.0
+  image: opensearchproject/opensearch:2.4.1
   environment:
     ES_JAVA_OPTS: "-Xms1g -Xmx1g"
     MEM_LIMIT: 1073741824
@@ -51,7 +51,7 @@ elasticsearch:
     - "9300:9300"
 
 postgres:
-  image: postgres:9.5
+  image: postgres:14.3
   environment:
     POSTGRES_PASSWORD: We_1234
     POSTGRES_USER: web-education

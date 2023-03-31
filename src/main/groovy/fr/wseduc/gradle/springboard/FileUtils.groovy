@@ -7,7 +7,9 @@ class FileUtils {
 
 	static def createFile(String propertiesFile, String templateFileName, String outputFileName) {
 		def props = new Properties()
-		props.load(new FileInputStream(new File(propertiesFile)))
+		def file = new File(propertiesFile)
+		def rootDirectory = file.getParentFile()
+		props.load(new FileInputStream(file))
 		def bindings = [:]
 		props.propertyNames().each{prop->
 			if ("assetsPath".equals(prop) &&  !props.getProperty(prop).startsWith(File.separator)) {
@@ -17,7 +19,7 @@ class FileUtils {
 			}
 		}
 		def defaultProps = new Properties()
-		defaultProps.load(new FileInputStream(new File("default.properties")))
+		defaultProps.load(new FileInputStream(new File(rootDirectory, "default.properties")))
 		defaultProps.propertyNames().each { prop ->
 			if (!bindings.containsKey(prop)) {
 				bindings[prop] = defaultProps.getProperty(prop)
