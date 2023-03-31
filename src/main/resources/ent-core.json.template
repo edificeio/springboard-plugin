@@ -2,7 +2,7 @@
   "assets-path": "${assetsPath}",
 "services" : [
 {
-  "name": "io.vertx~mod-mongo-persistor~3.2-SNAPSHOT",
+  "name": "io.vertx~mod-mongo-persistor~3.2.0",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded": true,
@@ -55,7 +55,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-postgresql~1.2.0",
+  "name": "fr.wseduc~mod-postgresql~1.3.1",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded" : true,
@@ -68,7 +68,7 @@
 },
 <% if (pgAdminUser != null && !pgAdminUser.trim().isEmpty()) { %>
 {
-  "name": "fr.wseduc~mod-postgresql~1.2.0",
+  "name": "fr.wseduc~mod-postgresql~1.3.1",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded" : true,
@@ -118,7 +118,7 @@
   },
 <% } %>
 {
-  "name": "fr.wseduc~mod-sms-proxy~1.0.2",
+  "name": "fr.wseduc~mod-sms-proxy~1.1-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "config":{

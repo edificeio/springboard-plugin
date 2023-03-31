@@ -10,7 +10,8 @@ class SpringboardPlugin implements Plugin<Project> {
 	@Override
 	void apply(Project project) {
 		project.task("generateConf") << {
-			FileUtils.createFile("conf.properties", "ent-core.json.template", "ent-core.json")
+			def rootDir = project.getRootDir().getAbsolutePath()
+			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/ent-core.json.template", "${rootDir}/ent-core.json")
 		}
 
 		project.task("extractDeployments") << {
