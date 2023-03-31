@@ -194,7 +194,7 @@
       "waitInSeconds": 10
 	},
       "explorerConfig": {
-          "enabled": true,
+          "enabled": false,
           "postgres": true
       },
     "mongoConfig" : {
