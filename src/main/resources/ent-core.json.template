@@ -118,7 +118,7 @@
   },
 <% } %>
 {
-  "name": "fr.wseduc~mod-sms-proxy~1.1-SNAPSHOT",
+  "name": "fr.wseduc~mod-sms-proxy~1.1.0",
   "waitDeploy" : true,
   "worker": true,
   "config":{
