@@ -180,9 +180,10 @@ class SpringboardPlugin implements Plugin<Project> {
 				.getResourceAsStream("neo4j-conf/neo4j.conf")
 		FileUtils.copy(neo4jConfStream, neo4jConf)
 
-		File dockerCompose = project.file("docker-compose.yml")
+		final String dockerComposeFileName = isM1() ? "docker-compose.mac.yml" : "docker-compose.yml"
+		File dockerCompose = project.file(dockerComposeFileName)
 		InputStream dockerComposeStream = this.getClass().getClassLoader()
-				.getResourceAsStream("docker-compose.yml")
+				.getResourceAsStream(dockerComposeFileName)
 		FileUtils.copy(dockerComposeStream, dockerCompose)
 
 		File gulpfile = project.file("gulpfile.js")
@@ -268,6 +269,10 @@ class SpringboardPlugin implements Plugin<Project> {
 		if (!confMap.containsKey("entcoreVersion")) {
 			confProperties.append("entcoreVersion=" + version + "\n")
 		}
+	}
+
+	private static boolean isM1() {
+		return "aarch64".equalsIgnoreCase(System.getProperty("os.arch"))
 	}
 
 }
