@@ -181,7 +181,7 @@ class SpringboardPlugin implements Plugin<Project> {
 		FileUtils.copy(neo4jConfStream, neo4jConf)
 
 		final String dockerComposeFileName = isM1() ? "docker-compose.mac.yml" : "docker-compose.yml"
-		File dockerCompose = project.file(dockerComposeFileName)
+		File dockerCompose = project.file("docker-compose.yml")
 		InputStream dockerComposeStream = this.getClass().getClassLoader()
 				.getResourceAsStream(dockerComposeFileName)
 		FileUtils.copy(dockerComposeStream, dockerCompose)
