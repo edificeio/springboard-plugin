@@ -1,8 +1,4 @@
 version: "3.9"
-networks:
-  default:
-    name: recette
-    external: true
 services:
   #rich-content-transformer:
   #  user: "1000:1000"
@@ -109,3 +105,16 @@ services:
     volumes:
       - ./:/home/node/app
       - ~/.npm:/.npm
+
+  ansible-factory:
+    image: jleobernard/ansible-factory:1.0.0
+    container_name: ansible-factory
+    environment:
+      - VAULT_ADDR=https://vault.ode.tools
+    volumes:
+      - ${SSH_DIR}:/root/.ssh/
+      - ${VAULT_TOKEN_PATH}:/root/.vault-token
+      - .:/ansible-factory/repos/recette
+      #- /opt/projects/ansible:/ansible-factory/repos/ansible
+      #- /opt/projects/ansible-factory:/ansible-factory/repos/ansible-factory
+      #- /opt/projects/fabric-deployment:/ansible-factory/repos/fabric-deployment
