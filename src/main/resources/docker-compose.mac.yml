@@ -9,9 +9,7 @@ services:
   #  ports:
   #    - "3100:3000"
   vertx:
-    #image: opendigitaleducation/vertx-service-launcher:1.4.2
-    build:
-      context: ./launcher
+    image: opendigitaleducation/vertx-service-launcher:1.4.3
     user: "1000:1000"
     ports:
       - "5000:5000"
@@ -22,8 +20,8 @@ services:
       - ./mods:/srv/springboard/mods
       - ./ent-core.json:/srv/springboard/conf/vertx.conf
       - ./aaf-duplicates-test:/home/wse/aaf
-#      - ~/.m2:/home/vertx/.m2
-#      - ./avatars:/srv/storage/avatars
+      - ~/.m2:/home/vertx/.m2
+      - ./avatars:/srv/storage/avatars
     depends_on:
       - neo4j
       - postgres
@@ -31,9 +29,9 @@ services:
       - pdf
       - elasticsearch
       - redis
-#    environment:
-#      - DEBUG_SUSPEND=y
-#      - MAVEN_REPOSITORIES=''
+    environment:
+      - DEBUG_SUSPEND=y
+      - MAVEN_REPOSITORIES=''
   pdf:
     image: opendigitaleducation/node-pdf-generator:1.0.0
     ports:
@@ -77,6 +75,8 @@ services:
       POSTGRES_PASSWORD: We_1234
       POSTGRES_USER: web-education
       POSTGRES_DB: ong
+      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_INITDB_ARGS: --auth-host=md5
     volumes:
       - ./data/pgdata:/var/lib/postgresql/data
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
@@ -85,14 +85,13 @@ services:
 
   mongo:
     image: mongo:3.6
-    container_name: mongo
     volumes:
       - ./data/mongodb:/data/db
 #    ports:
 #      - "27017:27017"
 
   gradle:
-    image: jleobernard/gradle:4.5.1
+    image: opendigitaleducation/gradle:4.5.1
     working_dir: /home/gradle/project
     volumes:
       - ./:/home/gradle/project
@@ -100,15 +99,14 @@ services:
       - ~/.gradle:/home/gradle/.gradle
 
   node:
-    image: jleobernard/node:16
+    image: opendigitaleducation/node:16
     working_dir: /home/node/app
     volumes:
       - ./:/home/node/app
       - ~/.npm:/.npm
 
   ansible-factory:
-    image: jleobernard/ansible-factory:1.0.0
-    container_name: ansible-factory
+    image: opendigitaleducation/ansible-factory:1.0.0
     environment:
       - VAULT_ADDR=https://vault.ode.tools
     volumes:

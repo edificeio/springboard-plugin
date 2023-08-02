@@ -180,6 +180,15 @@ class SpringboardPlugin implements Plugin<Project> {
 				.getResourceAsStream("neo4j-conf/neo4j.conf")
 		FileUtils.copy(neo4jConfStream, neo4jConf)
 
+		File initSql = project.file("docker-entrypoint-initdb.d/init.sql")
+		InputStream initSqlStream = this.getClass().getClassLoader()
+				.getResourceAsStream("docker-entrypoint-initdb.d/init.sql")
+		if(!initSql.exists()) {
+			project.mkdir("docker-entrypoint-initdb.d")
+			initSql.createNewFile()
+		}
+		FileUtils.copy(initSqlStream, initSql)
+
 		final String dockerComposeFileName = isM1() ? "docker-compose.mac.yml" : "docker-compose.yml"
 		File dockerCompose = project.file("docker-compose.yml")
 		InputStream dockerComposeStream = this.getClass().getClassLoader()

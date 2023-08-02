@@ -1,5 +1,5 @@
 vertx:
-  image: opendigitaleducation/vertx-service-launcher:1.4.2
+  image: opendigitaleducation/vertx-service-launcher:1.4.3
   user: "1000:1000"
   ports:
     - "8090:8090"
@@ -56,14 +56,17 @@ postgres:
     POSTGRES_PASSWORD: We_1234
     POSTGRES_USER: web-education
     POSTGRES_DB: ong
+    POSTGRES_HOST_AUTH_METHOD: md5
+    POSTGRES_INITDB_ARGS: --auth-host=md5
   volumes:
+    - ./data/pgdata:/var/lib/postgresql/data
     - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
 mongo:
   image: mongo:3.6
 
 gradle:
-  image: gradle:4.5-alpine
+  image: opendigitaleducation:4.5-alpine
   working_dir: /home/gradle/project
   volumes:
     - ./:/home/gradle/project
@@ -76,4 +79,15 @@ node:
   volumes:
     - ./:/home/node/app
     - ~/.npm:/.npm
-
+ansible-factory:
+  image: opendigitaleducation/ansible-factory:1.0.0
+  container_name: ansible-factory
+  environment:
+    - VAULT_ADDR=https://vault.ode.tools
+  volumes:
+    - ${SSH_DIR}:/root/.ssh/
+    - ${VAULT_TOKEN_PATH}:/root/.vault-token
+    - .:/ansible-factory/repos/recette
+    #- /opt/projects/ansible:/ansible-factory/repos/ansible
+    #- /opt/projects/ansible-factory:/ansible-factory/repos/ansible-factory
+    #- /opt/projects/fabric-deployment:/ansible-factory/repos/fabric-deployment
