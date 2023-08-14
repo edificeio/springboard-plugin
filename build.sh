@@ -6,21 +6,14 @@ then
   export GROUP_GID=1000
 fi
 
-if [[ $(uname -m) == 'arm64' ]]; then
-  DOCKER_EXTRA_OPTS="-f docker-compose.mac.yml"
-  GRADLE_EXTRA=" --daemon --build-cache"
-else
-  DOCKER_EXTRA_OPTS=""
-  GRADLE_EXTRA=""
-fi
 
 clean () {
-  docker-compose $DOCKER_EXTRA_OPTS run --rm -u "$USER_UID:$GROUP_GID" gradle gradle clean
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle clean
 }
 
 install() {
 #  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle install publishToMavenLocal
-   docker-compose $DOCKER_EXTRA_OPTS run --rm -u "$USER_UID:$GROUP_GID" gradle gradle install
+   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle install
 }
 
 publish() {
@@ -31,7 +24,7 @@ publish() {
     echo "sonatypeUsername=$NEXUS_SONATYPE_USERNAME" >> "?/.gradle/gradle.properties"
     echo "sonatypePassword=$NEXUS_SONATYPE_PASSWORD" >> "?/.gradle/gradle.properties"
   fi
-  docker-compose $DOCKER_EXTRA_OPTS run --rm -u "$USER_UID:$GROUP_GID" gradle gradle publish
+  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle publish
 }
 
 for param in "$@"

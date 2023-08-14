@@ -206,6 +206,10 @@ class SpringboardPlugin implements Plugin<Project> {
 		FileUtils.copy(packageJsonStream, packageJson)
 
 
+		File entcoreJsonTemplate = project.file("ent-core.json.template")
+		FileUtils.copy(this.getClass().getClassLoader().getResourceAsStream("ent-core.json.template"),
+				entcoreJsonTemplate)
+
 		String filename = "conf.properties"
 		File confProperties = project.file(filename)
 		Map confMap = FileUtils.createOrAppendProperties(confProperties, filename)
@@ -214,12 +218,7 @@ class SpringboardPlugin implements Plugin<Project> {
 		File defaultProperties = project.file(filenameDefault)
 		Map defaultMap = FileUtils.createOrAppendProperties(defaultProperties, filenameDefault)
 
-		File dotEnvFile = project.file(".env")
-		if(!dotEnvFile.exists()) {
-			String homeDir = "~"
-			dotEnvFile.withWriter {writer -> writer.write("SSH_DIR=${homeDir}/.ssh\nVAULT_TOKEN_PATH=${homeDir}/.vault-token")}
-		}
-
+		Map appliPort = [:]
 		project.file("deployments").eachDir {
 			it.eachDir { dir ->
 				String dest = "migration".equals(dir.name) ? dir.name + File.separator + it.name : dir.name
@@ -230,6 +229,17 @@ class SpringboardPlugin implements Plugin<Project> {
 			it.eachFile(FileType.FILES) { file ->
 				File f
 				switch (file.name) {
+					case "conf.json.template":
+						f = entcoreJsonTemplate
+						f.append(",\n")
+						f.append(file.text)
+						file.eachLine { line ->
+							def matcher = line =~ /\s*\t*\s*"port"\s*:\s*([0-9]+)[,]?\s*\t*\s*/
+							if (matcher.find()) {
+								appliPort.put(it.name, matcher.group(1))
+							}
+						}
+						break;
 					case "test.scala":
 						f = scn
 						f.append("\n" + file.text)
@@ -243,6 +253,26 @@ class SpringboardPlugin implements Plugin<Project> {
 				}
 			}
 		}
+
+		InputStream httpProxy = this.getClass().getClassLoader().getResourceAsStream("http-proxy.json.template")
+		entcoreJsonTemplate.append(httpProxy.text)
+		appliPort.each { k, v ->
+			entcoreJsonTemplate.append(
+					",\n" +
+					"          {\n" +
+					"            \"location\": \"/" + k + "\",\n" +
+					"            \"proxy_pass\": \"http://localhost:" + v + "\"\n" +
+					"          }"
+			)
+		}
+		entcoreJsonTemplate.append(
+				"        ]\n" +
+				"      }\n" +
+				"    }\n" +
+				"<% } %>" +
+				"  ]\n" +
+				"}"
+		)
 		scn.append("\n}")
 
 		if (!confMap.containsKey("entcoreVersion")) {

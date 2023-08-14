@@ -1,0 +1,742 @@
+{
+  "assets-path": "${assetsPath}",
+"services" : [
+{
+  "name": "io.vertx~mod-mongo-persistor~3.2.0",
+  "waitDeploy" : true,
+  "worker": true,
+  "multi-threaded": true,
+  "config":{
+    "address": "wse.mongodb.persistor",
+    <% if (seeds != null && !seeds.trim().isEmpty()) { %>
+    "seeds": ${seeds},
+    <% } %>
+    "host": "${mongoHost}",
+    "port": ${mongoPort},
+    "db_name": "${dbName}",
+    "use_mongo_types": true,
+    "pool_size": 10
+  }
+},
+{
+  "name" : "fr.wseduc~mod-image-resizer~2.0.3",
+  "worker": true,
+  "multi-threaded": true,
+  "waitDeploy" : true,
+  "config":{
+    "address" : "wse.image.resizer",
+    "fs-flat" : $flatFsStorage,
+    <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
+    "swift" : {
+      "uri" : "${swiftUri}",
+      "container" : "${swiftContainer}",
+      "user" : "${swiftUser}",
+      "key" : "${swiftKey}"
+    }
+    <% } else { %>
+    "gridfs" : {
+      <% if (seeds != null && !seeds.trim().isEmpty()) { %>
+      "seeds": ${seeds},
+      <% } %>
+      "host": "${mongoHost}",
+      "port": ${mongoPort},
+      "db_name": "${dbName}",
+      "pool_size": 10
+    }
+    <% } %>
+  }
+},
+{
+  "name": "fr.wseduc~mod-zip~2.0.3",
+  "waitDeploy" : true,
+  "worker": true,
+  "config":{
+    "address": "entcore.zipper"
+  }
+},
+{
+  "name": "fr.wseduc~mod-postgresql~1.3.1",
+  "waitDeploy" : true,
+  "worker": true,
+  "multi-threaded" : true,
+  "config":{
+    "address" : "sql.persistor",
+    "url" : "${sqlUrl}",
+    "username" : "${sqlUsername}",
+    "password" : "${sqlPassword}"
+  }
+},
+<% if (pgAdminUser != null && !pgAdminUser.trim().isEmpty()) { %>
+{
+  "name": "fr.wseduc~mod-postgresql~1.3.1",
+  "waitDeploy" : true,
+  "worker": true,
+  "multi-threaded" : true,
+  "config":{
+    "address" : "sql.persistor.admin",
+    "url" : "${sqlUrl}",
+    "username" : "${pgAdminUser}",
+    "password" : "${pgAdminPwd}"
+  }
+},
+<% } %>
+{
+  "name": "com.opendigitaleducation~mod-json-schema-validator~1.0.1",
+  "waitDeploy" : true,
+  "worker": true,
+  "multi-threaded" : true,
+  "config":{
+  }
+},
+<% if (modSftp != null && !modSftp.trim().isEmpty()) { %>
+{
+  "name": "fr.cgi~mod-sftp~1.0.0",
+  "waitDeploy": true,
+  "config": {
+    "main" : "fr.cgi.sftp.Sftp",
+    "worker" : true,
+    "address" : "sftp"
+  }
+},
+<% } %>
+<% if (webdavHost != null && !webdavHost.trim().isEmpty()) { %>
+{
+  "name": "fr.wseduc~mod-webdav~1.0.1",
+  "config": {
+    "address" : "webdav"
+    <% if ("true".equals(webdavCredential)) { %>
+    ,
+    "credentials" : {
+      "${webdavHost}" : {
+        "username" : "${webdavUsername}",
+        "password" : "${webdavPassword}",
+        "insecure" : ${webdavInsecure}
+      }
+    }
+    <% } %>
+    }
+  },
+<% } %>
+{
+  "name": "fr.wseduc~mod-sms-proxy~1.1.0",
+  "waitDeploy" : true,
+  "worker": true,
+  "config":{
+    "address" : "entcore.sms",
+    "providers" : ${smsProviders}
+  }
+},
+{
+  "name": "fr.wseduc~mod-pdf-generator~1.0.1",
+  "waitDeploy" : true,
+  "worker": true,
+  "config":{
+    "address" : "entcore.pdf.generator"
+  }
+},
+
+{ "name": "org.entcore~infra~${entcoreVersion}",
+"waitDeploy" : true,
+"config" : {
+  "port": 8001,
+  "mode": "${mode}",
+  "auto-redeploy": false,
+  "path-prefix": "infra",
+  <% if ("true".equals(pdfEnabled)) { %>
+  "node-pdf-generator" : {
+    "pdf-connector-id": "exportpdf",
+    "auth": "${nodePdfToken}",
+    "url" : "${nodePdfUri}"
+    },
+<% } %>
+  "sql": true,
+  <% if (signKey != null && !signKey.trim().isEmpty()) { %>
+  "key": "${signKey}",
+  <% } %>
+  <% if (contentSecurityPolicy != null && !contentSecurityPolicy.trim().isEmpty()) { %>
+  "content-security-policy": "${contentSecurityPolicy}",
+  <% } %>
+  "cluster" : ${cluster},
+  "skins": ${skins},
+  <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
+    "swift" : {
+      "uri" : "${swiftUri}",
+      "container" : "${swiftContainer}",
+      "user" : "${swiftUser}",
+      "key" : "${swiftKey}"
+    },
+    <% } else if (fsStoragePath != null && !fsStoragePath.trim().isEmpty()) { %>
+    "file-system" : {
+      "path" : "${fsStoragePath}",
+      "flat" : ${flatFsStorage}
+    },
+    <% } else { %>
+    "gridfs-address" : "wse.gridfs.persistor",
+    <% } %>
+    <% if (sharedConf != null && !sharedConf.trim().isEmpty()) { %>
+    "sharedConf": ${sharedConf},
+    <% } %>
+    <% if (emailConfig != null && !emailConfig.trim().isEmpty()) { %>
+    "emailConfig": ${emailConfig},
+    <% } else { %>
+    "emailConfig": {
+      "email": "${senderEmail}",
+      "host": "${host}"
+    },
+    <% } %>
+    "eventConfig": {
+     "user-blacklist" : []
+    },
+    "emailValidationConfig": {
+      "active": false,
+      "ttlInSeconds": 600,
+      "retryNumber": 5,
+      "waitInSeconds": 10
+	},
+      "explorerConfig": {
+          "enabled": false,
+          "postgres": true
+      },
+    "mongoConfig" : {
+      "hosts" : [ {
+        "host": "${mongoHost}",
+        "port": ${mongoPort}
+      }],
+      "db_name": "${dbName}",
+      "use_mongo_types" : true
+    },
+    "postgresConfig":{
+        "host": "${sqlIp}",
+        "database": "${sqlDb}",
+        "port": 5432,
+        "user": "${sqlUsername}",
+        "password": "${sqlPassword}",
+        "pool-size": 50
+    },
+    "neo4jConfig" : {
+      <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
+      "server-uris": ${serverUris},
+      <% } else { %>
+      "server-uri": "${neo4jUri}/db/data/",
+      <% } %>
+      "slave-readonly": $neo4jSlaveReadOnly,
+      "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
+    }
+  }},
+  {
+    "name": "org.entcore~app-registry~${entcoreVersion}",
+    "waitDeploy" : true,
+    "config":{
+      "main":"org.entcore.registry.AppRegistry",
+      "auto-redeploy": false,
+      "csrf-token" : $csrfToken,
+      "mode": "${mode}",
+      "ssl" : $ssl,
+      "address" : "wse.app.registry",
+      "app-type": "SYSTEM",
+      "port" : 8012,
+      <% if ("true".equals(bprEnabled)) { %>
+        "library-enabled": true,
+        "library-api-url": "${bprUrl}",
+        "library-token": "${bprToken}",
+      <% } %>
+      "publicConf": {
+        <% if ("true".equals(xitiSwitch)) { %>
+          "xiti": {
+            "ID_SERVICE": {
+              "default": "",
+              "/admin-console": ""
+            }
+          }
+        <% } %>
+      }
+    }
+  },
+    {
+      "name": "org.entcore~session~${entcoreVersion}",
+      "worker": true,
+      "config":{
+        "session_timeout": 10800000,
+        "address" : "wse.session"
+      }
+    },
+    {
+      "name": "org.entcore~auth~${entcoreVersion}",
+      "config":{
+        "path-prefix": "auth",
+        "app-type": "SYSTEM",
+        "port": 8009,
+        "auto-redeploy": false,
+        "ssl" : $ssl,
+        "mode": "${mode}",
+        "email": "${senderEmail}",
+        "mandatory": ${authMandatoryFields},
+        "activationAutoLogin" : $activationAutoLogin,
+        "teacherForgotPasswordEmail" : $teacherForgotPasswordEmail,
+        <% if (openidconnectFederate != null && !openidconnectFederate.trim().isEmpty()) { %>
+        "openid-federate" : ${openidconnectFederate},
+        "slo": ${samlSLO},
+        <% } %>
+        <% if (samlMetadataFolder != null && !samlMetadataFolder.trim().isEmpty()) { %>
+        "saml-metadata-folder" : "${samlMetadataFolder}",
+        "saml-private-key": "${samlPrivateKey}",
+        "saml-services-providers" : ${samlServicesProviders},
+        "saml-issuer": "${samlIssuer}",
+        "saml-entng-idp-nq": "${samlEntngIdpNq}",
+        "saml-public-key": "${samlPublicKey}",
+        "idp-metadata-mapping": "${idpMetadataMapping}",
+        "check-federated-login" : true,
+        "slo": ${samlSLO},
+        "loginUri":"${federationLoginUri}",
+        "callbackParam":"${federationCallBackParam}",
+        <% } %>
+        "authenticationServer": {
+          "loginURL": "/auth/login",
+          "logoutURL": "/auth/logout",
+          "loginCallback": "",
+          "logoutCallback": ""
+        },
+        "passwordRegex" : "${passwordRegex}",
+        "host": "${host}"
+      }
+    },
+    {
+      "name": "org.entcore~directory~${entcoreVersion}",
+      "config":{
+        "path-prefix": "directory",
+        "auto-redeploy": false,
+        "ssl" : $ssl,
+        "mode": "${mode}",
+        "host": "${host}",
+        "csrf-token" : $csrfToken,
+        "port": 8003,
+        "email": "${senderEmail}",
+        "app-name": "Directory",
+        "app-type": "SYSTEM",
+        "workspace-url": "localhost",
+        "workspace-port":8011,
+        "workspace-prefix" : "/workspace",
+        "activation-welcome-message" : $activationWelcomeMessage,
+        "createdUserEmail" : $createdUserEmail,
+        "classDefaultRoles" : $classDefaultRoles,
+        "avatar-path": "${fsAvatarPath}",
+        "avatar-flat": ${flatAvatarStorage},
+        "user-book-data":{
+          "default-theme":"default",
+          "default-avatar": "no-avatar.jpg",
+          "default-mood" : "default",
+          "hobbies": ["sport","cinema", "animals", "music", "places", "books"]
+        },
+        "publicConf": {
+           "feeders" : $wizardFeeders
+           <% if (federatedAddress != null && !federatedAddress.trim().isEmpty()) { %>
+           ,"federatedAddress" : ${federatedAddress}
+           <% } %>
+           <% if ("true".equals(xitiSwitch)) { %>
+             ,"xiti": {
+               "ID_SERVICE": {
+                 "default": 10,
+                 "/userbook/mon-compte": "",
+                 "/admin-console": ""
+               }
+             }
+           <% } %>
+        }
+      }
+    },
+    {
+      "name": "org.entcore~workspace~${entcoreVersion}",
+      "config":{
+        "main":"org.entcore.workspace.Workspace",
+        "auto-redeploy": false,
+        "csrf-token" : $csrfToken,
+        "mode": "${mode}",
+        "ssl" : $ssl,
+        "host": "${host}",
+        "neo4jPlugin" : ${neo4jPlugin},
+        "userbook-host": "${host}",
+        "app-name": "Espace documentaire",
+        "app-address": "/workspace/workspace",
+        "app-icon": "workspace-large",
+        "app-type": "END_USER",
+        "port": 8011,
+        "wsPort" : 6502,
+        "mongo-address" : "wse.mongodb.persistor",
+        "publicConf": {
+          <% if ("true".equals(xitiSwitch)) { %>
+            "xiti": {
+              "ID_SERVICE": {
+                "default": 1
+              }
+            }
+          <% } %>
+        }
+      }
+    },
+    {
+      "name": "org.entcore~communication~${entcoreVersion}",
+      "config":{
+        "main":"org.entcore.communication.Communication",
+        "auto-redeploy": false,
+        "ssl" : $ssl,
+        "csrf-token" : $csrfToken,
+        "mode": "${mode}",
+        "port": 8015,
+        "address" : "wse.communication",
+        "app-type": "SYSTEM",
+        "initDefaultCommunicationRules" :
+         <% if (defaultCommunicationRules != null && !defaultCommunicationRules.trim().isEmpty()) { %>
+            ${defaultCommunicationRules}
+         <% } else { %>
+            {
+              "Structure-Personnel" : {
+                "users" : "BOTH", "communiqueWith" : ["Structure-Teacher", "Structure-Relative", "Structure-Student"]
+              },
+              "Structure-Teacher" : {
+                "users" : "BOTH", "communiqueWith" : ["Structure-Personnel", "Structure-Relative", "Structure-Student"]
+              },
+              "Structure-Student" : {"users" : "OUTGOING"},
+              "Structure-Relative" : {"users" : "OUTGOING"},
+              "Class-Personnel" : {"users" : "OUTGOING"},
+              "Class-Teacher" : {"users" : "OUTGOING"},
+              "Class-Student" : {
+                "users" : "BOTH", "communiqueWith" : ["Class-Personnel", "Class-Teacher"]
+              },
+              "Class-Relative" : {
+                "users" : "BOTH", "Relative-Student" : "INCOMING", "communiqueWith" : ["Class-Personnel", "Class-Student", "Class-Teacher"]
+              }
+            }
+         <% } %>,
+       "publicConf": {
+         <% if ("true".equals(xitiSwitch)) { %>
+            "xiti": {
+              "ID_SERVICE": {
+                "default": "",
+                "/admin-console": ""
+              }
+            }
+          <% } %>
+        }
+      }
+    },
+    {
+      "name": "org.entcore~portal~${entcoreVersion}",
+      "config":{
+        "port": 8017,
+        "app-type": "SYSTEM",
+        "auto-redeploy": false,
+        "ssl" : $ssl,
+        "csrf-token" : $csrfToken,
+        "mode": "${mode}",
+        <% if (assetsPath != null && !assetsPath.trim().isEmpty()) { %>
+           "assets-path": "${assetsPath}",
+        <% } %>
+        "path-prefix": "",
+                "root-page": "/timeline/timeline",
+        "urls": {
+          "userbook": "/userbook",
+          "auth": "/auth",
+          "portal": "/",
+          <% if (logoutCallback != null && !logoutCallback.trim().isEmpty()) { %>
+          "logoutCallback": "${logoutCallback}"
+          <% } else { %>
+          "logoutCallback": "/"
+          <% } %>
+        },
+        "admin-urls": [
+          {"name": "directory", "url": "/directory/admin-console"},
+          {"name": "appRegistry", "url": "/appregistry/admin-console"},
+          {"name": "communication", "url": "/communication/admin-console"},
+          {"name": "wizard", "url": "/directory/wizard"},
+          {"name": "timeline.history", "url": "/timeline/admin-history"},
+          {"name": "timeline", "url": "/timeline/admin-console", "allowed": ["SUPER_ADMIN"]},
+          {"name": "welcomeMessage", "url": "/auth/admin-welcome-message", "allowed": ["SUPER_ADMIN"]},
+          {"name": "flashMessage", "url": "/timeline/flashmsg/admin", "allowed": ["SUPER_ADMIN"]},
+          {"name": "embed", "url": "/infra/embed/admin", "allowed": ["SUPER_ADMIN"]}
+          <% if ("true".equals(xitiSwitch)) { %>
+          ,{"name": "xiti", "url": "/xiti/admin-console", "allowed": ["SUPER_ADMIN"]}
+          <% } %>
+          <% if ("true".equals(keyring)) { %>
+          ,{"name": "keyring", "url": "/sso/keyring/admin-console", "allowed": ["SUPER_ADMIN"]}
+          <% } %>
+          <% if ("true".equals(edtudt)) { %>
+          ,{"name": "edtudt", "url": "/directory/timetable"}
+          <% } %>
+          <% if ("true".equals(directoryCalendarSwitch)) { %>
+          ,{"name": "calendar", "url": "/directory/calendar"}
+          <% } %>
+          <% if ("true".equals(adminZimbra)) { %>
+          ,{"name": "zimbra", "url":"/zimbra/admin-console"}
+          <% } %>
+        ],
+        "widgets": [
+          <% if (widgets != null && !widgets.trim().isEmpty()) { %>
+             ${widgets}
+          <% } else { %>
+           {
+             "name": "notes",
+             "path": "/public/template/notes.html",
+             "js": "/public/js/notes.js"
+           },
+           {
+             "name": "calendar",
+             "path": "/public/template/calendar.html",
+             "js": "/public/js/calendar.js"
+           }
+          <% } %>
+        ],
+            "resources-applications": [
+              ${resourcesApplications}
+            ]
+      }
+    },
+    {
+      "name": "org.entcore~conversation~${entcoreVersion}",
+      "config":{
+        "main":"org.entcore.conversation.Conversation",
+        "host": "${host}",
+        "mode": "${mode}",
+        "csrf-token" : $csrfToken,
+        "ssl" : $ssl,
+        "auto-redeploy": false,
+        "userbook-host": "${host}",
+        "app-address": "/conversation/conversation",
+        "port": 8019,
+        "app-name" : "Messagerie",
+        "app-icon" : "conversation-large",
+        "app-type": "END_USER",
+        "sql": true,
+        "db-schema": "conversation",
+        "publicConf": {
+          <% if ("true".equals(xitiSwitch)) { %>
+            "xiti": {
+              "ID_SERVICE": {
+                "default": 10
+              }
+            }
+          <% } %>
+        }
+      }
+    },
+    {
+      "name": "org.entcore~feeder~${entcoreVersion}",
+      "worker": true,
+      "config":{
+        "address" : "entcore.feeder",
+        "neo4j-address" : "wse.neo4j.persistor",
+        "apply-communication-rules" : $applycommunication,
+        "import-files" : "${importDirectory}",
+        "feeder" : "${feeder}",
+        "mode" : "${mode}",
+        <% if (edt != null && !edt.trim().isEmpty()) { %>
+        "edt": ${edt},
+        <% } %>
+        <% if (udt != null && !udt.trim().isEmpty()) { %>
+        "udt": ${udt},
+        <% } %>
+        "auto-export" : ${autoExport},
+	"import-person-in-charge": true,
+        "exclude-mark-duplicates-by-source" : ["CSV"],
+        "exporter" : "${exporter}",
+        "export-path" : "${exportPath}",
+        "export-destination" : "${exportDestination}"
+      }
+    },
+    {
+      "name": "org.entcore~timeline~${entcoreVersion}",
+      "config":{ "csrf-token": true,
+        "main":"org.entcore.timeline.Timeline",
+        "port": 8016,
+        "app-name": "Timeline",
+        "app-address": "/timeline/timeline",
+        "address" : "wse.timeline",
+        "app-type": "SYSTEM",
+        "auto-redeploy": false,
+        "ssl" : $ssl,
+        "host": "${host}",
+        "antiFloodClear": 60000,
+        "sql": true,
+        "db-schema": "flashmsg",
+        "mode": "${mode}"
+      }
+    },
+    {
+      "name": "org.entcore~cas~${entcoreVersion}",
+      "config":{
+        "main" : "org.entcore.cas.Cas",
+        "port" : 8023,
+        "app-name" : "Cas",
+        "app-address" : "/cas",
+        "app-icon" : "cas-large",
+        "app-type": "SYSTEM",
+        "host": "${host}",
+        "ssl" : $ssl,
+        "auto-redeploy": false,
+        "userbook-host": "${host}",
+        "external-login-uri" : "${casExternalLoginUri}",
+        "integration-mode" : "HTTP",
+        "app-registry.port" : 8012,
+        "mode" : "${mode}",
+        "entcore.port" : 8009,
+        "services" : [
+          {
+            "class" : "org.entcore.cas.services.EliotRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.PronoteRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.KneRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.LeSiteTvRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.UniversalisRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class":"org.entcore.cas.services.AtNormandieRegisteredService",
+            "principalAttributeName":"id",
+            "patterns":[]
+          },
+          {
+            "class" : "org.entcore.cas.services.WebclasseursRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.UidRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.UuidRegisteredService",
+            "principalAttributeName" : "userId",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.ProEPSRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.EducagriRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.EduMediaRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.GepiRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.MSELRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.GRRRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.LabomepRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.PearltreesRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.ExplorateurDeMetiersRegisteredService",
+            "principalAttributeName" : "id",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.SalvumRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.MilliwebRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.PmbRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.IjboxRegisteredService",
+            "principalAttributeName" : "externalId",
+            "patterns" : []
+          },
+          {
+            "class" : "org.entcore.cas.services.EnseignoRegisteredService",
+            "principalAttributeName" : "id",
+            "patterns" : []
+          },
+          {
+              "class": "org.entcore.cas.services.ElmsRegisteredService",
+              "principalAttributeName": "login",
+              "patterns": []
+          },
+          {
+            "class" : "org.entcore.cas.services.DefaultRegisteredService",
+            "principalAttributeName" : "login",
+            "patterns" : [${patternDefaultRegisteredService}]
+          }
+        ]
+      }
+    },
+    {
+      "name": "org.entcore~archive~${entcoreVersion}",
+      "config":{
+        "main":"org.entcore.archive.Archive",
+        "port": 8004,
+        "mode": "${mode}",
+        "host": "${host}",
+        "ssl" : $ssl,
+        "email": "${senderEmail}",
+        "auto-redeploy": false,
+        "app-name" : "Archive",
+        "app-address" : "/archive",
+        "app-icon" : "archive-large",
+        "app-type": "END_USER",
+        "expected-exports" : ["rack","workspace"]
+      }
+    },
+    {
+      "name": "org.entcore~admin~${entcoreVersion}",
+      "config": {
+        "main":"org.entcore.admin.Admin",
+        "port": 8089,
+        "csrf-token" : $csrfToken,
+        "ssl" : $ssl,
+        "mode": "${mode}",
+        "auto-redeploy": false,
+        "host" : "${host}",
+        "app-name" : "Admin",
+        "app-address" : "/admin",
+        "app-icon" : "admin-large",
+        "app-type": "END_USER"
+      }
+    }
