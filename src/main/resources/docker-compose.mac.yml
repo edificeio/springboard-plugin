@@ -9,7 +9,7 @@ services:
   #  ports:
   #    - "3100:3000"
   vertx:
-    image: opendigitaleducation/vertx-service-launcher:1.4.3
+    image: opendigitaleducation/vertx-service-launcher:1.4.4
     user: "1000:1000"
     ports:
       - "5000:5000"
@@ -99,7 +99,7 @@ services:
       - ~/.gradle:/home/gradle/.gradle
 
   node:
-    image: opendigitaleducation/node:16
+    image: opendigitaleducation/node:16-alpine-pnpm
     working_dir: /home/node/app
     volumes:
       - ./:/home/node/app
