@@ -195,11 +195,6 @@ class SpringboardPlugin implements Plugin<Project> {
 				.getResourceAsStream(dockerComposeFileName)
 		FileUtils.copy(dockerComposeStream, dockerCompose)
 
-		File gulpfile = project.file("gulpfile.js")
-		InputStream gulpfileStream = this.getClass().getClassLoader()
-				.getResourceAsStream("gulpfile.js")
-		FileUtils.copy(gulpfileStream, gulpfile)
-
 		File packageJson = project.file("package.json")
 		InputStream packageJsonStream = this.getClass().getClassLoader()
 				.getResourceAsStream("package.json")
