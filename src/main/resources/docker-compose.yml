@@ -68,7 +68,7 @@ services:
     image: mongo:3.6
 
   gradle:
-    image: opendigitaleducation:4.5-alpine
+    image: opendigitaleducation/gradle:4.5.1
     working_dir: /home/gradle/project
     volumes:
       - ./:/home/gradle/project
