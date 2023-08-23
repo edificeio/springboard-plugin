@@ -1,81 +1,83 @@
-vertx:
-  image: opendigitaleducation/vertx-service-launcher:1.4.4
-  user: "1000:1000"
-  ports:
-    - "8090:8090"
-#    - "5000:5000"
-  volumes:
-    - ./assets:/srv/springboard/assets
-    - ./mods:/srv/springboard/mods
-    - ./ent-core.json:/srv/springboard/conf/vertx.conf
-    - ./aaf-duplicates-test:/home/wse/aaf
-#    - ~/.m2:/home/vertx/.m2
-#    - ./avatars:/srv/storage/avatars
-  links:
-    - neo4j
-    - postgres
-    - mongo
-    - pdf
-    - elasticsearch
-#environment:
-#  MAVEN_REPOSITORIES: ''
+version: "3.9"
+services:
+  vertx:
+    image: opendigitaleducation/vertx-service-launcher:1.4.4
+    user: "1000:1000"
+    ports:
+      - "8090:8090"
+  #    - "5000:5000"
+    volumes:
+      - ./assets:/srv/springboard/assets
+      - ./mods:/srv/springboard/mods
+      - ./ent-core.json:/srv/springboard/conf/vertx.conf
+      - ./aaf-duplicates-test:/home/wse/aaf
+  #    - ~/.m2:/home/vertx/.m2
+  #    - ./avatars:/srv/storage/avatars
+    links:
+      - neo4j
+      - postgres
+      - mongo
+      - pdf
+      - elasticsearch
+  #environment:
+  #  MAVEN_REPOSITORIES: ''
 
-pdf:
-  image: opendigitaleducation/node-pdf-generator:1.0.0
-  ports:
-    - "3000:3000"
+  pdf:
+    image: opendigitaleducation/node-pdf-generator:1.0.0
+    ports:
+      - "3000:3000"
 
-neo4j:
-  image: neo4j:3.1
-  volumes:
-    - ./neo4j-conf:/conf
+  neo4j:
+    image: neo4j:3.1
+    volumes:
+      - ./neo4j-conf:/conf
 
-elasticsearch:
-  image: opensearchproject/opensearch:2.4.1
-  environment:
-    ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-    MEM_LIMIT: 1073741824
-    discovery.type: single-node
-    DISABLE_SECURITY_PLUGIN: "true"
-  ulimits:
-    memlock:
-      soft: -1
-      hard: -1
-    nofile:
-      soft: 65536
-      hard: 65536
-  cap_add:
-    - IPC_LOCK
-  ports:
-    - "9200:9200"
-    - "9300:9300"
+  elasticsearch:
+    image: opensearchproject/opensearch:2.4.1
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      MEM_LIMIT: 1073741824
+      discovery.type: single-node
+      DISABLE_SECURITY_PLUGIN: "true"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    cap_add:
+      - IPC_LOCK
+    ports:
+      - "9200:9200"
+      - "9300:9300"
 
-postgres:
-  image: postgres:14.3
-  environment:
-    POSTGRES_PASSWORD: We_1234
-    POSTGRES_USER: web-education
-    POSTGRES_DB: ong
-    POSTGRES_HOST_AUTH_METHOD: md5
-    POSTGRES_INITDB_ARGS: --auth-host=md5
-  volumes:
-    - ./data/pgdata:/var/lib/postgresql/data
-    - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+  postgres:
+    image: postgres:14.3
+    environment:
+      POSTGRES_PASSWORD: We_1234
+      POSTGRES_USER: web-education
+      POSTGRES_DB: ong
+      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_INITDB_ARGS: --auth-host=md5
+    volumes:
+      - ./data/pgdata:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
-mongo:
-  image: mongo:3.6
+  mongo:
+    image: mongo:3.6
 
-gradle:
-  image: opendigitaleducation:4.5-alpine
-  working_dir: /home/gradle/project
-  volumes:
-    - ./:/home/gradle/project
-    - ~/.m2:/home/gradle/.m2
-    - ~/.gradle:/home/gradle/.gradle
+  gradle:
+    image: opendigitaleducation:4.5-alpine
+    working_dir: /home/gradle/project
+    volumes:
+      - ./:/home/gradle/project
+      - ~/.m2:/home/gradle/.m2
+      - ~/.gradle:/home/gradle/.gradle
 
-node:
-  image: opendigitaleducation/node:16-alpine-pnpm
-  working_dir: /home/node/app
-  volumes:
-    - ./:/home/node/app
-    - ~/.npm:/.npm
+  node:
+    image: opendigitaleducation/node:16-alpine-pnpm
+    working_dir: /home/node/app
+    volumes:
+      - ./:/home/node/app
+      - ~/.npm:/.npm
