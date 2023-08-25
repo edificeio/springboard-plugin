@@ -27,6 +27,12 @@ services:
     ports:
       - "3000:3000"
 
+  content-transformer:
+    user: "1000:1000"
+    image: opendigitaleducation/content-transformer:0.0.1
+    ports:
+      - "3100:3000"
+
   neo4j:
     image: neo4j:3.1
     volumes:
