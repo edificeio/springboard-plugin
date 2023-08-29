@@ -1,4 +1,4 @@
-version: "3.9"
+version: "3.3"
 services:
   vertx:
     image: opendigitaleducation/vertx-service-launcher:1.4.4
