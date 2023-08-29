@@ -1,7 +1,7 @@
 version: "3.3"
 services:
   vertx:
-    image: opendigitaleducation/vertx-service-launcher:1.4.4
+    image: opendigitaleducation/vertx-service-launcher:1.4.5
     user: "1000:1000"
     ports:
       - "8090:8090"
