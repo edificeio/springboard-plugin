@@ -60,7 +60,7 @@ services:
 
   postgres:
     image: postgres:14.3
-    user: "$DEFAULT_DOCKER_USER"
+    user: "$DEFAULT_DOCKER_USER" #REMOVE_BY_CI
     environment:
       POSTGRES_PASSWORD: We_1234
       POSTGRES_USER: web-education
