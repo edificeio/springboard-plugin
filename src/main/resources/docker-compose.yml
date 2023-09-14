@@ -2,7 +2,7 @@ version: "3.3"
 services:
   vertx:
     image: opendigitaleducation/vertx-service-launcher:1.4.5
-    user: "1000:1000"
+    user: "$DEFAULT_DOCKER_USER"
     ports:
       - "8090:8090"
   #    - "5000:5000"
@@ -28,7 +28,7 @@ services:
       - "3000:3000"
 
   content-transformer:
-    user: "1000:1000"
+    user: "$DEFAULT_DOCKER_USER"
     image: opendigitaleducation/content-transformer:0.0.1
     ports:
       - "3100:3000"
@@ -60,6 +60,7 @@ services:
 
   postgres:
     image: postgres:14.3
+    user: "$DEFAULT_DOCKER_USER"
     environment:
       POSTGRES_PASSWORD: We_1234
       POSTGRES_USER: web-education
@@ -75,6 +76,7 @@ services:
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1
+    user: "$DEFAULT_DOCKER_USER"
     working_dir: /home/gradle/project
     volumes:
       - ./:/home/gradle/project
@@ -83,6 +85,7 @@ services:
 
   node:
     image: opendigitaleducation/node:16-alpine-pnpm
+    user: "$DEFAULT_DOCKER_USER"
     working_dir: /home/node/app
     volumes:
       - ./:/home/node/app

@@ -2,8 +2,8 @@
 
 if [ -z ${USER_UID:+x} ]
 then
-  export USER_UID=1000
-  export GROUP_GID=1000
+  export USER_UID=`id -u`
+  export GROUP_GID=`id -g`
 fi
 
 
