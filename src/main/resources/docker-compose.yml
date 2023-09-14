@@ -90,3 +90,4 @@ services:
     volumes:
       - ./:/home/node/app
       - ~/.npm:/.npm
+      - .config:/.config
