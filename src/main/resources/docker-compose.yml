@@ -68,7 +68,7 @@ services:
       POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_INITDB_ARGS: --auth-host=md5
     volumes:
-      - ./data/pgdata:/var/lib/postgresql/data
+      - ./data/pgdata:/var/lib/postgresql/data #REMOVE_BY_CI
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   mongo:
