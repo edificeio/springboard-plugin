@@ -1,5 +1,16 @@
 {
   "assets-path": "${assetsPath}",
+  "metricsOptions": {
+    "enabled": true,
+    "prometheusOptions": {
+      "enabled": true,
+      "startEmbeddedServer": true,
+      "embeddedServerOptions": {
+        "port": 9090,
+        "embeddedServerEndpoint": "/metrics/vertx"
+      }
+    }
+  },
 "services" : [
 {
   "name": "io.vertx~mod-mongo-persistor~3.2.0",
