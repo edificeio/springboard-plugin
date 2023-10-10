@@ -23,4 +23,5 @@ mods
 data
 developer.id
 *.mod.json
-gradle*
+gradle
+gradlew*
