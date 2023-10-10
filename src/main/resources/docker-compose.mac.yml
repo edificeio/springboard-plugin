@@ -47,7 +47,7 @@ services:
 #    ports:
 #      - "6379:6379"
   elasticsearch:
-    image: opensearchproject/opensearch:2.4.1
+    image: opensearchproject/opensearch:2.8.0
     environment:
       ES_JAVA_OPTS: "-Xms4g -Xmx4g"
       discovery.type: single-node

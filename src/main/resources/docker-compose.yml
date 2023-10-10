@@ -39,7 +39,7 @@ services:
       - ./neo4j-conf:/conf
 
   elasticsearch:
-    image: opensearchproject/opensearch:2.4.1
+    image: opensearchproject/opensearch:2.8.0
     environment:
       ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       MEM_LIMIT: 1073741824
