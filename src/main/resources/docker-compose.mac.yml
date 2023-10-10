@@ -2,49 +2,58 @@ version: "3.3"
 services:
   vertx:
     image: opendigitaleducation/vertx-service-launcher:1.4.5
-    user: "$DEFAULT_DOCKER_USER"
+    user: "1000:1000"
     ports:
+      - "5000:5000"
       - "8090:8090"
-  #    - "5000:5000"
+      - "9090:9090"
     volumes:
       - ./assets:/srv/springboard/assets
       - ./mods:/srv/springboard/mods
       - ./ent-core.json:/srv/springboard/conf/vertx.conf
       - ./aaf-duplicates-test:/home/wse/aaf
-  #    - ~/.m2:/home/vertx/.m2
-  #    - ./avatars:/srv/storage/avatars
-    links:
+      - ~/.m2:/home/vertx/.m2
+      - ./avatars:/srv/storage/avatars
+    depends_on:
       - neo4j
       - postgres
       - mongo
       - pdf
       - elasticsearch
-  #environment:
-  #  MAVEN_REPOSITORIES: ''
-
+      - redis
+    environment:
+      - DEBUG_SUSPEND=y
+      - MAVEN_REPOSITORIES=''
   pdf:
     image: opendigitaleducation/node-pdf-generator:1.0.0
     ports:
       - "3000:3000"
 
   content-transformer:
-    user: "$DEFAULT_DOCKER_USER"
+    user: "1000:1000"
     image: opendigitaleducation/content-transformer:0.0.1
     ports:
       - "3100:3000"
-
   neo4j:
-    image: neo4j:3.1
+    image: neo4j/neo4j-arm64-experimental:3.5-arm64
     volumes:
       - ./neo4j-conf:/conf
-
+      - ./data/neo4j:/data
+#    ports:
+#      - "7474:7474"
+#      - "7687:7687"
+  redis:
+    image: redis:5.0.3-alpine
+#    ports:
+#      - "6379:6379"
   elasticsearch:
     image: opensearchproject/opensearch:2.4.1
     environment:
-      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
-      MEM_LIMIT: 1073741824
+      ES_JAVA_OPTS: "-Xms4g -Xmx4g"
       discovery.type: single-node
       DISABLE_SECURITY_PLUGIN: "true"
+    volumes:
+      - ./data/es:/usr/share/opensearch/data
     ulimits:
       memlock:
         soft: -1
@@ -59,8 +68,7 @@ services:
       - "9300:9300"
 
   postgres:
-    image: postgres:14.3
-    user: "$DEFAULT_DOCKER_USER" #REMOVE_BY_CI
+    image: arm64v8/postgres:14.8
     environment:
       POSTGRES_PASSWORD: We_1234
       POSTGRES_USER: web-education
@@ -68,15 +76,20 @@ services:
       POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_INITDB_ARGS: --auth-host=md5
     volumes:
-      - ./data/pgdata:/var/lib/postgresql/data #REMOVE_BY_CI
+      - ./data/pgdata:/var/lib/postgresql/data
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
 
   mongo:
     image: mongo:3.6
+    volumes:
+      - ./data/mongodb:/data/db
+#    ports:
+#      - "27017:27017"
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1
-    user: "$DEFAULT_DOCKER_USER"
     working_dir: /home/gradle/project
     volumes:
       - ./:/home/gradle/project
@@ -85,9 +98,7 @@ services:
 
   node:
     image: opendigitaleducation/node:16-alpine-pnpm
-    user: "$DEFAULT_DOCKER_USER"
     working_dir: /home/node/app
     volumes:
       - ./:/home/node/app
       - ~/.npm:/.npm
-      - .config:/.config

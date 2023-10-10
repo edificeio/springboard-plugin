@@ -180,15 +180,20 @@ class SpringboardPlugin implements Plugin<Project> {
 				.getResourceAsStream("neo4j-conf/neo4j.conf")
 		FileUtils.copy(neo4jConfStream, neo4jConf)
 
+		File initSql = project.file("docker-entrypoint-initdb.d/init.sql")
+		InputStream initSqlStream = this.getClass().getClassLoader()
+				.getResourceAsStream("docker-entrypoint-initdb.d/init.sql")
+		if(!initSql.exists()) {
+			project.mkdir("docker-entrypoint-initdb.d")
+			initSql.createNewFile()
+		}
+		FileUtils.copy(initSqlStream, initSql)
+
+		final String dockerComposeFileName = isM1() ? "docker-compose.mac.yml" : "docker-compose.yml"
 		File dockerCompose = project.file("docker-compose.yml")
 		InputStream dockerComposeStream = this.getClass().getClassLoader()
-				.getResourceAsStream("docker-compose.yml")
+				.getResourceAsStream(dockerComposeFileName)
 		FileUtils.copy(dockerComposeStream, dockerCompose)
-
-		File gulpfile = project.file("gulpfile.js")
-		InputStream gulpfileStream = this.getClass().getClassLoader()
-				.getResourceAsStream("gulpfile.js")
-		FileUtils.copy(gulpfileStream, gulpfile)
 
 		File packageJson = project.file("package.json")
 		InputStream packageJsonStream = this.getClass().getClassLoader()
@@ -268,6 +273,11 @@ class SpringboardPlugin implements Plugin<Project> {
 		if (!confMap.containsKey("entcoreVersion")) {
 			confProperties.append("entcoreVersion=" + version + "\n")
 		}
+	}
+
+	private static boolean isM1() {
+		return "true".equalsIgnoreCase(System.getenv("IS_M1")) ||
+				"aarch64".equalsIgnoreCase(System.getProperty("os.arch"))
 	}
 
 }

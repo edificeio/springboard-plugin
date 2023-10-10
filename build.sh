@@ -2,9 +2,10 @@
 
 if [ -z ${USER_UID:+x} ]
 then
-  export USER_UID=1000
-  export GROUP_GID=1000
+  export USER_UID=`id -u`
+  export GROUP_GID=`id -g`
 fi
+
 
 clean () {
   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle clean
