@@ -1,7 +1,6 @@
-version: "3.3"
 services:
   vertx:
-    image: opendigitaleducation/vertx-service-launcher:1.4.5
+    image: opendigitaleducation/vertx-service-launcher:2.0.1
     user: "$DEFAULT_DOCKER_USER"
     ports:
       - "8090:8090"
@@ -96,3 +95,27 @@ services:
       - ./:/home/node/app
       - ~/.npm:/.npm
       - .config:/.config
+
+  k6:
+    image: grafana/k6:master
+    user: "$DEFAULT_DOCKER_USER"
+    volumes:
+      - ./it/src:/home/k6/src
+      - ./it/resources:/home/k6/data
+    environment:
+      ROOT_URL: http://vertx:8090
+      DATA_ROOT_PATH: /home/k6/data
+      ADMC_LOGIN: tom.mate
+      ADMC_PASSWORD: password
+
+  k6-stress:
+    image: grafana/k6:master
+    user: "$DEFAULT_DOCKER_USER"
+    volumes:
+      - ./stress/src:/home/k6/src
+      - ./stress/resources:/home/k6/data
+    environment:
+      ROOT_URL: http://vertx:8090
+      DATA_ROOT_PATH: /home/k6/data
+      ADMC_LOGIN: tom.mate
+      ADMC_PASSWORD: password
