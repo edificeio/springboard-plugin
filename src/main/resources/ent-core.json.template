@@ -529,6 +529,7 @@
         "app-type": "END_USER",
         "sql": true,
         "db-schema": "conversation",
+        "emailProvider": $emailProvider,
         "publicConf": {
           <% if ("true".equals(xitiSwitch)) { %>
             "xiti": {
