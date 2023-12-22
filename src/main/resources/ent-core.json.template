@@ -502,7 +502,7 @@
         "app-type": "END_USER",
         "sql": true,
         "db-schema": "conversation",
-        "get-visible-strategy": "${getVisibleStrategy}",
+        "emailProvider": $emailProvider,
         "publicConf": {
             "debounce-time-to-auto-save": ${debounceTimeToAutoSave}
         }
