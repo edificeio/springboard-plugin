@@ -438,6 +438,7 @@
         "auto-redeploy": false,
         "ssl" : $ssl,
         "csrf-token" : $csrfToken,
+        "optionalFeature-cantoo-scriptPath": "${cantooOptionalFeatureScriptPath}", 
         "mode": "${mode}",
         <% if (assetsPath != null && !assetsPath.trim().isEmpty()) { %>
            "assets-path": "${assetsPath}",
