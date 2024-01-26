@@ -39,13 +39,13 @@ services:
     volumes:
       - ./neo4j-conf:/conf
       - ./data/neo4j:/data
-#    ports:
-#      - "7474:7474"
-#      - "7687:7687"
+  #    ports:
+  #      - "7474:7474"
+  #      - "7687:7687"
   redis:
     image: redis:5.0.3-alpine
-#    ports:
-#      - "6379:6379"
+  #    ports:
+  #      - "6379:6379"
   elasticsearch:
     image: opensearchproject/opensearch:2.8.0
     environment:
@@ -85,8 +85,8 @@ services:
     image: mongo:3.6
     volumes:
       - ./data/mongodb:/data/db
-#    ports:
-#      - "27017:27017"
+  #    ports:
+  #      - "27017:27017"
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1
@@ -97,7 +97,7 @@ services:
       - ~/.gradle:/home/gradle/.gradle
 
   node:
-    image: opendigitaleducation/node:16-alpine-pnpm
+    image: opendigitaleducation/node:18-alpine-pnpm
     working_dir: /home/node/app
     volumes:
       - ./:/home/node/app
