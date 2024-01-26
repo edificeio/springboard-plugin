@@ -5,14 +5,14 @@ services:
     user: "$DEFAULT_DOCKER_USER"
     ports:
       - "8090:8090"
-  #    - "5000:5000"
+    #    - "5000:5000"
     volumes:
       - ./assets:/srv/springboard/assets
       - ./mods:/srv/springboard/mods
       - ./ent-core.json:/srv/springboard/conf/vertx.conf
       - ./aaf-duplicates-test:/home/wse/aaf
-  #    - ~/.m2:/home/vertx/.m2
-  #    - ./avatars:/srv/storage/avatars
+    #    - ~/.m2:/home/vertx/.m2
+    #    - ./avatars:/srv/storage/avatars
     links:
       - neo4j
       - postgres
@@ -89,7 +89,7 @@ services:
       - ~/.gradle:/home/gradle/.gradle
 
   node:
-    image: opendigitaleducation/node:16-alpine-pnpm
+    image: opendigitaleducation/node:18-alpine-pnpm
     user: "$DEFAULT_DOCKER_USER"
     working_dir: /home/node/app
     volumes:
