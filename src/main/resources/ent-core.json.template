@@ -169,6 +169,9 @@
   <% } %>
   "cluster" : ${cluster},
   "skins": ${skins},
+  <%  if (skinLevels != null && !skinLevels.trim().isEmpty()) { %>
+	"skin-levels": ${skinLevels},
+	<% } %>
   <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
     "swift" : {
       "uri" : "${swiftUri}",
