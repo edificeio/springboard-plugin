@@ -55,4 +55,8 @@
           {
             "location": "/admin",
             "proxy_pass": "http://localhost:8089"
+          },
+          {
+            "location": "/audience",
+            "proxy_pass": "http://localhost:8091"
           }
