@@ -77,7 +77,7 @@ services:
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   mongo:
-    image: mongo:4.2
+    image: mongo:7.0
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1
