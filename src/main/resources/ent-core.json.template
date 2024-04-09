@@ -13,7 +13,7 @@
   },
 "services" : [
 {
-  "name": "io.vertx~mod-mongo-persistor~${modMongoPersistorVersion}",
+  "name": "io.vertx~mod-mongo-persistor~4.0-b2school-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded": true,
@@ -30,7 +30,7 @@
   }
 },
 {
-  "name" : "fr.wseduc~mod-image-resizer~${modImageResizerVersion}",
+  "name" : "fr.wseduc~mod-image-resizer~3.0-b2school-SNAPSHOT",
   "worker": true,
   "multi-threaded": true,
   "waitDeploy" : true,
@@ -58,7 +58,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-zip~${modZipVersion}",
+  "name": "fr.wseduc~mod-zip~3.0-b2school-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "config":{
@@ -66,7 +66,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-postgresql~${modPostgresVersion}",
+  "name": "fr.wseduc~mod-postgresql~2.0-b2school-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded" : true,
@@ -79,7 +79,7 @@
 },
 <% if (pgAdminUser != null && !pgAdminUser.trim().isEmpty()) { %>
 {
-  "name": "fr.wseduc~mod-postgresql~${modPostgresVersion}",
+  "name": "fr.wseduc~mod-postgresql~2.0-b2school-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded" : true,
@@ -92,7 +92,7 @@
 },
 <% } %>
 {
-  "name": "com.opendigitaleducation~mod-json-schema-validator~${modJsonSchemaValidatorVersion}",
+  "name": "com.opendigitaleducation~mod-json-schema-validator~2.0-b2school-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "multi-threaded" : true,
@@ -129,7 +129,7 @@
   },
 <% } %>
 {
-  "name": "fr.wseduc~mod-sms-proxy~${modSmsproxyVersion}",
+  "name": "fr.wseduc~mod-sms-proxy~2.0-b2school-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "config":{
@@ -138,7 +138,7 @@
   }
 },
 {
-  "name": "fr.wseduc~mod-pdf-generator~${modPdfgenerator}",
+  "name": "fr.wseduc~mod-pdf-generator~2.0-b2school-SNAPSHOT",
   "waitDeploy" : true,
   "worker": true,
   "config":{
@@ -146,7 +146,7 @@
   }
 },
 
-{ "name": "org.entcore~infra~${entcoreVersion}",
+{ "name": "org.entcore~infra~5.0-b2school-SNAPSHOT",
 "waitDeploy" : true,
 "config" : {
   "port": 8001,
@@ -238,7 +238,7 @@
     }
   }},
   {
-    "name": "org.entcore~app-registry~${entcoreVersion}",
+    "name": "org.entcore~app-registry~5.0-b2school-SNAPSHOT",
     "waitDeploy" : true,
     "config":{
       "main":"org.entcore.registry.AppRegistry",
@@ -267,7 +267,7 @@
     }
   },
     {
-      "name": "org.entcore~session~${entcoreVersion}",
+      "name": "org.entcore~session~5.0-b2school-SNAPSHOT",
       "worker": true,
       "config":{
         "session_timeout": 10800000,
@@ -275,7 +275,7 @@
       }
     },
     {
-      "name": "org.entcore~auth~${entcoreVersion}",
+      "name": "org.entcore~auth~5.0-b2school-SNAPSHOT",
       "config":{
         "path-prefix": "auth",
         "app-type": "SYSTEM",
@@ -315,7 +315,7 @@
       }
     },
     {
-      "name": "org.entcore~directory~${entcoreVersion}",
+      "name": "org.entcore~directory~5.0-b2school-SNAPSHOT",
       "config":{
         "path-prefix": "directory",
         "auto-redeploy": false,
@@ -359,7 +359,7 @@
       }
     },
     {
-      "name": "org.entcore~workspace~${entcoreVersion}",
+      "name": "org.entcore~workspace~5.0-b2school-SNAPSHOT",
       "config":{
         "main":"org.entcore.workspace.Workspace",
         "auto-redeploy": false,
@@ -388,7 +388,7 @@
       }
     },
     {
-      "name": "org.entcore~communication~${entcoreVersion}",
+      "name": "org.entcore~communication~5.0-b2school-SNAPSHOT",
       "config":{
         "main":"org.entcore.communication.Communication",
         "auto-redeploy": false,
@@ -434,7 +434,7 @@
       }
     },
     {
-      "name": "org.entcore~portal~${entcoreVersion}",
+      "name": "org.entcore~portal~5.0-b2school-SNAPSHOT",
       "config":{
         "port": 8017,
         "app-type": "SYSTEM",
@@ -506,7 +506,7 @@
       }
     },
     {
-      "name": "org.entcore~conversation~${entcoreVersion}",
+      "name": "org.entcore~conversation~5.0-b2school-SNAPSHOT",
       "config":{
         "main":"org.entcore.conversation.Conversation",
         "host": "${host}",
@@ -534,7 +534,7 @@
       }
     },
     {
-      "name": "org.entcore~feeder~${entcoreVersion}",
+      "name": "org.entcore~feeder~5.0-b2school-SNAPSHOT",
       "worker": true,
       "config":{
         "address" : "entcore.feeder",
@@ -558,7 +558,7 @@
       }
     },
     {
-      "name": "org.entcore~timeline~${entcoreVersion}",
+      "name": "org.entcore~timeline~5.0-b2school-SNAPSHOT",
       "config":{ "csrf-token": true,
         "main":"org.entcore.timeline.Timeline",
         "port": 8016,
@@ -576,7 +576,7 @@
       }
     },
     {
-      "name": "org.entcore~cas~${entcoreVersion}",
+      "name": "org.entcore~cas~5.0-b2school-SNAPSHOT",
       "config":{
         "main" : "org.entcore.cas.Cas",
         "port" : 8023,
@@ -728,7 +728,7 @@
       }
     },
     {
-      "name": "org.entcore~archive~${entcoreVersion}",
+      "name": "org.entcore~archive~5.0-b2school-SNAPSHOT",
       "config":{
         "main":"org.entcore.archive.Archive",
         "port": 8004,
@@ -745,7 +745,7 @@
       }
     },
     {
-      "name": "org.entcore~admin~${entcoreVersion}",
+      "name": "org.entcore~admin~5.0-b2school-SNAPSHOT",
       "config": {
         "main":"org.entcore.admin.Admin",
         "port": 8089,
