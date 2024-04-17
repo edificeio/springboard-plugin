@@ -101,7 +101,7 @@
 },
 <% if (modSftp != null && !modSftp.trim().isEmpty()) { %>
 {
-  "name": "fr.cgi~mod-sftp~1.0.0",
+  "name": "fr.cgi~mod-sftp~2.0-b2school-SNAPSHOT",
   "waitDeploy": true,
   "config": {
     "main" : "fr.cgi.sftp.Sftp",
