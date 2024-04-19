@@ -249,7 +249,7 @@
       "address" : "wse.app.registry",
       "app-type": "SYSTEM",
       "port" : 8012,
-      "edumalin-widget-config": $edumalinWidgetConfig,
+      <%if (edumalinWidgetConfig != null && edumalinWidgetConfig != {}) { %> "edumalin-widget-config": ${edumalinWidgetConfig}, <% } %>
       <% if ("true".equals(bprEnabled)) { %>
         "library-enabled": true,
         "library-api-url": "${bprUrl}",
