@@ -444,7 +444,7 @@
         "csrf-token" : $csrfToken,
         "optionalFeature-cantoo-scriptPath": "${cantooOptionalFeatureScriptPath}", 
         <% if (zendeskGuideKey != null && !zendeskGuideKey.trim().isEmpty()) { %>
-           "zendeskGuide": {"key": "${zendeskGuideKey}", "color": "${zendeskGuideColor}"},
+           "zendeskGuide": {"key": "${zendeskGuideKey}", "color": "${zendeskGuideColor}", "modules": "${zendeskGuideModules}"},
         <% } %>
         "mode": "${mode}",
         <% if (assetsPath != null && !assetsPath.trim().isEmpty()) { %>
