@@ -5,7 +5,10 @@ import org.gradle.api.Project
 
 class FileUtils {
 
-	static def createFile(String propertiesFile, String templateFileName, String outputFileName) {
+	static def createFile(String propertiesFile, 
+						  String gradleFile,
+						  String templateFileName,
+						  String outputFileName) {
 		def props = new Properties()
 		def file = new File(propertiesFile)
 		def rootDirectory = file.getParentFile()
@@ -18,8 +21,12 @@ class FileUtils {
 				bindings[prop] = props.getProperty(prop)
 			}
 		}
+		def gradleProps = new Properties()
+		gradleProps.load(new FileInputStream(gradleFile))
+		removeUselessGradleProps(gradleProps);
 		def defaultProps = new Properties()
 		defaultProps.load(new FileInputStream(new File(rootDirectory, "default.properties")))
+		defaultProps.putAll(gradleProps)
 		defaultProps.propertyNames().each { prop ->
 			if (!bindings.containsKey(prop)) {
 				bindings[prop] = defaultProps.getProperty(prop)
@@ -36,6 +43,16 @@ class FileUtils {
 		fileWriter.close()
 	}
 
+	/**
+	* Removes from the specified props the properties that are not
+	* useful for the generation of the entcore.json
+	*/
+	static def removeUselessGradleProps(Properties props) {
+		props.remove("modowner");
+		props.remove("modname");
+		props.remove("version");
+		props.remove("produceJar");
+	}
 
 	static def copy(InputStream is, File output) {
 		int read;
