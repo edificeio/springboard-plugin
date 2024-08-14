@@ -40,7 +40,7 @@ services:
       - ./neo4j-conf:/conf
 
   redis:
-    image: redis:5.0.3-alpine
+    image: redis:7.4.0-alpine
 #    ports:
 #      - "6379:6379"
   elasticsearch:
@@ -64,7 +64,7 @@ services:
       - "9300:9300"
 
   postgres:
-    image: postgres:14.3
+    image: postgres:14.13
     user: "$DEFAULT_DOCKER_USER" #REMOVE_BY_CI
     environment:
       POSTGRES_PASSWORD: We_1234
@@ -77,7 +77,7 @@ services:
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 
   mongo:
-    image: mongo:4.2
+    image: mongo:7.0.12
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1
