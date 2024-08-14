@@ -43,7 +43,7 @@ services:
   #      - "7474:7474"
   #      - "7687:7687"
   redis:
-    image: redis:5.0.3-alpine
+    image: redis:7.4.0-alpine
   #    ports:
   #      - "6379:6379"
   elasticsearch:
@@ -68,7 +68,7 @@ services:
       - "9300:9300"
 
   postgres:
-    image: arm64v8/postgres:14.8
+    image: arm64v8/postgres:14.13
     environment:
       POSTGRES_PASSWORD: We_1234
       POSTGRES_USER: web-education
@@ -82,7 +82,7 @@ services:
       - "5432:5432"
 
   mongo:
-    image: mongo:3.6
+    image: mongo:7.0.12
     volumes:
       - ./data/mongodb:/data/db
   #    ports:
