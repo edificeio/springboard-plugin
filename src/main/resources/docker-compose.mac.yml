@@ -102,3 +102,13 @@ services:
     volumes:
       - ./:/home/node/app
       - ~/.npm:/.npm
+  k6:
+    image: grafana/k6:master
+    volumes:
+      - ./it/src:/home/k6/src
+      - ./resources:/home/k6/data
+    environment:
+      ROOT_URL: http://172.17.0.1:8090
+      DATA_ROOT_PATH: /home/k6/data
+      ADMC_LOGIN: tom.mate
+      ADMC_PASSWORD: password
