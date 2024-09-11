@@ -1,4 +1,3 @@
-version: "3.3"
 services:
   vertx:
     image: opendigitaleducation/vertx-service-launcher:1.4.5
@@ -104,11 +103,24 @@ services:
       - ~/.npm:/.npm
   k6:
     image: grafana/k6:master
+    user: "1000:1000"
     volumes:
       - ./it/src:/home/k6/src
-      - ./resources:/home/k6/data
+      - ./it/resources:/home/k6/data
     environment:
-      ROOT_URL: http://172.17.0.1:8090
+      ROOT_URL: http://vertx:8090
+      DATA_ROOT_PATH: /home/k6/data
+      ADMC_LOGIN: tom.mate
+      ADMC_PASSWORD: password
+  
+  k6-stress:
+    image: grafana/k6:master
+    user: "1000:1000"
+    volumes:
+      - ./stress/src:/home/k6/src
+      - ./stress/resources:/home/k6/data
+    environment:
+      ROOT_URL: http://vertx:8090
       DATA_ROOT_PATH: /home/k6/data
       ADMC_LOGIN: tom.mate
       ADMC_PASSWORD: password
