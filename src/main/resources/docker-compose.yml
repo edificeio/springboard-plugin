@@ -30,7 +30,7 @@ services:
 
   content-transformer:
     user: "$DEFAULT_DOCKER_USER"
-    image: opendigitaleducation/content-transformer:0.0.1
+    image: ghcr.io/edificeio/edifice-tiptap-transformer:1.0.2
     ports:
       - "3100:3000"
 
