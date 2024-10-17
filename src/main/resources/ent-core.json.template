@@ -346,6 +346,13 @@
            <% if (federatedAddress != null && !federatedAddress.trim().isEmpty()) { %>
            ,"federatedAddress" : ${federatedAddress}
            <% } %>
+           ,"userPosition": {
+              <% if (restrictCRUDToADMC != null && !restrictCRUDToADMC.trim().isEmpty()) { %>
+              "restrictCRUDToADMC": ${restrictCRUDToADMC}
+              <% } else { %>
+              "restrictCRUDToADMC": false
+              <% } %>
+           }
            <% if ("true".equals(xitiSwitch)) { %>
              ,"xiti": {
                "ID_SERVICE": {
