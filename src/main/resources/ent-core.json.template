@@ -30,7 +30,7 @@
   }
 },
 {
-  "name" : "fr.wseduc~mod-image-resizer~${modImageResizerVersion}",
+  "name" : "fr.wseduc~mod-image-resizer~2.1-dev-sre-SNAPSHOT",
   "worker": true,
   "multi-threaded": true,
   "waitDeploy" : true,
