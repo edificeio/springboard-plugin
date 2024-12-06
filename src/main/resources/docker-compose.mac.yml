@@ -106,7 +106,7 @@ services:
     user: "1000:1000"
     volumes:
       - ./it/src:/home/k6/src
-      - ./it/resources:/home/k6/data
+      - ./it/resources/data:/home/k6/data
     environment:
       ROOT_URL: http://vertx:8090
       DATA_ROOT_PATH: /home/k6/data
