@@ -428,6 +428,7 @@
               }
             }
          <% } %>,
+       "visibles-search-type": "${visiblesSearchType}",
        "publicConf": {
          <% if ("true".equals(xitiSwitch)) { %>
             "xiti": {
@@ -529,9 +530,11 @@
         "app-type": "END_USER",
         "sql": true,
         "db-schema": "conversation",
+        "get-visible-strategy": "${getVisibleStrategy}",
         "publicConf": {
+            "debounce-time-to-auto-save": ${debounceTimeToAutoSave}
           <% if ("true".equals(xitiSwitch)) { %>
-            "xiti": {
+            ,"xiti": {
               "ID_SERVICE": {
                 "default": 10
               }
