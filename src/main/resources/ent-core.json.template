@@ -207,8 +207,20 @@
       "retryNumber": 5,
       "waitInSeconds": 10
 	},
+    "content-transformer": {
+      "url": "http://content-transformer:3000",
+      "content-transformer-metrics": {
+        "enabled": true
+      }
+    },
+    "redisConfig": {
+            "host": "redis",
+            "port": 6379,
+      "maxPoolWaiting": 2024,
+      "maxWaitingHandlers": 2024
+  },
       "explorerConfig": {
-          "enabled": false,
+          "enabled": true,
           "postgres": true
       },
     "mongoConfig" : {
