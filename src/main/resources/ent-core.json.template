@@ -525,6 +525,7 @@
             ]
       }
     },
+
     {
       "name": "org.entcore~conversation~${entcoreVersion}",
       "config":{
@@ -595,6 +596,25 @@
         "sql": true,
         "db-schema": "flashmsg",
         "mode": "${mode}"
+      }
+    },
+    {
+      "name": "org.entcore~broker~${entcoreVersion}",
+      "main":"org.entcore.broker.Broker",
+      "config":{
+        "port": 8778,
+        "mode": "prod",
+        "app-type": "SYSTEM",
+        "auto-redeploy": false,
+        "app-name" : "Broker",
+        "app-address" : "http://localhost:8778/broker",
+        "sql": false,
+        "broker-type": "nats",
+        "nats": {
+          "io.nats.client.url": "nats://nats:4222"
+        },        
+        "publicConf": {
+        }     
       }
     },
     {
