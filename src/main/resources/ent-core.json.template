@@ -611,7 +611,7 @@
         "sql": false,
         "broker-type": "nats",
         "nats": {
-          "io.nats.client.url": "nats://nats:4222",
+          "io.nats.client.url": "nats://nats:4222"
         },        
         "publicConf": {
         }     
