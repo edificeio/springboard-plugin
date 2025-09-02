@@ -264,7 +264,7 @@
       <% if ("true".equals(bprEnabled)) { %>
         "library-enabled": true,
         "library-api-url": "${bprUrl}",
-        "library-token": "${bprToken}",
+        "library-token": "${bprToken}"
       <% } %>
     }
   },
