@@ -37,8 +37,8 @@ services:
 
   localstack:
     image: localstack/localstack:latest
-    ports:
-      - "4566:4566"
+    ports: #REMOVE_BY_CI
+      - "4566:4566" #REMOVE_BY_CI
     environment:
       - SERVICES=s3
       - AWS_DEFAULT_REGION=us-east-1
@@ -74,14 +74,14 @@ services:
       - ENABLE_REMOTE_DEBUG=true
   pdf:
     image: opendigitaleducation/node-pdf-generator:1.0.0
-    ports:
-      - "3000:3000"
+    ports: #REMOVE_BY_CI
+      - "3000:3000" #REMOVE_BY_CI
 
   content-transformer:
     user: "$DEFAULT_DOCKER_USER"
     image: ghcr.io/edificeio/edifice-tiptap-transformer:1.0.2
-    ports:
-      - "3100:3000"
+    ports: #REMOVE_BY_CI
+      - "3100:3000" #REMOVE_BY_CI
 
   neo4j:
     image: neo4j:3.1
@@ -108,7 +108,7 @@ services:
         hard: 65536
     cap_add:
       - IPC_LOCK
-    ports:
+    ports: #REMOVE_BY_CI
       - "9200:9200"
       - "9300:9300"
 
