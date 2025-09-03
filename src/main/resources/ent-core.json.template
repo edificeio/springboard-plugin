@@ -598,6 +598,7 @@
         "mode": "${mode}"
       }
     },
+    <% if (binding.hasVariable('withBroker') && withBroker != null && withBroker) { %>
     {
       "name": "org.entcore~broker~${entcoreVersion}",
       "main":"org.entcore.broker.Broker",
@@ -617,6 +618,7 @@
         }     
       }
     },
+    <% } %>
     {
       "name": "org.entcore~cas~${entcoreVersion}",
       "config":{
