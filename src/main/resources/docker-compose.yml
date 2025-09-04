@@ -43,7 +43,7 @@ services:
       - SERVICES=s3
       - AWS_DEFAULT_REGION=us-east-1
     volumes:
-      - ./cluster-config/init-s3:/etc/localstack/init
+      - ./conf/cluster-config/init-s3:/etc/localstack/init
 
   vertx:
     image: opendigitaleducation/vertx-service-launcher:3.0-SNAPSHOT
@@ -87,6 +87,10 @@ services:
     image: neo4j:3.1
     volumes:
       - ./neo4j-conf:/conf
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
 
   redis:
     image: redis:7.4.0-alpine
@@ -109,8 +113,8 @@ services:
     cap_add:
       - IPC_LOCK
     ports: #REMOVE_BY_CI
-      - "9200:9200"
-      - "9300:9300"
+      - "9200:9200" #REMOVE_BY_CI
+      - "9300:9300" #REMOVE_BY_CI
 
   postgres:
     image: postgres:14.13
