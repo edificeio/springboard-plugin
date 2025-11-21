@@ -130,10 +130,6 @@ class SpringboardPlugin implements Plugin<Project> {
 		project.file("src/test/scala/org/entcore/test/scenarios")?.mkdirs()
 		project.file("src/test/scala/org/entcore/test/simulations")?.mkdir()
 		project.file("aaf-duplicates-test")?.mkdir()
-		project.file("conf")?.mkdirs()
-		
-		// Recursively copy all files from resources/conf to project conf directory
-		copyResourceDirectory(project, "conf", "conf")
 
 		File scn = project.file("src/test/scala/org/entcore/test/scenarios/IntegrationTestScenario.scala")
 		InputStream scnis = this.getClass().getClassLoader()
@@ -282,77 +278,6 @@ class SpringboardPlugin implements Plugin<Project> {
 	private static boolean isM1() {
 		return "true".equalsIgnoreCase(System.getenv("IS_M1")) ||
 				"aarch64".equalsIgnoreCase(System.getProperty("os.arch"))
-	}
-
-	/**
-	 * Recursively copies all files and directories from a resource directory to a target directory
-	 */
-	private void copyResourceDirectory(Project project, String resourcePath, String targetPath) {
-		// Get the resource URL
-		URL resourceUrl = this.getClass().getClassLoader().getResource(resourcePath)
-		if (resourceUrl == null) {
-			project.logger.warn("Resource directory not found: ${resourcePath}")
-			return
-		}
-
-		try {
-			// Handle different URL protocols (jar: for packaged plugin, file: for development)
-			if (resourceUrl.protocol == "jar") {
-				// Extract from JAR file
-				copyFromJar(project, resourceUrl, resourcePath, targetPath)
-			} else {
-				// Copy from file system (development mode)
-				copyFromFileSystem(project, new File(resourceUrl.toURI()), targetPath)
-			}
-		} catch (Exception e) {
-			project.logger.error("Failed to copy resource directory ${resourcePath}: ${e.message}")
-		}
-	}
-
-	private void copyFromJar(Project project, URL jarUrl, String resourcePath, String targetPath) {
-		// Parse JAR URL to get the JAR file path
-		String jarPath = jarUrl.path.substring(5, jarUrl.path.indexOf("!"))
-		def jarFile = new java.util.jar.JarFile(jarPath)
-		
-		try {
-			jarFile.entries().each { entry ->
-				if (entry.name.startsWith(resourcePath + "/") && !entry.isDirectory()) {
-					String relativePath = entry.name.substring(resourcePath.length() + 1)
-					File targetFile = project.file("${targetPath}/${relativePath}")
-					
-					// Create parent directories
-					targetFile.parentFile?.mkdirs()
-					
-					// Copy file content
-					InputStream inputStream = jarFile.getInputStream(entry)
-					FileUtils.copy(inputStream, targetFile)
-					inputStream.close()
-				}
-			}
-		} finally {
-			jarFile.close()
-		}
-	}
-
-	private void copyFromFileSystem(Project project, File sourceDir, String targetPath) {
-		if (!sourceDir.exists() || !sourceDir.isDirectory()) {
-			return
-		}
-		
-		sourceDir.eachFileRecurse { file ->
-			if (file.isFile()) {
-				String relativePath = sourceDir.toPath().relativize(file.toPath()).toString()
-				File targetFile = project.file("${targetPath}/${relativePath}")
-				
-				// Create parent directories
-				targetFile.parentFile?.mkdirs()
-				
-				// Copy file
-				file.withInputStream { inputStream ->
-					FileUtils.copy(inputStream, targetFile)
-				}
-			}
-		}
 	}
 
 }

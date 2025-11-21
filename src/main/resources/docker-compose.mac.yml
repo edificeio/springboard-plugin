@@ -1,73 +1,28 @@
 services:
-  zookeeper:
-    image: zookeeper:3.9
-    hostname: zookeeper
-    environment:
-      - ZOO_MY_ID=1
-  # zkweb:
-  #   image: tobilg/zookeeper-webui
-  #   ports:
-  #     - "8081:8080"
-  #   environment:
-  #     - ZK_DEFAULT_NODE=zookeeper:2181
-  #   depends_on:
-  #     - zookeeper
-  #   ulimits:
-  #     nofile:
-  #       soft: 65536
-  #       hard: 65536
-  traefik:
-    image: traefik:3.4
-    command:
-      - "--api.insecure=true"
-      - "--api.dashboard=true"
-      - "--providers.zookeeper=true"
-      - "--providers.zookeeper.endpoints=zookeeper:2181"
-      - "--providers.zookeeper.rootkey=ent-core/traefik"
-      - "--entrypoints.web.address=:8090"
-      - "--log.level=DEBUG"
-    ports:
-      - "8090:8090"
-      - "8080:8080"
-    depends_on:
-      - zookeeper
-  localstack:
-    image: localstack/localstack:latest
-    ports:
-      - "4566:4566"
-    environment:
-      - SERVICES=s3
-      - AWS_DEFAULT_REGION=us-east-1
-    volumes:
-      - ./cluster-config/init-s3:/etc/localstack/init
-
   vertx:
-    image: opendigitaleducation/vertx-service-launcher:3.0-SNAPSHOT
-    user: "$DEFAULT_DOCKER_USER"
+    image: opendigitaleducation/vertx-service-launcher:2.0.1
+    user: "1000:1000"
     ports:
       - "5000:5000"
+      - "8090:8090"
+      - "9090:9090"
     volumes:
       - ./assets:/srv/springboard/assets
       - ./mods:/srv/springboard/mods
       - ./ent-core.json:/srv/springboard/conf/vertx.conf
-      - ./conf/cluster-config/zookeeper.json:/srv/springboard/conf/zookeeper.json
       - ./aaf-duplicates-test:/home/wse/aaf
       - ~/.m2:/home/vertx/.m2
-    #    - ./avatars:/srv/storage/avatars
-    links:
+      - ./avatars:/srv/storage/avatars
+    depends_on:
       - neo4j
       - postgres
       - mongo
       - pdf
       - elasticsearch
       - redis
-      - localstack
-      - zookeeper
     environment:
-      - MODE=cluster
-      - ENABLED_SERVICES=o
-      - DEBUG_SUSPEND=n
-      - ENABLE_REMOTE_DEBUG=true
+      - DEBUG_SUSPEND=y
+      - MAVEN_REPOSITORIES=''
   pdf:
     image: opendigitaleducation/node-pdf-generator:1.0.0
     ports:
@@ -146,3 +101,26 @@ services:
     volumes:
       - ./:/home/node/app
       - ~/.npm:/.npm
+  k6:
+    image: grafana/k6:master
+    user: "1000:1000"
+    volumes:
+      - ./it/src:/home/k6/src
+      - ./it/resources:/home/k6/data
+    environment:
+      ROOT_URL: http://vertx:8090
+      DATA_ROOT_PATH: /home/k6/data
+      ADMC_LOGIN: tom.mate
+      ADMC_PASSWORD: password
+
+  k6-stress:
+    image: grafana/k6:master
+    user: "1000:1000"
+    volumes:
+      - ./stress/src:/home/k6/src
+      - ./stress/resources:/home/k6/data
+    environment:
+      ROOT_URL: http://vertx:8090
+      DATA_ROOT_PATH: /home/k6/data
+      ADMC_LOGIN: tom.mate
+      ADMC_PASSWORD: password
