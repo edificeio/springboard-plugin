@@ -19,6 +19,7 @@ services:
       - pdf
       - elasticsearch
       - redis
+      - nats
   #environment:
   #  MAVEN_REPOSITORIES: ''
 
@@ -74,9 +75,24 @@ services:
     volumes:
       - ./data/pgdata:/var/lib/postgresql/data #REMOVE_BY_CI
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-
   mongo:
     image: mongo:7.0.12
+  nats:
+    image: 'nats:2.10.25-alpine'
+    ports:
+      - '4222:4222'
+    #volumes:
+    #  - ./conf/nats/server:/etc/nats/certs
+    command:
+      - "--js"
+      - "--sd=/data"
+      - "--http_port=8222"
+      # Uncomment the following lines to enable TLS
+      #- "--tls"
+      #- "--tlscert=/etc/nats/certs/server-cert.pem"
+      #- "--tlskey=/etc/nats/certs/server-key.pem"
+      #- "--tlscacert=/etc/nats/certs/rootCA.pem"
+      #- "--tlsverify"
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1
