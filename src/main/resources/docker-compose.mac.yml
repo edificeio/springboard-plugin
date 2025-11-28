@@ -42,7 +42,7 @@ services:
       - ./conf/cluster-config/init-s3:/etc/localstack/init
 
   vertx:
-    image: opendigitaleducation/vertx-service-launcher:3.0-SNAPSHOT
+    image: opendigitaleducation/vertx-service-launcher:4.0-zookeeper-SNAPSHOT
     user: "$DEFAULT_DOCKER_USER"
     ports:
       - "5000:5000"
@@ -65,7 +65,7 @@ services:
       - zookeeper
     environment:
       - MODE=cluster
-      - ENABLED_SERVICES=o
+      - ENABLED_SERVICES=
       - DEBUG_SUSPEND=n
       - ENABLE_REMOTE_DEBUG=true
   pdf:
