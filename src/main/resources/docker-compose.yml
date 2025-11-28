@@ -46,7 +46,7 @@ services:
       - ./conf/cluster-config/init-s3:/etc/localstack/init
 
   vertx:
-    image: opendigitaleducation/vertx-service-launcher:3.0-SNAPSHOT
+    image: opendigitaleducation/vertx-service-launcher:4.0-zookeeper-SNAPSHOT
     user: "$DEFAULT_DOCKER_USER"
     ports: #REMOVE_BY_CI
       - "5000:5000" #REMOVE_BY_CI
