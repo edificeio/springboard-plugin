@@ -67,6 +67,7 @@ services:
       - redis
       - localstack
       - zookeeper
+      - nats
     environment:
       - MODE=cluster
       - ENABLED_SERVICES=
@@ -109,8 +110,8 @@ services:
     cap_add:
       - IPC_LOCK
     ports: #REMOVE_BY_CI
-      - "9200:9200"
-      - "9300:9300"
+      - "9200:9200"  #REMOVE_BY_CI
+      - "9300:9300" #REMOVE_BY_CI
 
   postgres:
     image: postgres:14.13
@@ -124,9 +125,24 @@ services:
     volumes:
       - ./data/pgdata:/var/lib/postgresql/data #REMOVE_BY_CI
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-
   mongo:
     image: mongo:7.0.12
+  nats:
+    image: 'nats:2.10.25-alpine'
+    ports:
+      - '4222:4222'
+    #volumes:
+    #  - ./conf/nats/server:/etc/nats/certs
+    command:
+      - "--js"
+      - "--sd=/data"
+      - "--http_port=8222"
+      # Uncomment the following lines to enable TLS
+      #- "--tls"
+      #- "--tlscert=/etc/nats/certs/server-cert.pem"
+      #- "--tlskey=/etc/nats/certs/server-key.pem"
+      #- "--tlscacert=/etc/nats/certs/rootCA.pem"
+      #- "--tlsverify"
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1

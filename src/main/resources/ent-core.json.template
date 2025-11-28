@@ -563,9 +563,26 @@
         "app-address" : "http://localhost:8778/broker",
         "sql": false,
         "broker-type": "nats",
-        "nats": {
-          "io.nats.client.url": "nats://nats:4222"
-        },        
+        "nats": [
+          {
+            "name": "ent",
+            "default": true,
+            "routing": [],
+            "client": {
+              "io.nats.client.url": "nats://nats:4222"
+            }
+          },
+          {
+            "name": "ia",
+            "default": false,
+            "routing": [
+              "ia.>"
+            ],
+            "client": {
+              "io.nats.client.url": "nats://nats:4222"
+            }
+          }
+        ],
         "publicConf": {
         }     
       }

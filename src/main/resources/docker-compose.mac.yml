@@ -53,8 +53,8 @@ services:
       - ./conf/cluster-config/zookeeper.json:/srv/springboard/conf/zookeeper.json
       - ./aaf-duplicates-test:/home/wse/aaf
       - ~/.m2:/home/vertx/.m2
-    #    - ./avatars:/srv/storage/avatars
-    links:
+      - ./avatars:/srv/storage/avatars
+    depends_on:
       - neo4j
       - postgres
       - mongo
@@ -63,9 +63,10 @@ services:
       - redis
       - localstack
       - zookeeper
+      - nats
     environment:
       - MODE=cluster
-      - ENABLED_SERVICES=o
+      - ENABLED_SERVICES=
       - DEBUG_SUSPEND=n
       - ENABLE_REMOTE_DEBUG=true
   pdf:
@@ -131,6 +132,22 @@ services:
       - ./data/mongodb:/data/db
   #    ports:
   #      - "27017:27017"
+  nats:
+    image: 'nats:2.10.25-alpine'
+    ports:
+      - '4222:4222'
+    #volumes:
+    #  - ./conf/nats/server:/etc/nats/certs
+    command:
+      - "--js"
+      - "--sd=/data"
+      - "--http_port=8222"
+      # Uncomment the following lines to enable TLS
+      #- "--tls"
+      #- "--tlscert=/etc/nats/certs/server-cert.pem"
+      #- "--tlskey=/etc/nats/certs/server-key.pem"
+      #- "--tlscacert=/etc/nats/certs/rootCA.pem"
+      #- "--tlsverify"
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1
