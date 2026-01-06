@@ -4,11 +4,28 @@ import groovy.text.SimpleTemplateEngine
 import org.gradle.api.Project
 
 class FileUtils {
+	
+	/**
+	 * Map of module property names to module names on GitHub
+	 * so we can fetch their version if not specified in gradle.properties.
+	 */
+	static final Map<String, String> MOD_NAME_MAPPINGS = [
+		modPdfgenerator: 'mod-pdf-generator',
+		modMongoPersistorVersion: 'mod-mongo-persistor',
+		modImageResizerVersion: 'mod-image-resizer',
+		modZipVersion: 'mod-zip',
+		modPostgresVersion: 'mod-postgresql',
+		modJsonschemavalidatorVersion: 'mod-json-schema-validator',
+		modSftpVersion: 'OPEN-ENT-NG/mod-sftp',
+		modWebdavVersion: 'OPEN-ENT-NG/mod-webdav',
+		modSmsproxyVersion: 'mod-sms-sender'
+	]
 
 	static def createFile(String propertiesFile, 
 						  String gradleFile,
 						  String templateFileName,
-						  String outputFileName) {
+						  String outputFileName,
+						  logger) {
 		def props = new Properties()
 		def file = new File(propertiesFile)
 		def rootDirectory = file.getParentFile()
@@ -32,6 +49,7 @@ class FileUtils {
 				bindings[prop] = defaultProps.getProperty(prop)
 			}
 		}
+		populateModuleVersionsNotInBindings(bindings, logger)
 		def engine = new SimpleTemplateEngine()
 		def templateFile = new File(templateFileName)
 		def output = engine.createTemplate(templateFile).make(bindings)
@@ -41,6 +59,55 @@ class FileUtils {
 		def fileWriter = new FileWriter(outputFile)
 		fileWriter.write(output.toString())
 		fileWriter.close()
+	}
+
+	/**
+	 * For each module defined in MOD_NAME_MAPPINGS, if the corresponding
+	 * property is not defined in the bindings map, fetch the latest release
+	 * version from GitHub and add it to the bindings.
+	 */
+	static def populateModuleVersionsNotInBindings(Map bindings, logger) {
+		String modsDefaultBranch = System.getenv("MODS_DEFAULT_BRANCH")
+		MOD_NAME_MAPPINGS.each { key, modName ->
+			if (!bindings.containsKey(key)) {
+				logger.lifecycle("Fetching latest release version for module: " + modName)	
+				// Fetch raw pom.xml from GitHub for the module. It will successively try
+				// the default branch (if defined in env MODS_DEFAULT_BRANCH), then master,
+				// then main.
+				// If it still does not exist raise an error
+				String[] branches = []
+				if (modsDefaultBranch != null && !modsDefaultBranch.isEmpty()) {
+					branches = [modsDefaultBranch, 'master', 'main']
+				} else {
+					branches = ['master', 'main']
+				}
+				String latestVersion = null
+				for (String branch : branches) {
+					try {
+						String modUrl;
+						if (modName.contains('/')) {
+							modUrl = modName
+						} else {
+							modUrl = "edificeio/" + modName
+						}
+						URL pomUrl = new URL("https://raw.githubusercontent.com/" + modUrl + "/refs/heads/" + branch + "/pom.xml")
+						InputStream pomStream = pomUrl.openStream()
+						String pomContent = pomStream.getText("UTF-8")
+						// Parse the xml and extract the version of the artifact
+						def pomXml = new XmlSlurper().parseText(pomContent)
+						latestVersion = pomXml.version.text()
+						break
+					} catch (Exception e) {
+						// Continue to next branch
+					}
+				}
+				if (latestVersion == null) {
+					throw new RuntimeException("Could not find the latest version of module: " + modName)
+				}
+				logger.lifecycle("Using latest version for module " + modName + " : " + latestVersion)
+				bindings[key] = latestVersion
+			}
+		}
 	}
 
 	/**
