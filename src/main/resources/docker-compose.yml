@@ -54,6 +54,8 @@ services:
       - ./assets:/srv/springboard/assets
       - ./mods:/srv/springboard/mods
       - ./ent-core.json:/srv/springboard/conf/vertx.conf
+      - ./conf/vertx/logback.xml:/srv/springboard/conf/logback.xml
+      - ./conf/vertx/logging.properties:/srv/springboard/conf/logging.properties
       - ./conf/cluster-config/zookeeper.json:/srv/springboard/conf/zookeeper.json
       - ./aaf-duplicates-test:/home/wse/aaf
       - ~/.m2:/home/vertx/.m2

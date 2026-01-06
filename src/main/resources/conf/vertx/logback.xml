@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Console appender for general logging -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} %level %msg%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Console appender with JSON formatter for access logs -->
+    <appender name="ACCESS_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="fr.wseduc.webutils.request.LogbackJsonEncoder"/>
+    </appender>
+
+    <!-- Root logger -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- Access loggers with JSON formatting -->
+    <logger name="fr.wseduc.webutils.request.AccessLogger" level="TRACE" additivity="false">
+        <appender-ref ref="ACCESS_CONSOLE"/>
+    </logger>
+    
+    <logger name="org.entcore.common.http.EntAccessLogger" level="TRACE" additivity="false">
+        <appender-ref ref="ACCESS_CONSOLE"/>
+    </logger>
+
+    <!-- Other specific loggers -->
+    <logger name="org.vertx" level="INFO"/>
+    <logger name="com.hazelcast" level="ERROR"/>
+    <logger name="io.netty.util.internal.PlatformDependent" level="ERROR"/>
+</configuration>

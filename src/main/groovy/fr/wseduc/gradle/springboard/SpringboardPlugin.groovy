@@ -11,7 +11,12 @@ class SpringboardPlugin implements Plugin<Project> {
 	void apply(Project project) {
 		project.task("generateConf") << {
 			def rootDir = project.getRootDir().getAbsolutePath()
-			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/ent-core.json.template", "${rootDir}/ent-core.json")
+			FileUtils.createFile(
+				"${rootDir}/conf.properties",
+				"${rootDir}/gradle.properties",
+				"${rootDir}/ent-core.json.template",
+				"${rootDir}/ent-core.json",
+				project.logger)
 		}
 
 		project.task("extractDeployments") << {
