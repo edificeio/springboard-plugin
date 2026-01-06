@@ -8,12 +8,12 @@ fi
 
 
 clean () {
-  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle clean
+  docker compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle clean
 }
 
 install() {
-#  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle install publishToMavenLocal
-   docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle install
+#  docker compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle install publishToMavenLocal
+   docker compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle install
 }
 
 publish() {
@@ -24,7 +24,7 @@ publish() {
     echo "sonatypeUsername=$NEXUS_SONATYPE_USERNAME" >> "?/.gradle/gradle.properties"
     echo "sonatypePassword=$NEXUS_SONATYPE_PASSWORD" >> "?/.gradle/gradle.properties"
   fi
-  docker-compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle publish
+  docker compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle publish
 }
 
 for param in "$@"
