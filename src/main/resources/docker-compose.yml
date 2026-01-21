@@ -16,10 +16,13 @@ services:
       - "--providers.zookeeper.rootkey=ent-core/traefik"
       - "--entrypoints.web.address=:8090"
       - "--log.level=DEBUG"
-    ports: #REMOVE_BY_CI
+<% if (isM1 == "true") { %>    ports:
+      - "8090:8090"
+      - "8080:8080"
+<% } else { %>    ports: #REMOVE_BY_CI
       - "8090:8090" #REMOVE_BY_CI
       - "8080:8080" #REMOVE_BY_CI
-    depends_on:
+<% } %>    depends_on:
       - zookeeper
 
   # zkweb:
@@ -37,29 +40,35 @@ services:
 
   localstack:
     image: localstack/localstack:latest
-    ports: #REMOVE_BY_CI
+<% if (isM1 == "true") { %>    ports:
+      - "4566:4566"
+<% } else { %>    ports: #REMOVE_BY_CI
       - "4566:4566" #REMOVE_BY_CI
-    environment:
+<% } %>    environment:
       - SERVICES=s3
       - AWS_DEFAULT_REGION=us-east-1
     volumes:
       - ./conf/cluster-config/init-s3:/etc/localstack/init
 
   vertx:
-    image: opendigitaleducation/vertx-service-launcher:3.0-SNAPSHOT
-    user: "$DEFAULT_DOCKER_USER"
-    ports: #REMOVE_BY_CI
+    image: opendigitaleducation/vertx-service-launcher:<%= vertxServiceLauncherVersion %>
+    user: "\$DEFAULT_DOCKER_USER"
+<% if (isM1 == "true") { %>    ports:
+      - "5000:5000"
+<% } else { %>    ports: #REMOVE_BY_CI
       - "5000:5000" #REMOVE_BY_CI
-    volumes:
+<% } %>    volumes:
       - ./assets:/srv/springboard/assets
       - ./mods:/srv/springboard/mods
       - ./ent-core.json:/srv/springboard/conf/vertx.conf
       - ./conf/cluster-config/zookeeper.json:/srv/springboard/conf/zookeeper.json
       - ./aaf-duplicates-test:/home/wse/aaf
       - ~/.m2:/home/vertx/.m2
-    #    - ./avatars:/srv/storage/avatars
+<% if (isM1 == "true") { %>      - ./avatars:/srv/storage/avatars
+    depends_on:
+<% } else { %>    #    - ./avatars:/srv/storage/avatars
     links:
-      - neo4j
+<% } %>      - neo4j
       - postgres
       - mongo
       - pdf
@@ -75,20 +84,32 @@ services:
       - ENABLE_REMOTE_DEBUG=true
   pdf:
     image: opendigitaleducation/node-pdf-generator:1.0.0
-    ports: #REMOVE_BY_CI
+<% if (isM1 == "true") { %>    ports:
+      - "3000:3000"
+<% } else { %>    ports: #REMOVE_BY_CI
       - "3000:3000" #REMOVE_BY_CI
-
+<% } %>
   content-transformer:
-    user: "$DEFAULT_DOCKER_USER"
-    image: ghcr.io/edificeio/edifice-tiptap-transformer:1.0.2
-    ports: #REMOVE_BY_CI
+<% if (isM1 == "true") { %>    user: "1000:1000"
+<% } else { %>    user: "\$DEFAULT_DOCKER_USER"
+<% } %>    image: ghcr.io/edificeio/edifice-tiptap-transformer:1.0.2
+<% if (isM1 == "true") { %>    ports:
+      - "3100:3000"
+<% } else { %>    ports: #REMOVE_BY_CI
       - "3100:3000" #REMOVE_BY_CI
-
+<% } %>
   neo4j:
-    image: neo4j:3.1
+<% if (isM1 == "true") { %>    image: neo4j/neo4j-arm64-experimental:3.5-arm64
     volumes:
       - ./neo4j-conf:/conf
-
+      - ./data/neo4j:/data
+  #    ports:
+  #      - "7474:7474"
+  #      - "7687:7687"
+<% } else { %>    image: neo4j:3.1
+    volumes:
+      - ./neo4j-conf:/conf
+<% } %>
   redis:
     image: redis:7.4.0-alpine
 #    ports:
@@ -96,11 +117,14 @@ services:
   elasticsearch:
     image: opensearchproject/opensearch:2.8.0
     environment:
-      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+<% if (isM1 == "true") { %>      ES_JAVA_OPTS: "-Xms4g -Xmx4g"
+<% } else { %>      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       MEM_LIMIT: 1073741824
-      discovery.type: single-node
+<% } %>      discovery.type: single-node
       DISABLE_SECURITY_PLUGIN: "true"
-    ulimits:
+<% if (isM1 == "true") { %>    volumes:
+      - ./data/es:/usr/share/opensearch/data
+<% } %>    ulimits:
       memlock:
         soft: -1
         hard: -1
@@ -109,24 +133,37 @@ services:
         hard: 65536
     cap_add:
       - IPC_LOCK
-    ports: #REMOVE_BY_CI
+<% if (isM1 == "true") { %>    ports:
+      - "9200:9200"
+      - "9300:9300"
+<% } else { %>    ports: #REMOVE_BY_CI
       - "9200:9200"  #REMOVE_BY_CI
       - "9300:9300" #REMOVE_BY_CI
-
+<% } %>
   postgres:
-    image: postgres:14.13
-    user: "$DEFAULT_DOCKER_USER" #REMOVE_BY_CI
-    environment:
+<% if (isM1 == "true") { %>    image: arm64v8/postgres:14.13
+<% } else { %>    image: postgres:14.13
+    user: "\$DEFAULT_DOCKER_USER" #REMOVE_BY_CI
+<% } %>    environment:
       POSTGRES_PASSWORD: We_1234
       POSTGRES_USER: web-education
       POSTGRES_DB: ong
       POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_INITDB_ARGS: --auth-host=md5
     volumes:
-      - ./data/pgdata:/var/lib/postgresql/data #REMOVE_BY_CI
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+<% if (isM1 == "true") { %>      - ./data/pgdata:/var/lib/postgresql/data
+<% } else { %>      - ./data/pgdata:/var/lib/postgresql/data #REMOVE_BY_CI
+<% } %>      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+<% if (isM1 == "true") { %>    ports:
+      - "5432:5432"
+<% } %>
   mongo:
     image: mongo:7.0.12
+<% if (isM1 == "true") { %>    volumes:
+      - ./data/mongodb:/data/db
+  #    ports:
+  #      - "27017:27017"
+<% } %>
   nats:
     image: 'nats:2.10.25-alpine'
     ports: #REMOVE_BY_CI
@@ -146,8 +183,8 @@ services:
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1
-    user: "$DEFAULT_DOCKER_USER"
-    working_dir: /home/gradle/project
+<% if (isM1 == "false") { %>    user: "\$DEFAULT_DOCKER_USER"
+<% } %>    working_dir: /home/gradle/project
     volumes:
       - ./:/home/gradle/project
       - ~/.m2:/home/gradle/.m2
@@ -155,9 +192,10 @@ services:
 
   node:
     image: opendigitaleducation/node:18-alpine-pnpm
-    user: "$DEFAULT_DOCKER_USER"
-    working_dir: /home/node/app
+<% if (isM1 == "false") { %>    user: "\$DEFAULT_DOCKER_USER"
+<% } %>    working_dir: /home/node/app
     volumes:
       - ./:/home/node/app
       - ~/.npm:/.npm
-      - .config:/.config
+<% if (isM1 == "false") { %>      - .config:/.config
+<% } %>

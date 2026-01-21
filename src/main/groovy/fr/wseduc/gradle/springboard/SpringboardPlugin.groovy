@@ -12,6 +12,9 @@ class SpringboardPlugin implements Plugin<Project> {
 		project.task("generateConf") << {
 			def rootDir = project.getRootDir().getAbsolutePath()
 			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/ent-core.json.template", "${rootDir}/ent-core.json")
+			
+			// Generate docker-compose.yml with variabilized version and M1 detection
+			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/docker-compose.yml.template", "${rootDir}/docker-compose.yml", [isM1: isM1() ? "true" : "false"])
 		}
 
 		project.task("extractDeployments") << {
@@ -193,10 +196,9 @@ class SpringboardPlugin implements Plugin<Project> {
 		}
 		FileUtils.copy(initSqlStream, initSql)
 
-		final String dockerComposeFileName = isM1() ? "docker-compose.mac.yml" : "docker-compose.yml"
-		File dockerCompose = project.file("docker-compose.yml")
+		File dockerCompose = project.file("docker-compose.yml.template")
 		InputStream dockerComposeStream = this.getClass().getClassLoader()
-				.getResourceAsStream(dockerComposeFileName)
+				.getResourceAsStream("docker-compose.yml")
 		FileUtils.copy(dockerComposeStream, dockerCompose)
 
 		File packageJson = project.file("package.json")
