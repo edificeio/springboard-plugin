@@ -8,7 +8,8 @@ class FileUtils {
 	static def createFile(String propertiesFile, 
 						  String gradleFile,
 						  String templateFileName,
-						  String outputFileName) {
+						  String outputFileName,
+						  Map additionalBindings = [:]) {
 		def props = new Properties()
 		def file = new File(propertiesFile)
 		def rootDirectory = file.getParentFile()
@@ -30,6 +31,12 @@ class FileUtils {
 		defaultProps.propertyNames().each { prop ->
 			if (!bindings.containsKey(prop)) {
 				bindings[prop] = defaultProps.getProperty(prop)
+			}
+		}
+		// Add any additional bindings if the binding does not already exist
+		additionalBindings.each { key, value ->
+			if (!bindings.containsKey(key)) {
+				bindings[key] = value
 			}
 		}
 		def engine = new SimpleTemplateEngine()

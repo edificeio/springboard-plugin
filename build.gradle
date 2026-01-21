@@ -17,6 +17,7 @@ apply from: "gradle/maven.gradle"
 dependencies {
   compile gradleApi()
   compile localGroovy()
+  compile 'org.yaml:snakeyaml:1.33'
 }
 
 

@@ -2,8 +2,12 @@ package fr.wseduc.gradle.springboard
 
 import groovy.io.FileType
 import java.io.*;
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.yaml.snakeyaml.Yaml
+import org.yaml.snakeyaml.DumperOptions
 
 class SpringboardPlugin implements Plugin<Project> {
 
@@ -12,6 +16,20 @@ class SpringboardPlugin implements Plugin<Project> {
 		project.task("generateConf") << {
 			def rootDir = project.getRootDir().getAbsolutePath()
 			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/ent-core.json.template", "${rootDir}/ent-core.json")
+			
+			// Generate docker-compose.yml with variabilized version and M1 detection
+			Map additionalBindings = [isM1: isM1() ? "true" : "false", vertxCliVersion: "latest"]
+			// Get vertxServiceLauncherVersion from gradle.properties or default to the version that can be found in GitHub edificeio/vertx-service-launcher pom.xml on branch dev
+			def vertxServiceLauncherVersion = getLauncherVersion(project)
+			additionalBindings.vertxServiceLauncherVersion = vertxServiceLauncherVersion
+			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/docker-compose.yml.template", "${rootDir}/docker-compose.yml", additionalBindings)
+			
+			extractMods(project)
+			configureIndependantServices(project)
+		}
+
+		project.task("extractMods") << {
+			extractMods(project)
 		}
 
 		project.task("extractDeployments") << {
@@ -41,6 +59,157 @@ class SpringboardPlugin implements Plugin<Project> {
 			gatling(project)
 		}
 
+		// Setup JS tests tasks
+		setupJsTestsTasks(project)
+
+	}
+
+	private String getLauncherVersion(Project project) {
+		// First try to get vertxServiceLauncherVersion from gradle.properties
+		if (project.hasProperty("vertxServiceLauncherVersion")) {
+			return project.property("vertxServiceLauncherVersion")
+		}
+		// If not found, try to fetch from GitHub
+		return fetchVersionFromGitHub(project, "dev", "edificeio/vertx-service-launcher")
+	}
+
+	/**
+	 * Sets up the JS tests tasks: downloadTestsJS, unzip*Jar tasks, and prepareJsTests
+	 * This allows springboards to use these tasks without having to redefine them
+	 * Automatically detects all dependencies with classifier "testJs" or "tests" from all configurations
+	 */
+	private void setupJsTestsTasks(Project project) {
+		// Supported classifiers for test JS artifacts
+		def testClassifiers = ['testJs', 'tests']
+
+		// Create a single configuration to hold all testJs dependencies (non-transitive)
+		if (!project.configurations.findByName('testJsJars')) {
+			project.configurations.create('testJsJars') {
+				transitive = false
+			}
+		}
+
+		// Create entcoreTestJsJar configuration for backward compatibility (non-transitive)
+		if (!project.configurations.findByName('entcoreTestJsJar')) {
+			project.configurations.create('entcoreTestJsJar') {
+				transitive = false
+			}
+		}
+
+		// Use afterEvaluate to ensure all dependencies are declared before we scan them
+		project.afterEvaluate {
+			// Collect all testJs/tests dependencies from all configurations
+			def testJsDeps = []
+			
+			project.configurations.each { config ->
+				config.dependencies.each { dep ->
+					if (dep instanceof org.gradle.api.artifacts.ExternalModuleDependency) {
+						dep.artifacts.each { artifact ->
+							if (artifact.classifier in testClassifiers) {
+								testJsDeps << [
+									group: dep.group,
+									name: dep.name,
+									version: dep.version,
+									classifier: artifact.classifier, // Keep track of the actual classifier
+									module: dep.name // Use artifact name as module identifier
+								]
+							}
+						}
+					}
+				}
+			}
+
+			// Also check for configurations named *TestJsJar (legacy support)
+			project.configurations.findAll { it.name.endsWith('TestJsJar') }.each { config ->
+				config.dependencies.each { dep ->
+					if (!testJsDeps.find { it.group == dep.group && it.name == dep.name }) {
+						// For legacy configs, try to detect the classifier from artifact or default to 'testJs'
+						def classifier = 'testJs'
+						if (dep instanceof org.gradle.api.artifacts.ExternalModuleDependency && dep.artifacts) {
+							def art = dep.artifacts.find { it.classifier in testClassifiers }
+							if (art) classifier = art.classifier
+						}
+						testJsDeps << [
+							group: dep.group,
+							name: dep.name,
+							version: dep.version,
+							classifier: classifier,
+							module: dep.name
+						]
+					}
+				}
+			}
+
+			// Remove duplicates based on group:name
+			testJsDeps = testJsDeps.unique { "${it.group}:${it.name}" }
+
+			if (testJsDeps.isEmpty()) {
+				project.logger.lifecycle("[prepareJsTests] No testJs dependencies found - nothing to do")
+				return
+			}
+
+			project.logger.lifecycle("[prepareJsTests] Found ${testJsDeps.size()} testJs module(s) to prepare:")
+			testJsDeps.each { dep ->
+				project.logger.lifecycle("[prepareJsTests]   - ${dep.group}:${dep.name}:${dep.version}:${dep.classifier}")
+			}
+
+			// Add all testJs dependencies to our configuration with their actual classifier
+			testJsDeps.each { dep ->
+				project.dependencies.add('testJsJars', "${dep.group}:${dep.name}:${dep.version}:${dep.classifier}")
+			}
+
+			// Configure downloadTestsJS task
+			def downloadTask = project.tasks.findByName('downloadTestsJS')
+			if (downloadTask) {
+				downloadTask.from project.configurations.testJsJars
+				downloadTask.doLast {
+					project.logger.lifecycle("[downloadTestsJS] Downloaded ${testJsDeps.size()} testJs JAR(s) to ${project.buildDir}/libs/testJs")
+				}
+			}
+
+			// Create unzip tasks for each module
+			testJsDeps.each { dep ->
+				def taskName = "unzip${dep.module.capitalize()}TestJsJar"
+				
+				if (!project.tasks.findByName(taskName)) {
+					project.task(taskName, type: org.gradle.api.tasks.Copy, dependsOn: 'downloadTestsJS') {
+						from {
+							project.configurations.testJsJars.filter { file ->
+								file.name.contains(dep.name)
+							}.collect { project.zipTree(it) }
+						}
+						into "${project.buildDir}/libs/testJs/${dep.module}"
+						doLast {
+							project.logger.lifecycle("[${taskName}] Extracted ${dep.group}:${dep.name}:${dep.version} to ${project.buildDir}/libs/testJs/${dep.module}")
+						}
+					}
+				}
+			}
+
+			// Update prepareJsTests dependencies
+			def prepareTask = project.tasks.findByName('prepareJsTests')
+			if (prepareTask) {
+				testJsDeps.each { dep ->
+					def taskName = "unzip${dep.module.capitalize()}TestJsJar"
+					if (project.tasks.findByName(taskName)) {
+						prepareTask.dependsOn taskName
+					}
+				}
+				prepareTask.doLast {
+					project.logger.lifecycle("[prepareJsTests] Successfully prepared ${testJsDeps.size()} testJs module(s)")
+				}
+			}
+		}
+
+		// Create downloadTestsJS task (will be configured in afterEvaluate)
+		project.task('downloadTestsJS', type: org.gradle.api.tasks.Copy) {
+			into "${project.buildDir}/libs/testJs"
+		}
+
+		// Create aggregate prepareJsTests task (dependencies will be added in afterEvaluate)
+		project.task('prepareJsTests') {
+			description = 'Prepares all JS test dependencies'
+		}
 	}
 
 	private void gatling(Project project) {
@@ -76,6 +245,388 @@ class SpringboardPlugin implements Plugin<Project> {
 		project.copy {
 			from "deployments/assets/themes"
 			into "assets/themes"
+		}
+	}
+
+	private void configureIndependantServices(Project project) {
+		project.logger.lifecycle("[configureIndependantServices] Starting independant services configuration...")
+		
+		def services = loadIndependantServicesConf(project)
+		project.logger.lifecycle("[configureIndependantServices] Loaded ${services.size()} service(s) from configuration")
+		
+		// Filter services that are enabled and not local
+		def servicesToAdd = services.findAll { it.enabled && !it.local }
+		project.logger.lifecycle("[configureIndependantServices] ${servicesToAdd.size()} service(s) to add (enabled and not local)")
+		
+		if (servicesToAdd.isEmpty()) {
+			project.logger.lifecycle("No independant services to add to docker-compose.yml")
+			return
+		}
+		
+		// Read the existing docker-compose.yml file
+		def dockerComposeFile = project.file("docker-compose.yml")
+		if (!dockerComposeFile.exists()) {
+			project.logger.warn("docker-compose.yml not found, skipping independant services configuration")
+			return
+		}
+		
+		project.logger.lifecycle("[configureIndependantServices] docker-compose.yml found, updating...")
+		
+		try {
+			def yaml = new Yaml()
+			def dockerCompose = yaml.load(dockerComposeFile.text)
+			
+			if (dockerCompose == null || !(dockerCompose instanceof Map)) {
+				project.logger.warn("Invalid docker-compose.yml format")
+				return
+			}
+			
+			// Ensure services section exists
+			if (!dockerCompose.services) {
+				dockerCompose.services = [:]
+			}
+			
+			// Get user from environment or empty string
+			def user = "\$DEFAULT_DOCKER_USER"
+			
+			// Add each service
+			servicesToAdd.each { service ->
+				project.logger.lifecycle("Configuring independant service ${service.name} for docker-compose.yml")
+				def serviceConfig = [:]
+				
+				// Add user if present - convert to String to avoid GString serialization issues
+				if (user) {
+					serviceConfig.user = user.toString()
+				}
+				
+				// Add image - convert to String to avoid GString serialization issues
+				serviceConfig.image = "${service.url}:${service.version}".toString()
+				
+				// Add port mapping if port != outPort - convert to String to avoid GString serialization issues
+				if (service.port != service.outPort) {
+					serviceConfig.ports = ["${service.outPort}:${service.port}".toString()]
+				}
+				
+				// Add environment for nest type
+				if (service.type == "nest") {
+					serviceConfig.environment = [
+						"CONF_FILE_PATH=/app/dist/config-docker.yaml",
+						"PROD=true",
+						"NODE_ENV=production"
+					]
+				}
+				
+				dockerCompose.services[service.name.toString()] = serviceConfig
+				project.logger.lifecycle("Added service ${service.name} to docker-compose.yml")
+			}
+			
+			// Write back to file with proper YAML formatting
+			def options = new DumperOptions()
+			options.defaultFlowStyle = DumperOptions.FlowStyle.BLOCK
+			options.prettyFlow = true
+			options.indent = 2
+			
+			def yamlWriter = new Yaml(options)
+			dockerComposeFile.text = yamlWriter.dump(dockerCompose)
+			
+			project.logger.lifecycle("Successfully updated docker-compose.yml with ${servicesToAdd.size()} independant service(s)")
+		} catch (Exception e) {
+			throw new RuntimeException("Error updating docker-compose.yml: ${e.message}", e)
+		}
+	}
+
+	/**
+	 * Loads independant services configuration from a services.yaml or services.yml file.
+	 * Equivalent of LoadIndependantServicesConf in Go.
+	 * @param project The Gradle project
+	 * @return List of SpringboardService with all fields populated
+	 */
+	private List<SpringboardService> loadIndependantServicesConf(Project project) {
+		// Try services.yaml first, then fall back to services.yml
+		def confFile = project.file("services.yaml")
+		if (!confFile.exists()) {
+			confFile = project.file("services.yml")
+			if (!confFile.exists()) {
+				project.logger.lifecycle("No services.yaml or services.yml file found, using default configuration")
+				return []
+			}
+		}
+
+		try {
+			def yaml = new Yaml()
+			def yamlConf = yaml.load(confFile.text)
+			if (yamlConf == null || !(yamlConf instanceof Map) || yamlConf.services == null) {
+				project.logger.lifecycle("No services defined in ${confFile.name}")
+				return []
+			}
+			
+			// Parse services from YAML into typed objects
+			def services = yamlConf.services.collect { serviceMap ->
+				new IndependantService(
+					name: serviceMap.name,
+					port: serviceMap.port ?: 0,
+					outPort: serviceMap.outPort ?: 0,
+					version: serviceMap.version ?: "",
+					enabled: serviceMap.enabled ?: false,
+					testable: serviceMap.testable ?: false,
+					type: serviceMap.type ?: "",
+					local: serviceMap.local ?: false,
+					url: serviceMap.url ?: ""
+				)
+			}
+			
+			def conf = new IndependantServiceConf(services: services)
+			return completeServicesConf(conf)
+		} catch (Exception e) {
+			throw new RuntimeException("Error reading YAML file ${confFile.name}: ${e.message}", e)
+		}
+	}
+
+	/**
+	 * Completes services configuration by filling in defaults and computing derived values.
+	 * Equivalent of CompleteServicesConf in Go.
+	 * @param conf The independant service configuration
+	 * @return List of SpringboardService with all fields populated
+	 */
+	private List<SpringboardService> completeServicesConf(IndependantServiceConf conf) {
+		// Check if all required fields are present
+		if (conf.services == null) {
+			throw new RuntimeException("no services defined")
+		}
+		
+		def isMac = isMac()
+		def defaultDockerHost = "maven.opendigitaleducation.com/ent"
+		
+		def services = conf.services.collect { service ->
+			// Validate required fields
+			if (!service.name) {
+				throw new RuntimeException("service name is missing")
+			}
+			if (service.port == 0) {
+				throw new RuntimeException("port missing for service ${service.name}")
+			}
+			
+			// Fill in defaults
+			def version = service.version ?: "latest"
+			def url = service.url ?: "${defaultDockerHost}/${service.name}"
+			def outPort = service.outPort ?: service.port
+			
+			// Compute nginx URL based on local flag and OS
+			def nginxUrl
+			if (service.local) {
+				if (isMac) {
+					nginxUrl = "http://host.docker.internal:${outPort}"
+				} else {
+					nginxUrl = "http://172.17.0.1:${outPort}"
+				}
+			} else {
+				nginxUrl = "http://${service.name}:${service.port}"
+			}
+			
+			new SpringboardService(
+				name: service.name,
+				port: service.port,
+				outPort: outPort,
+				version: version,
+				enabled: service.enabled,
+				testable: service.testable,
+				local: service.local,
+				url: url,
+				nginxUrl: nginxUrl,
+				type: service.type
+			)
+		}
+		
+		return services
+	}
+
+	private void extractMods(Project project) {
+		if (!project.file("mods")?.exists()) {
+			project.file("mods").mkdir()
+		}
+		
+		// Define default mods that should always be included
+		// Format: [groupId~artifactId, versionProperty, githubRepoPath]
+		def defaultModsSpecs = [
+			["io.vertx~mod-mongo-persistor", "modMongoPersistorVersion", "edificeio/mod-mongo-persistor"],
+			["fr.wseduc~mod-zip", "modZipVersion", "edificeio/mod-zip"],
+			["fr.wseduc~mod-postgresql", "modPostgresVersion", "edificeio/mod-postgresql"],
+			["com.opendigitaleducation~mod-json-schema-validator", "modJsonschemavalidatorVersion", "edificeio/mod-json-schema-validator"],
+			["fr.cgi~mod-sftp", "modSftpVersion", "OPEN-ENT-NG/mod-sftp", "dev"],
+			["fr.wseduc~mod-webdav", "modWebdavVersion", "OPEN-ENT-NG/mod-webdav", "master"],
+			["fr.wseduc~mod-sms-proxy", "modSmsproxyVersion", "edificeio/mod-sms-sender"],
+			["fr.wseduc~mod-pdf-generator", "modPdfgenerator", "edificeio/mod-pdf-generator"],
+			["org.entcore~infra", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~app-registry", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~session", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~auth", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~directory", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~workspace", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~communication", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~portal", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~conversation", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~feeder", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~timeline", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~broker", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~cas", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~archive", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~admin", "entCoreVersion", "edificeio/entcore"]
+		]
+
+		def defaultBranch = project.hasProperty("modsDefaultBranch") ? project.property("modsDefaultBranch") : "dev"
+		
+		// Parse default mods and resolve version properties
+		def defaultMods = defaultModsSpecs.collect { spec ->
+			def groupArtifact = spec[0].split('~')
+			def versionProperty = spec[1]
+			
+			def version = project.hasProperty(versionProperty) ? project.property(versionProperty) : null
+			if (version == null && spec.size() >= 3) {
+				def githubRepoPath = spec[2]
+				def branch = defaultBranch
+				if (spec.size() >= 4) {
+					branch = spec[3]
+				}
+				version = fetchVersionFromGitHub(project, branch, githubRepoPath)
+			}
+			if (version == null) {
+				project.logger.warn("Version property ${versionProperty} not found and could not fetch from GitHub for ${groupArtifact[0]}:${groupArtifact[1]}")
+				return null
+			}
+			[group: groupArtifact[0], name: groupArtifact[1], version: version]
+		}.findAll { it != null }
+		
+		// Get all deployment dependencies
+		def deploymentDeps = project.configurations.deployment.dependencies.collect { 
+			[group: it.group, name: it.name, version: it.version]
+		}
+		
+		// Combine default mods and deployment dependencies (avoid duplicates)
+		def allDeps = (defaultMods + deploymentDeps).unique { "${it.group}:${it.name}" }
+		
+		// Use thread pool for parallel processing
+		def threadPool = Executors.newFixedThreadPool(Math.min(Runtime.runtime.availableProcessors(), allDeps.size()))
+		
+		// Track first failure for fail-fast behavior
+		def firstFailure = null
+		
+		try {
+			// Download and process all fat jars in parallel
+			allDeps.each { dep ->
+				threadPool.submit({
+					// Check if another task has already failed
+					if (firstFailure != null) {
+						return
+					}
+					
+					try {
+						// Create the new filename: groupId~artifactId~version-fat.jar
+						def newFileName = "${dep.group}~${dep.name}~${dep.version}-fat.jar"
+						def targetFile = project.file("mods/${newFileName}")
+						
+						// Skip if target file already exists
+						if (targetFile.exists()) {
+							project.logger.info("Skipping ${dep.group}:${dep.name}:${dep.version} - already exists in mods/")
+							return
+						}
+						
+						// Create a detached configuration for this specific fat jar
+						def fatDep = project.dependencies.create("${dep.group}:${dep.name}:${dep.version}:fat")
+						def fatConfig = project.configurations.detachedConfiguration(fatDep)
+						fatConfig.transitive = false
+						
+						// Get the fat jar file
+						def fatJarFile = fatConfig.singleFile
+						
+						// Copy and rename the fat jar
+						synchronized(project) {
+							project.copy {
+								from fatJarFile
+								into "mods/"
+								rename { newFileName }
+							}
+						}
+						
+						// Unzip the fat jar
+						synchronized(project) {
+							project.copy {
+								from project.zipTree(targetFile)
+								into "mods/${dep.group}~${dep.name}~${dep.version}"
+							}
+						}
+						
+						project.logger.info("Successfully processed fat jar for ${dep.group}:${dep.name}:${dep.version}")
+					} catch (Exception e) {
+						def errorMsg = "Could not download fat jar for ${dep.group}:${dep.name}:${dep.version}: ${e.message}"
+						project.logger.error(errorMsg)
+						
+						// Store first failure and immediately shutdown thread pool
+						synchronized(this) {
+							if (firstFailure == null) {
+								firstFailure = new RuntimeException(errorMsg, e)
+								threadPool.shutdownNow()
+							}
+						}
+					}
+				})
+			}
+		} finally {
+			threadPool.shutdown()
+			threadPool.awaitTermination(30, TimeUnit.MINUTES)
+		}
+		
+		// Throw the first failure if any occurred
+		if (firstFailure != null) {
+			throw firstFailure
+		}
+	}
+
+	/**
+	 * Fetches the version from GitHub pom.xml for a given module
+	 * @param project The Gradle project
+	 * @param githubRepoPath The GitHub repository path (e.g., "edificeio/entcore" or full URL)
+	 */
+	private String fetchVersionFromGitHub(Project project, String defaultBranch, String githubRepoPath) {
+		try {
+			// Skip if placeholder is not replaced
+			if (githubRepoPath.isEmpty()) {
+				project.logger.debug("GitHub repository path not configured, skipping version fetch")
+				return null
+			}
+			
+			// Construct the raw GitHub URL
+			def githubUrl
+			if (githubRepoPath.startsWith("http")) {
+				// Full URL provided
+				githubUrl = githubRepoPath
+			} else {
+				// Repository path provided (e.g., "edificeio/entcore")
+				githubUrl = "https://raw.githubusercontent.com/${githubRepoPath}/${defaultBranch}/pom.xml"
+			}
+			
+			project.logger.info("Fetching version from GitHub: ${githubUrl}")
+			
+			def url = new URL(githubUrl)
+			def connection = url.openConnection()
+			connection.setConnectTimeout(10000)
+			connection.setReadTimeout(10000)
+			
+			def pomContent = connection.inputStream.text
+			
+			// Parse pom.xml to extract version
+			def pomXml = new XmlSlurper().parseText(pomContent)
+			def version = pomXml.version?.text()
+			
+			if (version) {
+				project.logger.info("Successfully fetched version ${version} from GitHub for ${githubRepoPath}")
+				return version
+			} else {
+				project.logger.warn("No version found in pom.xml for ${githubRepoPath}")
+				return null
+			}
+		} catch (Exception e) {
+			project.logger.warn("Failed to fetch version from GitHub for ${githubRepoPath}: ${e.message}")
+			return null
 		}
 	}
 
@@ -193,10 +744,9 @@ class SpringboardPlugin implements Plugin<Project> {
 		}
 		FileUtils.copy(initSqlStream, initSql)
 
-		final String dockerComposeFileName = isM1() ? "docker-compose.mac.yml" : "docker-compose.yml"
-		File dockerCompose = project.file("docker-compose.yml")
+		File dockerCompose = project.file("docker-compose.yml.template")
 		InputStream dockerComposeStream = this.getClass().getClassLoader()
-				.getResourceAsStream(dockerComposeFileName)
+				.getResourceAsStream("docker-compose.yml")
 		FileUtils.copy(dockerComposeStream, dockerCompose)
 
 		File packageJson = project.file("package.json")
@@ -229,9 +779,6 @@ class SpringboardPlugin implements Plugin<Project> {
 				File f
 				switch (file.name) {
 					case "conf.json.template":
-						f = entcoreJsonTemplate
-						f.append(",\n")
-						f.append(file.text)
 						file.eachLine { line ->
 							def matcher = line =~ /\s*\t*\s*"port"\s*:\s*([0-9]+)[,]?\s*\t*\s*/
 							if (matcher.find()) {
@@ -252,26 +799,6 @@ class SpringboardPlugin implements Plugin<Project> {
 				}
 			}
 		}
-
-		InputStream httpProxy = this.getClass().getClassLoader().getResourceAsStream("http-proxy.json.template")
-		entcoreJsonTemplate.append(httpProxy.text)
-		appliPort.each { k, v ->
-			entcoreJsonTemplate.append(
-					",\n" +
-					"          {\n" +
-					"            \"location\": \"/" + k + "\",\n" +
-					"            \"proxy_pass\": \"http://localhost:" + v + "\"\n" +
-					"          }"
-			)
-		}
-		entcoreJsonTemplate.append(
-				"        ]\n" +
-				"      }\n" +
-				"    }\n" +
-				"<% } %>" +
-				"  ]\n" +
-				"}"
-		)
 		scn.append("\n}")
 
 		if (!confMap.containsKey("entcoreVersion")) {
@@ -282,6 +809,11 @@ class SpringboardPlugin implements Plugin<Project> {
 	private static boolean isM1() {
 		return "true".equalsIgnoreCase(System.getenv("IS_M1")) ||
 				"aarch64".equalsIgnoreCase(System.getProperty("os.arch"))
+	}
+
+	private static boolean isMac() {
+		def osName = System.getProperty("os.name").toLowerCase()
+		return osName.contains("mac") || osName.contains("darwin") || isM1()
 	}
 
 	/**
@@ -355,4 +887,45 @@ class SpringboardPlugin implements Plugin<Project> {
 		}
 	}
 
+}
+
+/**
+ * Represents a configuration for independant services.
+ * Equivalent of IndependantServiceConf struct in Go.
+ */
+class IndependantServiceConf {
+	List<IndependantService> services = []
+}
+
+/**
+ * Represents an independant service configuration.
+ * Equivalent of IndependantService struct in Go.
+ */
+class IndependantService {
+	String name
+	int port
+	int outPort
+	String version
+	boolean enabled
+	boolean testable
+	String type
+	boolean local
+	String url
+}
+
+/**
+ * Represents a fully configured springboard service.
+ * Equivalent of SpringboardService struct in Go.
+ */
+class SpringboardService {
+	String name
+	int port
+	int outPort
+	String version
+	boolean enabled
+	boolean testable
+	boolean local
+	String url
+	String nginxUrl
+	String type
 }
