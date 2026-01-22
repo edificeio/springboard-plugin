@@ -2,6 +2,8 @@ package fr.wseduc.gradle.springboard
 
 import groovy.io.FileType
 import java.io.*;
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -15,6 +17,12 @@ class SpringboardPlugin implements Plugin<Project> {
 			
 			// Generate docker-compose.yml with variabilized version and M1 detection
 			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/docker-compose.yml.template", "${rootDir}/docker-compose.yml", [isM1: isM1() ? "true" : "false"])
+			
+			extractMods(project)
+		}
+
+		project.task("extractMods") << {
+			extractMods(project)
 		}
 
 		project.task("extractDeployments") << {
@@ -79,6 +87,190 @@ class SpringboardPlugin implements Plugin<Project> {
 		project.copy {
 			from "deployments/assets/themes"
 			into "assets/themes"
+		}
+	}
+
+	private void extractMods(Project project) {
+		if (!project.file("mods")?.exists()) {
+			project.file("mods").mkdir()
+		}
+		
+		// Define default mods that should always be included
+		// Format: [groupId~artifactId, versionProperty, githubRepoPath]
+		def defaultModsSpecs = [
+			["io.vertx~mod-mongo-persistor", "modMongoPersistorVersion", "edificeio/mod-mongo-persistor"],
+			["fr.wseduc~mod-zip", "modZipVersion", "edificeio/mod-zip"],
+			["fr.wseduc~mod-postgresql", "modPostgresVersion", "edificeio/mod-postgresql"],
+			["com.opendigitaleducation~mod-json-schema-validator", "modJsonschemavalidatorVersion", "edificeio/mod-json-schema-validator"],
+			["fr.cgi~mod-sftp", "modSftpVersion", "OPEN-ENT-NG/mod-sftp", "dev"],
+			["fr.wseduc~mod-webdav", "modWebdavVersion", "OPEN-ENT-NG/mod-webdav", "master"],
+			["fr.wseduc~mod-sms-proxy", "modSmsproxyVersion", "edificeio/mod-sms-sender"],
+			["fr.wseduc~mod-pdf-generator", "modPdfgenerator", "edificeio/mod-pdf-generator"],
+			["org.entcore~infra", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~app-registry", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~session", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~auth", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~directory", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~workspace", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~communication", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~portal", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~conversation", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~feeder", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~timeline", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~broker", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~cas", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~archive", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~admin", "entCoreVersion", "edificeio/entcore"]
+		]
+
+		def defaultBranch = project.hasProperty("modsDefaultBranch") ? project.property("modsDefaultBranch") : "dev"
+		
+		// Parse default mods and resolve version properties
+		def defaultMods = defaultModsSpecs.collect { spec ->
+			def groupArtifact = spec[0].split('~')
+			def versionProperty = spec[1]
+			
+			def version = project.hasProperty(versionProperty) ? project.property(versionProperty) : null
+			if (version == null && spec.size() >= 3) {
+				def githubRepoPath = spec[2]
+				def branch = defaultBranch
+				if (spec.size() >= 4) {
+					branch = spec[3]
+				}
+				version = fetchVersionFromGitHub(project, branch, githubRepoPath)
+			}
+			if (version == null) {
+				project.logger.warn("Version property ${versionProperty} not found and could not fetch from GitHub for ${groupArtifact[0]}:${groupArtifact[1]}")
+				return null
+			}
+			[group: groupArtifact[0], name: groupArtifact[1], version: version]
+		}.findAll { it != null }
+		
+		// Get all deployment dependencies
+		def deploymentDeps = project.configurations.deployment.dependencies.collect { 
+			[group: it.group, name: it.name, version: it.version]
+		}
+		
+		// Combine default mods and deployment dependencies (avoid duplicates)
+		def allDeps = (defaultMods + deploymentDeps).unique { "${it.group}:${it.name}" }
+		
+		// Use thread pool for parallel processing
+		def threadPool = Executors.newFixedThreadPool(Math.min(Runtime.runtime.availableProcessors(), allDeps.size()))
+		
+		// Track first failure for fail-fast behavior
+		def firstFailure = null
+		
+		try {
+			// Download and process all fat jars in parallel
+			allDeps.each { dep ->
+				threadPool.submit({
+					// Check if another task has already failed
+					if (firstFailure != null) {
+						return
+					}
+					
+					try {
+						// Create a detached configuration for this specific fat jar
+						def fatDep = project.dependencies.create("${dep.group}:${dep.name}:${dep.version}:fat")
+						def fatConfig = project.configurations.detachedConfiguration(fatDep)
+						fatConfig.transitive = false
+						
+						// Get the fat jar file
+						def fatJarFile = fatConfig.singleFile
+						
+						// Create the new filename: groupId~artifactId~version-fat.jar
+						def newFileName = "${dep.group}~${dep.name}~${dep.version}-fat.jar"
+						def targetFile = project.file("mods/${newFileName}")
+						
+						// Copy and rename the fat jar
+						synchronized(project) {
+							project.copy {
+								from fatJarFile
+								into "mods/"
+								rename { newFileName }
+							}
+						}
+						
+						// Unzip the fat jar
+						synchronized(project) {
+							project.copy {
+								from project.zipTree(targetFile)
+								into "mods/${dep.group}~${dep.name}~${dep.version}"
+							}
+						}
+						
+						project.logger.info("Successfully processed fat jar for ${dep.group}:${dep.name}:${dep.version}")
+					} catch (Exception e) {
+						def errorMsg = "Could not download fat jar for ${dep.group}:${dep.name}:${dep.version}: ${e.message}"
+						project.logger.error(errorMsg)
+						
+						// Store first failure and immediately shutdown thread pool
+						synchronized(this) {
+							if (firstFailure == null) {
+								firstFailure = new RuntimeException(errorMsg, e)
+								threadPool.shutdownNow()
+							}
+						}
+					}
+				})
+			}
+		} finally {
+			threadPool.shutdown()
+			threadPool.awaitTermination(30, TimeUnit.MINUTES)
+		}
+		
+		// Throw the first failure if any occurred
+		if (firstFailure != null) {
+			throw firstFailure
+		}
+	}
+
+	/**
+	 * Fetches the version from GitHub pom.xml for a given module
+	 * @param project The Gradle project
+	 * @param githubRepoPath The GitHub repository path (e.g., "edificeio/entcore" or full URL)
+	 */
+	private String fetchVersionFromGitHub(Project project, String defaultBranch, String githubRepoPath) {
+		try {
+			// Skip if placeholder is not replaced
+			if (githubRepoPath.isEmpty()) {
+				project.logger.debug("GitHub repository path not configured, skipping version fetch")
+				return null
+			}
+			
+			// Construct the raw GitHub URL
+			def githubUrl
+			if (githubRepoPath.startsWith("http")) {
+				// Full URL provided
+				githubUrl = githubRepoPath
+			} else {
+				// Repository path provided (e.g., "edificeio/entcore")
+				githubUrl = "https://raw.githubusercontent.com/${githubRepoPath}/${defaultBranch}/pom.xml"
+			}
+			
+			project.logger.info("Fetching version from GitHub: ${githubUrl}")
+			
+			def url = new URL(githubUrl)
+			def connection = url.openConnection()
+			connection.setConnectTimeout(10000)
+			connection.setReadTimeout(10000)
+			
+			def pomContent = connection.inputStream.text
+			
+			// Parse pom.xml to extract version
+			def pomXml = new XmlSlurper().parseText(pomContent)
+			def version = pomXml.version?.text()
+			
+			if (version) {
+				project.logger.info("Successfully fetched version ${version} from GitHub for ${githubRepoPath}")
+				return version
+			} else {
+				project.logger.warn("No version found in pom.xml for ${githubRepoPath}")
+				return null
+			}
+		} catch (Exception e) {
+			project.logger.warn("Failed to fetch version from GitHub for ${githubRepoPath}: ${e.message}")
+			return null
 		}
 	}
 
