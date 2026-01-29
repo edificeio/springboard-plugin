@@ -43,7 +43,7 @@ services:
       - SERVICES=s3
       - AWS_DEFAULT_REGION=us-east-1
     volumes:
-      - ./cluster-config/init-s3:/etc/localstack/init
+      - ./conf/cluster-config/init-s3:/etc/localstack/init
 
   vertx:
     image: opendigitaleducation/vertx-service-launcher:3.0-SNAPSHOT
