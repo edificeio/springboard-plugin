@@ -129,8 +129,8 @@ services:
     image: mongo:7.0.12
   nats:
     image: 'nats:2.10.25-alpine'
-    ports:
-      - '4222:4222'
+    ports: #REMOVE_BY_CI
+      - '4222:4222' #REMOVE_BY_CI
     #volumes:
     #  - ./conf/nats/server:/etc/nats/certs
     command:
