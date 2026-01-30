@@ -11,6 +11,107 @@
       }
     }
   },
+
+  "sharedConf": {
+
+  <% if ("true".equals(pdfEnabled)) { %>
+  "node-pdf-generator" : {
+    "pdf-connector-id": "exportpdf",
+    "auth": "${nodePdfToken}",
+    "url" : "${nodePdfUri}"
+    },
+<% } %>
+  <% if (signKey != null && !signKey.trim().isEmpty()) { %>
+  "key": "${signKey}",
+  <% } else { %>
+    "key": "zbxgKWuzfxaYzbXcHnK3WnWK",
+  <% } %>
+  <% if (contentSecurityPolicy != null && !contentSecurityPolicy.trim().isEmpty()) { %>
+  "content-security-policy": "${contentSecurityPolicy}",
+  <% } %>
+  "cluster" : true,
+  "skins": ${skins},
+  <%  if (skinLevels != null && !skinLevels.trim().isEmpty()) { %>
+	"skin-levels": ${skinLevels},
+	<% } %>
+  <% if (swiftUri != null && !swiftUri.trim().isEmpty()) { %>
+    "swift" : {
+      "uri" : "${swiftUri}",
+      "container" : "${swiftContainer}",
+      "user" : "${swiftUser}",
+      "key" : "${swiftKey}"
+    },
+    <% } else if (fsStoragePath != null && !fsStoragePath.trim().isEmpty()) { %>
+    "file-system" : {
+      "path" : "${fsStoragePath}",
+      "flat" : ${flatFsStorage}
+    },
+    <% } else { %>
+    "gridfs-address" : "wse.gridfs.persistor",
+    <% } %>
+    <% if (sharedConf != null && !sharedConf.trim().isEmpty()) { %>
+    "sharedConf": ${sharedConf},
+    <% } %>
+    <% if (emailConfig != null && !emailConfig.trim().isEmpty()) { %>
+    "emailConfig": ${emailConfig},
+    <% } else { %>
+    "emailConfig": {
+      "email": "${senderEmail}",
+      "host": "${host}"
+    },
+    <% } %>
+    "eventConfig": {
+     "user-blacklist" : []
+    },
+    "emailValidationConfig": {
+      "active": false,
+      "ttlInSeconds": 600,
+      "retryNumber": 5,
+      "waitInSeconds": 10
+	},
+    "content-transformer": {
+      "url": "http://content-transformer:3000",
+      "content-transformer-metrics": {
+        "enabled": true
+      }
+    },
+    "redisConfig": {
+            "host": "redis",
+            "port": 6379,
+      "maxPoolWaiting": 2024,
+      "maxWaitingHandlers": 2024
+  },
+      "explorerConfig": {
+          "enabled": true,
+          "postgres": false,
+          "redis": true
+      },
+    "mongoConfig" : {
+      "hosts" : [ {
+        "host": "${mongoHost}",
+        "port": ${mongoPort}
+      }],
+      "db_name": "${dbName}",
+      "use_mongo_types" : true
+    },
+    "postgresConfig":{
+        "host": "${sqlIp}",
+        "database": "${sqlDb}",
+        "port": 5432,
+        "user": "${sqlUsername}",
+        "password": "${sqlPassword}",
+        "pool-size": 50
+    },
+    "neo4jConfig" : {
+      <% if (serverUris != null && !serverUris.trim().isEmpty()) { %>
+      "server-uris": ${serverUris},
+      <% } else { %>
+      "server-uri": "${neo4jUri}/db/data/",
+      <% } %>
+      "slave-readonly": $neo4jSlaveReadOnly,
+      "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
+    }
+  },
 "services" : [
 {
   "name": "io.vertx~mod-mongo-persistor~4.0-SNAPSHOT",
@@ -221,7 +322,8 @@
   },
       "explorerConfig": {
           "enabled": true,
-          "postgres": true
+          "postgres": false,
+          "redis": true
       },
     "mongoConfig" : {
       "hosts" : [ {
@@ -249,6 +351,43 @@
       "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
     }
   }},
+    {
+      "name": "org.entcore~broker~${entcoreVersion}",
+      "waitDeploy" : true,
+      "main":"org.entcore.broker.Broker",
+      "config":{
+        "port": 8778,
+        "mode": "prod",
+        "app-type": "SYSTEM",
+        "auto-redeploy": false,
+        "app-name" : "Broker",
+        "app-address" : "http://localhost:8778/broker",
+        "sql": false,
+        "broker-type": "nats",
+        "nats": [
+          {
+            "name": "ent",
+            "default": true,
+            "routing": [],
+            "client": {
+              "io.nats.client.url": "nats://nats:4222"
+            }
+          },
+          {
+            "name": "ia",
+            "default": false,
+            "routing": [
+              "ia.>"
+            ],
+            "client": {
+              "io.nats.client.url": "nats://nats:4222"
+            }
+          }
+        ],
+        "publicConf": {
+        }     
+      }
+    },
   {
     "name": "org.entcore~app-registry~${entcoreVersion}",
     "waitDeploy" : true,
@@ -550,44 +689,6 @@
         "mode": "${mode}"
       }
     },
-    <% if (binding.hasVariable('withBroker') && withBroker != null && withBroker) { %>
-    {
-      "name": "org.entcore~broker~${entcoreVersion}",
-      "main":"org.entcore.broker.Broker",
-      "config":{
-        "port": 8778,
-        "mode": "prod",
-        "app-type": "SYSTEM",
-        "auto-redeploy": false,
-        "app-name" : "Broker",
-        "app-address" : "http://localhost:8778/broker",
-        "sql": false,
-        "broker-type": "nats",
-        "nats": [
-          {
-            "name": "ent",
-            "default": true,
-            "routing": [],
-            "client": {
-              "io.nats.client.url": "nats://nats:4222"
-            }
-          },
-          {
-            "name": "ia",
-            "default": false,
-            "routing": [
-              "ia.>"
-            ],
-            "client": {
-              "io.nats.client.url": "nats://nats:4222"
-            }
-          }
-        ],
-        "publicConf": {
-        }     
-      }
-    },
-    <% } %>
     {
       "name": "org.entcore~cas~${entcoreVersion}",
       "config":{
