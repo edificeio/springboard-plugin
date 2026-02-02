@@ -423,9 +423,6 @@ class SpringboardPlugin implements Plugin<Project> {
 				File f
 				switch (file.name) {
 					case "conf.json.template":
-						f = entcoreJsonTemplate
-						f.append(",\n")
-						f.append(file.text)
 						file.eachLine { line ->
 							def matcher = line =~ /\s*\t*\s*"port"\s*:\s*([0-9]+)[,]?\s*\t*\s*/
 							if (matcher.find()) {
@@ -446,26 +443,6 @@ class SpringboardPlugin implements Plugin<Project> {
 				}
 			}
 		}
-
-		InputStream httpProxy = this.getClass().getClassLoader().getResourceAsStream("http-proxy.json.template")
-		entcoreJsonTemplate.append(httpProxy.text)
-		appliPort.each { k, v ->
-			entcoreJsonTemplate.append(
-					",\n" +
-					"          {\n" +
-					"            \"location\": \"/" + k + "\",\n" +
-					"            \"proxy_pass\": \"http://localhost:" + v + "\"\n" +
-					"          }"
-			)
-		}
-		entcoreJsonTemplate.append(
-				"        ]\n" +
-				"      }\n" +
-				"    }\n" +
-				"<% } %>" +
-				"  ]\n" +
-				"}"
-		)
 		scn.append("\n}")
 
 		if (!confMap.containsKey("entcoreVersion")) {
