@@ -52,6 +52,128 @@ class SpringboardPlugin implements Plugin<Project> {
 			gatling(project)
 		}
 
+		// Setup JS tests tasks
+		setupJsTestsTasks(project)
+
+	}
+
+	/**
+	 * Sets up the JS tests tasks: downloadTestsJS, unzip*Jar tasks, and prepareJsTests
+	 * This allows springboards to use these tasks without having to redefine them
+	 * Automatically detects all dependencies with classifier "testJs" from all configurations
+	 */
+	private void setupJsTestsTasks(Project project) {
+		// Create a single configuration to hold all testJs dependencies
+		if (!project.configurations.findByName('testJsJars')) {
+			project.configurations.create('testJsJars')
+		}
+
+		// Use afterEvaluate to ensure all dependencies are declared before we scan them
+		project.afterEvaluate {
+			// Collect all testJs dependencies from all configurations
+			def testJsDeps = []
+			
+			project.configurations.each { config ->
+				config.dependencies.each { dep ->
+					if (dep instanceof org.gradle.api.artifacts.ExternalModuleDependency) {
+						dep.artifacts.each { artifact ->
+							if (artifact.classifier == 'testJs') {
+								testJsDeps << [
+									group: dep.group,
+									name: dep.name,
+									version: dep.version,
+									module: dep.name // Use artifact name as module identifier
+								]
+							}
+						}
+					}
+				}
+			}
+
+			// Also check for configurations named *TestJsJar (legacy support)
+			project.configurations.findAll { it.name.endsWith('TestJsJar') }.each { config ->
+				config.dependencies.each { dep ->
+					if (!testJsDeps.find { it.group == dep.group && it.name == dep.name }) {
+						testJsDeps << [
+							group: dep.group,
+							name: dep.name,
+							version: dep.version,
+							module: dep.name
+						]
+					}
+				}
+			}
+
+			// Remove duplicates based on group:name
+			testJsDeps = testJsDeps.unique { "${it.group}:${it.name}" }
+
+			if (testJsDeps.isEmpty()) {
+				project.logger.lifecycle("[prepareJsTests] No testJs dependencies found - nothing to do")
+				return
+			}
+
+			project.logger.lifecycle("[prepareJsTests] Found ${testJsDeps.size()} testJs module(s) to prepare:")
+			testJsDeps.each { dep ->
+				project.logger.lifecycle("[prepareJsTests]   - ${dep.group}:${dep.name}:${dep.version}")
+			}
+
+			// Add all testJs dependencies to our configuration
+			testJsDeps.each { dep ->
+				project.dependencies.add('testJsJars', "${dep.group}:${dep.name}:${dep.version}:testJs")
+			}
+
+			// Configure downloadTestsJS task
+			def downloadTask = project.tasks.findByName('downloadTestsJS')
+			if (downloadTask) {
+				downloadTask.from project.configurations.testJsJars
+				downloadTask.doLast {
+					project.logger.lifecycle("[downloadTestsJS] Downloaded ${testJsDeps.size()} testJs JAR(s) to ${project.buildDir}/libs/testJs")
+				}
+			}
+
+			// Create unzip tasks for each module
+			testJsDeps.each { dep ->
+				def taskName = "unzip${dep.module.capitalize()}TestJsJar"
+				
+				if (!project.tasks.findByName(taskName)) {
+					project.task(taskName, type: org.gradle.api.tasks.Copy, dependsOn: 'downloadTestsJS') {
+						from {
+							project.configurations.testJsJars.filter { file ->
+								file.name.contains(dep.name)
+							}.collect { project.zipTree(it) }
+						}
+						into "${project.buildDir}/libs/testJs/${dep.module}"
+						doLast {
+							project.logger.lifecycle("[${taskName}] Extracted ${dep.group}:${dep.name}:${dep.version} to ${project.buildDir}/libs/testJs/${dep.module}")
+						}
+					}
+				}
+			}
+
+			// Update prepareJsTests dependencies
+			def prepareTask = project.tasks.findByName('prepareJsTests')
+			if (prepareTask) {
+				testJsDeps.each { dep ->
+					def taskName = "unzip${dep.module.capitalize()}TestJsJar"
+					if (project.tasks.findByName(taskName)) {
+						prepareTask.dependsOn taskName
+					}
+				}
+				prepareTask.doLast {
+					project.logger.lifecycle("[prepareJsTests] Successfully prepared ${testJsDeps.size()} testJs module(s)")
+				}
+			}
+		}
+
+		// Create downloadTestsJS task (will be configured in afterEvaluate)
+		project.task('downloadTestsJS', type: org.gradle.api.tasks.Copy) {
+			into "${project.buildDir}/libs/testJs"
+		}
+
+		// Create aggregate prepareJsTests task (dependencies will be added in afterEvaluate)
+		project.task('prepareJsTests') {
+			description = 'Prepares all JS test dependencies'
+		}
 	}
 
 	private void gatling(Project project) {
