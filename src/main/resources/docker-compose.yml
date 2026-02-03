@@ -199,3 +199,9 @@ services:
       - ~/.npm:/.npm
 <% if (isM1 == "false") { %>      - .config:/.config
 <% } %>
+  
+  vertx-cli:
+    image: opendigitaleducation/vertx-cli:<%= vertxCliVersion %>
+    user: "\$DEFAULT_DOCKER_USER"
+    volumes:
+      - ./:/opt/springboard
