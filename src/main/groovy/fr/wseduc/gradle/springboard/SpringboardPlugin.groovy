@@ -63,9 +63,18 @@ class SpringboardPlugin implements Plugin<Project> {
 	 * Automatically detects all dependencies with classifier "testJs" from all configurations
 	 */
 	private void setupJsTestsTasks(Project project) {
-		// Create a single configuration to hold all testJs dependencies
+		// Create a single configuration to hold all testJs dependencies (non-transitive)
 		if (!project.configurations.findByName('testJsJars')) {
-			project.configurations.create('testJsJars')
+			project.configurations.create('testJsJars') {
+				transitive = false
+			}
+		}
+
+		// Create entcoreTestJsJar configuration for backward compatibility (non-transitive)
+		if (!project.configurations.findByName('entcoreTestJsJar')) {
+			project.configurations.create('entcoreTestJsJar') {
+				transitive = false
+			}
 		}
 
 		// Use afterEvaluate to ensure all dependencies are declared before we scan them
