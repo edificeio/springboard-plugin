@@ -33,8 +33,12 @@ class FileUtils {
 				bindings[prop] = defaultProps.getProperty(prop)
 			}
 		}
-		// Add any additional bindings
-		bindings.putAll(additionalBindings)
+		// Add any additional bindings if the binding does not already exist
+		additionalBindings.each { key, value ->
+			if (!bindings.containsKey(key)) {
+				bindings[key] = value
+			}
+		}
 		def engine = new SimpleTemplateEngine()
 		def templateFile = new File(templateFileName)
 		def output = engine.createTemplate(templateFile).make(bindings)

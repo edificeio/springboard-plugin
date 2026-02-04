@@ -16,7 +16,8 @@ class SpringboardPlugin implements Plugin<Project> {
 			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/ent-core.json.template", "${rootDir}/ent-core.json")
 			
 			// Generate docker-compose.yml with variabilized version and M1 detection
-			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/docker-compose.yml.template", "${rootDir}/docker-compose.yml", [isM1: isM1() ? "true" : "false"])
+			Map additionalBindings = [isM1: isM1() ? "true" : "false", vertxCliVersion: "latest"]
+			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/docker-compose.yml.template", "${rootDir}/docker-compose.yml", additionalBindings)
 			
 			extractMods(project)
 		}
