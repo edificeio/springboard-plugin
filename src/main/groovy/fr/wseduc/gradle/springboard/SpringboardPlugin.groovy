@@ -60,9 +60,12 @@ class SpringboardPlugin implements Plugin<Project> {
 	/**
 	 * Sets up the JS tests tasks: downloadTestsJS, unzip*Jar tasks, and prepareJsTests
 	 * This allows springboards to use these tasks without having to redefine them
-	 * Automatically detects all dependencies with classifier "testJs" from all configurations
+	 * Automatically detects all dependencies with classifier "testJs" or "tests" from all configurations
 	 */
 	private void setupJsTestsTasks(Project project) {
+		// Supported classifiers for test JS artifacts
+		def testClassifiers = ['testJs', 'tests']
+
 		// Create a single configuration to hold all testJs dependencies (non-transitive)
 		if (!project.configurations.findByName('testJsJars')) {
 			project.configurations.create('testJsJars') {
@@ -79,18 +82,19 @@ class SpringboardPlugin implements Plugin<Project> {
 
 		// Use afterEvaluate to ensure all dependencies are declared before we scan them
 		project.afterEvaluate {
-			// Collect all testJs dependencies from all configurations
+			// Collect all testJs/tests dependencies from all configurations
 			def testJsDeps = []
 			
 			project.configurations.each { config ->
 				config.dependencies.each { dep ->
 					if (dep instanceof org.gradle.api.artifacts.ExternalModuleDependency) {
 						dep.artifacts.each { artifact ->
-							if (artifact.classifier == 'testJs') {
+							if (artifact.classifier in testClassifiers) {
 								testJsDeps << [
 									group: dep.group,
 									name: dep.name,
 									version: dep.version,
+									classifier: artifact.classifier, // Keep track of the actual classifier
 									module: dep.name // Use artifact name as module identifier
 								]
 							}
@@ -103,10 +107,17 @@ class SpringboardPlugin implements Plugin<Project> {
 			project.configurations.findAll { it.name.endsWith('TestJsJar') }.each { config ->
 				config.dependencies.each { dep ->
 					if (!testJsDeps.find { it.group == dep.group && it.name == dep.name }) {
+						// For legacy configs, try to detect the classifier from artifact or default to 'testJs'
+						def classifier = 'testJs'
+						if (dep instanceof org.gradle.api.artifacts.ExternalModuleDependency && dep.artifacts) {
+							def art = dep.artifacts.find { it.classifier in testClassifiers }
+							if (art) classifier = art.classifier
+						}
 						testJsDeps << [
 							group: dep.group,
 							name: dep.name,
 							version: dep.version,
+							classifier: classifier,
 							module: dep.name
 						]
 					}
@@ -123,12 +134,12 @@ class SpringboardPlugin implements Plugin<Project> {
 
 			project.logger.lifecycle("[prepareJsTests] Found ${testJsDeps.size()} testJs module(s) to prepare:")
 			testJsDeps.each { dep ->
-				project.logger.lifecycle("[prepareJsTests]   - ${dep.group}:${dep.name}:${dep.version}")
+				project.logger.lifecycle("[prepareJsTests]   - ${dep.group}:${dep.name}:${dep.version}:${dep.classifier}")
 			}
 
-			// Add all testJs dependencies to our configuration
+			// Add all testJs dependencies to our configuration with their actual classifier
 			testJsDeps.each { dep ->
-				project.dependencies.add('testJsJars', "${dep.group}:${dep.name}:${dep.version}:testJs")
+				project.dependencies.add('testJsJars', "${dep.group}:${dep.name}:${dep.version}:${dep.classifier}")
 			}
 
 			// Configure downloadTestsJS task
