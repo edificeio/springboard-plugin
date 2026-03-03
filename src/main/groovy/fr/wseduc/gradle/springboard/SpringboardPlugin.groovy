@@ -8,6 +8,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.yaml.snakeyaml.Yaml
 import org.yaml.snakeyaml.DumperOptions
+import org.yaml.snakeyaml.representer.Representer
+import org.yaml.snakeyaml.nodes.ScalarNode
+import org.yaml.snakeyaml.nodes.Tag
 
 class SpringboardPlugin implements Plugin<Project> {
 
@@ -25,7 +28,11 @@ class SpringboardPlugin implements Plugin<Project> {
 			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/docker-compose.yml.template", "${rootDir}/docker-compose.yml", additionalBindings)
 			
 			extractMods(project)
-			configureIndependantServices(project)
+			configureIndependentServices(project)
+
+			File entcoreJsonTemplate = project.file("main.json")
+			FileUtils.copy(this.getClass().getClassLoader().getResourceAsStream("main.json"),
+					entcoreJsonTemplate)
 		}
 
 		project.task("extractMods") << {
@@ -202,13 +209,17 @@ class SpringboardPlugin implements Plugin<Project> {
 		}
 
 		// Create downloadTestsJS task (will be configured in afterEvaluate)
-		project.task('downloadTestsJS', type: org.gradle.api.tasks.Copy) {
-			into "${project.buildDir}/libs/testJs"
+		if (!project.tasks.findByName('downloadTestsJS')) {
+			project.task('downloadTestsJS', type: org.gradle.api.tasks.Copy) {
+				into "${project.buildDir}/libs/testJs"
+			}
 		}
 
 		// Create aggregate prepareJsTests task (dependencies will be added in afterEvaluate)
-		project.task('prepareJsTests') {
-			description = 'Prepares all JS test dependencies'
+		if (!project.tasks.findByName('prepareJsTests')) {
+			project.task('prepareJsTests') {
+				description = 'Prepares all JS test dependencies'
+			}
 		}
 	}
 
@@ -248,29 +259,29 @@ class SpringboardPlugin implements Plugin<Project> {
 		}
 	}
 
-	private void configureIndependantServices(Project project) {
-		project.logger.lifecycle("[configureIndependantServices] Starting independant services configuration...")
+	private void configureIndependentServices(Project project) {
+		project.logger.lifecycle("[configureIndependentServices] Starting independent services configuration...")
 		
-		def services = loadIndependantServicesConf(project)
-		project.logger.lifecycle("[configureIndependantServices] Loaded ${services.size()} service(s) from configuration")
+		def services = loadIndependentServicesConf(project)
+		project.logger.lifecycle("[configureIndependentServices] Loaded ${services.size()} service(s) from configuration")
 		
 		// Filter services that are enabled and not local
 		def servicesToAdd = services.findAll { it.enabled && !it.local }
-		project.logger.lifecycle("[configureIndependantServices] ${servicesToAdd.size()} service(s) to add (enabled and not local)")
+		project.logger.lifecycle("[configureIndependentServices] ${servicesToAdd.size()} service(s) to add (enabled and not local)")
 		
 		if (servicesToAdd.isEmpty()) {
-			project.logger.lifecycle("No independant services to add to docker-compose.yml")
+			project.logger.lifecycle("No independent services to add to docker-compose.yml")
 			return
 		}
 		
 		// Read the existing docker-compose.yml file
 		def dockerComposeFile = project.file("docker-compose.yml")
 		if (!dockerComposeFile.exists()) {
-			project.logger.warn("docker-compose.yml not found, skipping independant services configuration")
+			project.logger.warn("docker-compose.yml not found, skipping independent services configuration")
 			return
 		}
 		
-		project.logger.lifecycle("[configureIndependantServices] docker-compose.yml found, updating...")
+		project.logger.lifecycle("[configureIndependentServices] docker-compose.yml found, updating...")
 		
 		try {
 			def yaml = new Yaml()
@@ -291,7 +302,7 @@ class SpringboardPlugin implements Plugin<Project> {
 			
 			// Add each service
 			servicesToAdd.each { service ->
-				project.logger.lifecycle("Configuring independant service ${service.name} for docker-compose.yml")
+				project.logger.lifecycle("Configuring independent service ${service.name} for docker-compose.yml")
 				def serviceConfig = [:]
 				
 				// Add user if present - convert to String to avoid GString serialization issues
@@ -306,15 +317,19 @@ class SpringboardPlugin implements Plugin<Project> {
 				if (service.port != service.outPort) {
 					serviceConfig.ports = ["${service.outPort}:${service.port}".toString()]
 				}
-				
+				def environment = []
 				// Add environment for nest type
 				if (service.type == "nest") {
-					serviceConfig.environment = [
-						"CONF_FILE_PATH=/app/dist/config-docker.yaml",
-						"PROD=true",
-						"NODE_ENV=production"
-					]
+					environment.add("CONF_FILE_PATH=/app/dist/config-docker.yaml")
+					environment.add("PROD=true")
+					environment.add("NODE_ENV=production")
+					environment.add("NATS_URL=nats://nats:4222")
 				}
+				if (service.sql) {
+					environment.add("DATABASE_URL=postgresql://postgres:5432/ong?stringtype=unspecified")
+				}
+				serviceConfig.environment = environment
+
 				
 				dockerCompose.services[service.name.toString()] = serviceConfig
 				project.logger.lifecycle("Added service ${service.name} to docker-compose.yml")
@@ -326,22 +341,28 @@ class SpringboardPlugin implements Plugin<Project> {
 			options.prettyFlow = true
 			options.indent = 2
 			
-			def yamlWriter = new Yaml(options)
+			// Use a custom representer so null map values serialize as empty scalars
+			// (e.g. "pgdata:" instead of "pgdata: null")
+			def representer = new Representer(options)
+			representer.nullRepresenter = { data ->
+				new ScalarNode(Tag.NULL, "", null, null, DumperOptions.ScalarStyle.PLAIN)
+			}
+			def yamlWriter = new Yaml(representer, options)
 			dockerComposeFile.text = yamlWriter.dump(dockerCompose)
 			
-			project.logger.lifecycle("Successfully updated docker-compose.yml with ${servicesToAdd.size()} independant service(s)")
+			project.logger.lifecycle("Successfully updated docker-compose.yml with ${servicesToAdd.size()} independent service(s)")
 		} catch (Exception e) {
 			throw new RuntimeException("Error updating docker-compose.yml: ${e.message}", e)
 		}
 	}
 
 	/**
-	 * Loads independant services configuration from a services.yaml or services.yml file.
-	 * Equivalent of LoadIndependantServicesConf in Go.
+	 * Loads independent services configuration from a services.yaml or services.yml file.
+	 * Equivalent of LoadIndependentServicesConf in Go.
 	 * @param project The Gradle project
 	 * @return List of SpringboardService with all fields populated
 	 */
-	private List<SpringboardService> loadIndependantServicesConf(Project project) {
+	private List<SpringboardService> loadIndependentServicesConf(Project project) {
 		// Try services.yaml first, then fall back to services.yml
 		def confFile = project.file("services.yaml")
 		if (!confFile.exists()) {
@@ -362,7 +383,7 @@ class SpringboardPlugin implements Plugin<Project> {
 			
 			// Parse services from YAML into typed objects
 			def services = yamlConf.services.collect { serviceMap ->
-				new IndependantService(
+				new IndependentService(
 					name: serviceMap.name,
 					port: serviceMap.port ?: 0,
 					outPort: serviceMap.outPort ?: 0,
@@ -371,11 +392,13 @@ class SpringboardPlugin implements Plugin<Project> {
 					testable: serviceMap.testable ?: false,
 					type: serviceMap.type ?: "",
 					local: serviceMap.local ?: false,
-					url: serviceMap.url ?: ""
+					url: serviceMap.url ?: "",
+					sql: serviceMap.sql ?: true,
+					mongo: serviceMap.mongo ?: false
 				)
 			}
 			
-			def conf = new IndependantServiceConf(services: services)
+			def conf = new IndependentServiceConf(services: services)
 			return completeServicesConf(conf)
 		} catch (Exception e) {
 			throw new RuntimeException("Error reading YAML file ${confFile.name}: ${e.message}", e)
@@ -385,10 +408,10 @@ class SpringboardPlugin implements Plugin<Project> {
 	/**
 	 * Completes services configuration by filling in defaults and computing derived values.
 	 * Equivalent of CompleteServicesConf in Go.
-	 * @param conf The independant service configuration
+	 * @param conf The independent service configuration
 	 * @return List of SpringboardService with all fields populated
 	 */
-	private List<SpringboardService> completeServicesConf(IndependantServiceConf conf) {
+	private List<SpringboardService> completeServicesConf(IndependentServiceConf conf) {
 		// Check if all required fields are present
 		if (conf.services == null) {
 			throw new RuntimeException("no services defined")
@@ -433,7 +456,9 @@ class SpringboardPlugin implements Plugin<Project> {
 				local: service.local,
 				url: url,
 				nginxUrl: nginxUrl,
-				type: service.type
+				type: service.type,
+				sql: service.sql,
+				mongo: service.mongo
 			)
 		}
 		
@@ -441,6 +466,7 @@ class SpringboardPlugin implements Plugin<Project> {
 	}
 
 	private void extractMods(Project project) {
+		project.logger.lifecycle("[extractMods] Starting mods extraction...")
 		if (!project.file("mods")?.exists()) {
 			project.file("mods").mkdir()
 		}
@@ -458,6 +484,7 @@ class SpringboardPlugin implements Plugin<Project> {
 			["fr.wseduc~mod-pdf-generator", "modPdfgenerator", "edificeio/mod-pdf-generator"],
 			["org.entcore~infra", "entCoreVersion", "edificeio/entcore"],
 			["org.entcore~app-registry", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~audience", "entCoreVersion", "edificeio/entcore"],
 			["org.entcore~session", "entCoreVersion", "edificeio/entcore"],
 			["org.entcore~auth", "entCoreVersion", "edificeio/entcore"],
 			["org.entcore~directory", "entCoreVersion", "edificeio/entcore"],
@@ -492,8 +519,10 @@ class SpringboardPlugin implements Plugin<Project> {
 			if (version == null) {
 				project.logger.warn("Version property ${versionProperty} not found and could not fetch from GitHub for ${groupArtifact[0]}:${groupArtifact[1]}")
 				return null
+			} else {
+				project.logger.info("Resolved version for ${groupArtifact[0]}:${groupArtifact[1]}: ${version}")
 			}
-			[group: groupArtifact[0], name: groupArtifact[1], version: version]
+			return [group: groupArtifact[0], name: groupArtifact[1], version: version]
 		}.findAll { it != null }
 		
 		// Get all deployment dependencies
@@ -526,39 +555,46 @@ class SpringboardPlugin implements Plugin<Project> {
 						
 						// Skip if target file already exists
 						if (targetFile.exists()) {
-							project.logger.info("Skipping ${dep.group}:${dep.name}:${dep.version} - already exists in mods/")
-							return
-						}
-						
-						// Create a detached configuration for this specific fat jar
-						def fatDep = project.dependencies.create("${dep.group}:${dep.name}:${dep.version}:fat")
-						def fatConfig = project.configurations.detachedConfiguration(fatDep)
-						fatConfig.transitive = false
-						
-						// Get the fat jar file
-						def fatJarFile = fatConfig.singleFile
-						
-						// Copy and rename the fat jar
-						synchronized(project) {
-							project.copy {
-								from fatJarFile
-								into "mods/"
-								rename { newFileName }
+							project.logger.info("Skipping download for ${dep.group}:${dep.name}:${dep.version} - already exists in mods/")
+						} else {
+							// Create a detached configuration for this specific fat jar
+							def fatDep = project.dependencies.create("${dep.group}:${dep.name}:${dep.version}:fat")
+							def fatConfig = project.configurations.detachedConfiguration(fatDep)
+							fatConfig.transitive = false
+							// Detached configurations are not covered by configurations.all, so we must
+							// explicitly disable SNAPSHOT caching to force re-checking remote repos
+							fatConfig.resolutionStrategy.cacheChangingModulesFor(0, TimeUnit.SECONDS)
+							
+							// Get the fat jar file
+							def fatJarFile = fatConfig.singleFile
+							
+							// Copy and rename the fat jar
+							synchronized(project) {
+								project.copy {
+									from fatJarFile
+									into "mods/"
+									rename { newFileName }
+								}
 							}
 						}
-						
-						// Unzip the fat jar
-						synchronized(project) {
-							project.copy {
-								from project.zipTree(targetFile)
-								into "mods/${dep.group}~${dep.name}~${dep.version}"
+						def targetDirPath = "mods/${dep.group}~${dep.name}~${dep.version}"
+						def targetDir = project.file(targetDirPath)
+						if (!targetDir.exists()) {
+							// Unzip the fat jar
+							synchronized(project) {
+								project.copy {
+									from project.zipTree(targetFile)
+									into targetDirPath
+								}
 							}
+						} else {
+							project.logger.info("Skipping extraction for ${dep.group}:${dep.name}:${dep.version} - already extracted in mods/")
 						}
 						
 						project.logger.info("Successfully processed fat jar for ${dep.group}:${dep.name}:${dep.version}")
 					} catch (Exception e) {
 						def errorMsg = "Could not download fat jar for ${dep.group}:${dep.name}:${dep.version}: ${e.message}"
-						project.logger.error(errorMsg)
+						project.logger.error(errorMsg, e)
 						
 						// Store first failure and immediately shutdown thread pool
 						synchronized(this) {
@@ -890,18 +926,18 @@ class SpringboardPlugin implements Plugin<Project> {
 }
 
 /**
- * Represents a configuration for independant services.
- * Equivalent of IndependantServiceConf struct in Go.
+ * Represents a configuration for independent services.
+ * Equivalent of IndependentServiceConf struct in Go.
  */
-class IndependantServiceConf {
-	List<IndependantService> services = []
+class IndependentServiceConf {
+	List<IndependentService> services = []
 }
 
 /**
- * Represents an independant service configuration.
- * Equivalent of IndependantService struct in Go.
+ * Represents an independent service configuration.
+ * Equivalent of IndependentService struct in Go.
  */
-class IndependantService {
+class IndependentService {
 	String name
 	int port
 	int outPort
@@ -911,6 +947,8 @@ class IndependantService {
 	String type
 	boolean local
 	String url
+	boolean sql
+	boolean mongo
 }
 
 /**
@@ -928,4 +966,6 @@ class SpringboardService {
 	String url
 	String nginxUrl
 	String type
+	boolean sql
+	boolean mongo
 }

@@ -1,0 +1,141 @@
+{
+  "assets-path" : "{{ assetsPath|default('/srv/vertx/entcore') }}",
+  "metricsOptions": {
+    "parking-enabled": false,
+    "parking-error-codes": [502, 504],
+    "parking-path": "/srv/vertx/entcore/tmp/pdf/",
+    "enabled": true,
+    "prometheusOptions": {
+      "enabled": true,
+      "startEmbeddedServer": true,
+      "embeddedServerOptions": {
+        "port": 9090,
+        "embeddedServerEndpoint": "/metrics/vertx"
+      }
+    }
+  },
+  "workerPoolSize": {{ workerPoolSize | default(400)}},
+  "sharedConf": {
+    {% if cookieSameSiteValue is defined %}
+    "sameSiteValue": "{{ cookieSameSiteValue }}",
+    {% endif %}
+    "encoding-available": ["Cp858", "Cp1250", "ISO-8859-1"],
+    {% if mfaConfig is defined %}
+      "mfaConfig": {{ mfaConfig }},
+    {% endif %}
+{% if pdfEnabled == "true" %}
+    "node-pdf-generator" : {
+      "pdf-connector-id": "exportpdf",
+      "auth": "{{ nodePdfToken }}",
+      "url" : "{{ nodePdfUri }}"
+    },
+{% endif %}
+{% if signKey and signKey|trim %}
+    "key": "{{ signKey }}",
+{% else %}
+    "key": "zbxgKWuzfxaYzbXcHnWK",
+{% endif %}
+{% if contentSecurityPolicy and contentSecurityPolicy|trim %}
+    "content-security-policy": "{{ contentSecurityPolicy }}",
+{% endif %}
+    "cluster" : true,
+    "skins": {{ skins }},
+{% if skinLevels and skinLevels|trim %}
+    "skin-levels": {{ skinLevels }},
+{% endif %}
+{% if swiftUri and swiftUri|trim %}
+    "swift" : {
+      "uri" : "{{ swiftUri }}",
+      "container" : "{{ swiftContainer }}",
+      "user" : "{{ swiftUser }}",
+      "key" : "{{ swiftKey }}"
+    },
+{% elif fsStoragePath and fsStoragePath|trim %}
+    "file-system" : {
+      "path" : "{{ fsStoragePath }}",
+      "flat" : {{ flatFsStorage| default('false') }}
+    },
+{% else %}
+    "gridfs-address" : "wse.gridfs.persistor",
+{% endif %}
+{% if sharedConf and sharedConf|trim %}
+    "sharedConf": {{ sharedConf }},
+{% endif %}
+{% if emailConfig and emailConfig|trim %}
+    "emailConfig": {{ emailConfig }},
+{% else %}
+    "emailConfig": {
+      "email": "{{ senderEmail }}",
+      "host": "{{ host }}"
+    },
+{% endif %}
+    "eventConfig": {
+     "user-blacklist" : []
+    },
+    "emailValidationConfig": {
+      "active": false,
+      "ttlInSeconds": 600,
+      "retryNumber": 5,
+      "waitInSeconds": 10
+    },
+    {% if contentTransformerUrl is defined %}
+    "content-transformer": {
+      "url": "{{ contentTransformerUrl }}",
+      {% if contentTransformerToken is defined %}
+        "auth": "{{ contentTransformerToken }}",
+      {% endif %}
+      "content-transformer-metrics": {
+        "enabled": {{ contentTransformerMetricsEnabled | default('true')}}
+        {% if contentTransformerMetricsSla is defined %}
+        ,
+        "sla": {{ contentTransformerMetricsSla }}
+        {% endif %}
+      }
+    },
+    {% else %}
+    "content-transformer": {
+      "url": "http://content-transformer:3000",
+      "content-transformer-metrics": {
+        "enabled": true
+      }
+    },
+    {% endif %}
+    "redisConfig": {
+      "host": "redis",
+      "port": 6379,
+      "maxPoolWaiting": 2024,
+      "maxWaitingHandlers": 2024
+    },
+    "explorerConfig": {
+      "enabled": true,
+      "postgres": false,
+      "redis": true
+    },
+    "mongoConfig" : {
+      "hosts" : [ {
+        "host": "{{ mongoHost }}",
+        "port": {{ mongoPort }}
+      }],
+      "db_name": "{{ dbName }}",
+      "use_mongo_types" : true
+    },
+    "postgresConfig":{
+      "host": "{{ sqlIp }}",
+      "database": "{{ sqlDb }}",
+      "port": 5432,
+      "user": "{{ sqlUsername }}",
+      "password": "{{ sqlPassword }}",
+      "pool-size": 50
+    },
+    "neo4jConfig" : {
+{% if serverUris and serverUris|trim %}
+      "server-uris": {{ serverUris }},
+{% else %}
+      "server-uri": "{{ neo4jUri }}/db/data/",
+{% endif %}
+      "slave-readonly": {{ neo4jSlaveReadOnly | default('false') }},
+      "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
+    }
+  },
+  "services" : {{generatedServicesPath}}
+}

@@ -18,5 +18,6 @@ class IntegrationTest extends Simulation {
 	setUp(IntegrationTestScenario.scn.inject(nothingFor(15 seconds), atOnceUsers(1)))
 		.protocols(httpProtocol)
 		.assertions(global.failedRequests.count.is(0))
+		.maxDuration(30 minutes)
 
 }

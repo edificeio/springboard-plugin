@@ -5,6 +5,13 @@ services:
     hostname: zookeeper
     environment:
       - ZOO_MY_ID=1
+      - ZOO_4LW_COMMANDS_WHITELIST=ruok
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   traefik:
     image: traefik:3.4
@@ -16,14 +23,19 @@ services:
       - "--providers.zookeeper.rootkey=ent-core/traefik"
       - "--entrypoints.web.address=:8090"
       - "--log.level=DEBUG"
-<% if (isM1 == "true") { %>    ports:
-      - "8090:8090"
-      - "8080:8080"
-<% } else { %>    ports: #REMOVE_BY_CI
+      - "--ping=true"
+    ports: #REMOVE_BY_CI
       - "8090:8090" #REMOVE_BY_CI
       - "8080:8080" #REMOVE_BY_CI
-<% } %>    depends_on:
-      - zookeeper
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   # zkweb:
   #   image: tobilg/zookeeper-webui
@@ -65,39 +77,41 @@ services:
       - ./aaf-duplicates-test:/home/wse/aaf
       - ~/.m2:/home/vertx/.m2
 <% if (isM1 == "true") { %>      - ./avatars:/srv/storage/avatars
-    depends_on:
 <% } else { %>    #    - ./avatars:/srv/storage/avatars
-    links:
-<% } %>      - neo4j
-      - postgres
-      - mongo
-      - pdf
-      - elasticsearch
-      - redis
-      - localstack
-      - zookeeper
-      - nats
+<% } %>
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      zookeeper:
+        condition: service_healthy
+      traefik:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
     environment:
       - MODE=cluster
       - ENABLED_SERVICES=
       - DEBUG_SUSPEND=n
       - ENABLE_REMOTE_DEBUG=true
       - TRAEFIK_DISCOVERY=true
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8012/app-registry/health/readiness"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
   pdf:
     image: opendigitaleducation/node-pdf-generator:1.0.0
 <% if (isM1 == "true") { %>    ports:
       - "3000:3000"
 <% } else { %>    ports: #REMOVE_BY_CI
       - "3000:3000" #REMOVE_BY_CI
-<% } %>
-  content-transformer:
-<% if (isM1 == "true") { %>    user: "1000:1000"
-<% } else { %>    user: "\$DEFAULT_DOCKER_USER"
-<% } %>    image: ghcr.io/edificeio/edifice-tiptap-transformer:1.0.2
-<% if (isM1 == "true") { %>    ports:
-      - "3100:3000"
-<% } else { %>    ports: #REMOVE_BY_CI
-      - "3100:3000" #REMOVE_BY_CI
 <% } %>
   neo4j:
 <% if (isM1 == "true") { %>    image: neo4j/neo4j-arm64-experimental:3.5-arm64
@@ -110,9 +124,21 @@ services:
 <% } else { %>    image: neo4j:3.1
     volumes:
       - ./neo4j-conf:/conf
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7474"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
 <% } %>
   redis:
     image: redis:7.4.0-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 #    ports:
 #      - "6379:6379"
   elasticsearch:
@@ -144,22 +170,33 @@ services:
   postgres:
 <% if (isM1 == "true") { %>    image: arm64v8/postgres:14.13
 <% } else { %>    image: postgres:14.13
-    user: "\$DEFAULT_DOCKER_USER" #REMOVE_BY_CI
 <% } %>    environment:
       POSTGRES_PASSWORD: We_1234
       POSTGRES_USER: web-education
       POSTGRES_DB: ong
       POSTGRES_HOST_AUTH_METHOD: md5
       POSTGRES_INITDB_ARGS: --auth-host=md5
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U web-education -d ong"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     volumes:
 <% if (isM1 == "true") { %>      - ./data/pgdata:/var/lib/postgresql/data
-<% } else { %>      - ./data/pgdata:/var/lib/postgresql/data #REMOVE_BY_CI
+<% } else { %>      - pgdata:/var/lib/postgresql/data #REMOVE_BY_CI
 <% } %>      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
 <% if (isM1 == "true") { %>    ports:
       - "5432:5432"
 <% } %>
   mongo:
     image: mongo:7.0.12
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 <% if (isM1 == "true") { %>    volumes:
       - ./data/mongodb:/data/db
   #    ports:
@@ -181,6 +218,12 @@ services:
       #- "--tlskey=/etc/nats/certs/server-key.pem"
       #- "--tlscacert=/etc/nats/certs/rootCA.pem"
       #- "--tlsverify"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
 
   gradle:
     image: opendigitaleducation/gradle:4.5.1
@@ -206,3 +249,5 @@ services:
     user: "\$DEFAULT_DOCKER_USER"
     volumes:
       - ./:/opt/springboard
+volumes:
+  pgdata:

@@ -14,10 +14,20 @@ if (!hasProperty('odePassword')) {
 apply plugin: 'groovy'
 apply from: "gradle/maven.gradle"
 
+configurations {
+  shaded
+}
+
 dependencies {
   compile gradleApi()
   compile localGroovy()
-  compile 'org.yaml:snakeyaml:1.33'
+  shaded 'org.yaml:snakeyaml:1.33'
+  compile configurations.shaded
+}
+
+shadowJar {
+  configurations = [project.configurations.shaded]
+  classifier = ''
 }
 
 
@@ -66,7 +76,7 @@ publishing {
     maven(MavenPublication) {
       groupId "${group}"
       artifactId "${archivesBaseName}"
-      artifact jar
+      artifact shadowJar
     }
   }
 }

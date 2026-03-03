@@ -112,5 +112,5 @@
       "legacy-indexes" : [{ "for" : "node", "name" : "node_auto_index", "type" : "fulltext" }]
     }
   },
-"services" : {{generatedServicesPath}}
+"services" : {{generatedServicesPath|safe}}
 }
