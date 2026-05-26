@@ -608,7 +608,7 @@ class SpringboardPlugin implements Plugin<Project> {
 			}
 		} finally {
 			threadPool.shutdown()
-			threadPool.awaitTermination(30, TimeUnit.MINUTES)
+			threadPool.awaitTermination(10, TimeUnit.MINUTES)
 		}
 		
 		// Throw the first failure if any occurred
