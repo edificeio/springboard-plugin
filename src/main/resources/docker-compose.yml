@@ -72,7 +72,7 @@ services:
 <% } %>    volumes:
       - ./assets:/srv/springboard/assets
       - ./mods:/srv/springboard/mods
-      - ./ent-core.json:/srv/springboard/conf/vertx.conf
+      - ./ent-core.json:/opt/conf/entcore.json
       - ./conf/cluster-config/zookeeper.json:/srv/springboard/conf/zookeeper.json
       - ./aaf-duplicates-test:/home/wse/aaf
       - ~/.m2:/home/vertx/.m2
