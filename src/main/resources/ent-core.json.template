@@ -13,7 +13,7 @@
   },
 
   "sharedConf": {
-
+    "smsProvider": "${smsProvider}",
   <% if ("true".equals(pdfEnabled)) { %>
   "node-pdf-generator" : {
     "pdf-connector-id": "exportpdf",
