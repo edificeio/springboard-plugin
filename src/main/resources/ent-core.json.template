@@ -57,7 +57,16 @@
     <% } else { %>
     "emailConfig": {
       "email": "${senderEmail}",
-      "host": "${host}"
+      "host": "${host}",
+      "type": "smtp",
+      "postgresql":{
+        "host": "${sqlIp}",
+        "database": "${sqlDb}",
+        "port": 5432,
+        "user": "${sqlUsername}",
+        "password": "${sqlPassword}",
+        "pool-size": 10
+      }
     },
     <% } %>
     "eventConfig": {
