@@ -65,8 +65,8 @@
         "port": 5432,
         "user": "${sqlUsername}",
         "password": "${sqlPassword}",
-        "pool-size": 10
-      }
+        "pool-size": 10
+      }
     },
     <% } %>
     "eventConfig": {

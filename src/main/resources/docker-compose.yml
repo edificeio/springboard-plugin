@@ -101,7 +101,7 @@ services:
       - ENABLE_REMOTE_DEBUG=true
       - TRAEFIK_DISCOVERY=true
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8012/app-registry/health/readiness"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8012/appregistry/health/readiness"]
       interval: 10s
       timeout: 5s
       retries: 20

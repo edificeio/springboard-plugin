@@ -497,7 +497,8 @@ class SpringboardPlugin implements Plugin<Project> {
 			["org.entcore~broker", "entCoreLibsVersion", "edificeio/entcore"],
 			["org.entcore~cas", "entCoreVersion", "edificeio/entcore"],
 			["org.entcore~archive", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~admin", "entCoreVersion", "edificeio/entcore"]
+			["org.entcore~admin", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~probes", "entCoreLibsVersion", "edificeio/edifice-entcore-libs"]
 		]
 
 		def defaultBranch = project.hasProperty("modsDefaultBranch") ? project.property("modsDefaultBranch") : "dev"
