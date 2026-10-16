@@ -13,7 +13,7 @@ clean () {
 
 install() {
 #  docker compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle install publishToMavenLocal
-   docker compose run --rm -u "$USER_UID:$GROUP_GID" gradle gradle install
+   docker compose run -e JAVA_TOOL_OPTIONS=-XX:-UseContainerSupport --rm -u "$USER_UID:$GROUP_GID" gradle gradle install
 }
 
 publish() {

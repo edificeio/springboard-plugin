@@ -35,6 +35,18 @@ class SpringboardPlugin implements Plugin<Project> {
 					entcoreJsonTemplate)
 		}
 
+
+		project.task("generateDockerConf") << {
+			def rootDir = project.getRootDir().getAbsolutePath()
+			
+			// Generate docker-compose.yml with variabilized version and M1 detection
+			Map additionalBindings = [isM1: isM1() ? "true" : "false", vertxCliVersion: "latest"]
+			// Get vertxServiceLauncherVersion from gradle.properties or default to the version that can be found in GitHub edificeio/vertx-service-launcher pom.xml on branch dev
+			def vertxServiceLauncherVersion = getLauncherVersion(project)
+			additionalBindings.vertxServiceLauncherVersion = vertxServiceLauncherVersion
+			FileUtils.createFile("${rootDir}/conf.properties", "${rootDir}/gradle.properties", "${rootDir}/docker-compose.yml.template", "${rootDir}/docker-compose.yml", additionalBindings)
+		}
+
 		project.task("extractMods") << {
 			extractMods(project)
 		}
