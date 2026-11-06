@@ -51,6 +51,13 @@ class SpringboardPlugin implements Plugin<Project> {
 			extractMods(project)
 		}
 
+		project.task("listMods") << {
+			// Prints the fat jars that extractMods would download, without downloading anything
+			resolveMods(project).each { dep ->
+				println "${dep.group}~${dep.name}~${dep.version}-fat.jar"
+			}
+		}
+
 		project.task("extractDeployments") << {
 			extractDeployments(project)
 		}
@@ -482,69 +489,7 @@ class SpringboardPlugin implements Plugin<Project> {
 		if (!project.file("mods")?.exists()) {
 			project.file("mods").mkdir()
 		}
-		
-		// Define default mods that should always be included
-		// Format: [groupId~artifactId, versionProperty, githubRepoPath]
-		def defaultModsSpecs = [
-			["io.vertx~mod-mongo-persistor", "modMongoPersistorVersion", "edificeio/mod-mongo-persistor"],
-			["fr.wseduc~mod-zip", "modZipVersion", "edificeio/mod-zip"],
-			["fr.wseduc~mod-postgresql", "modPostgresVersion", "edificeio/mod-postgresql"],
-			["com.opendigitaleducation~mod-json-schema-validator", "modJsonschemavalidatorVersion", "edificeio/mod-json-schema-validator"],
-			["fr.cgi~mod-sftp", "modSftpVersion", "OPEN-ENT-NG/mod-sftp", "dev"],
-			["fr.wseduc~mod-webdav", "modWebdavVersion", "OPEN-ENT-NG/mod-webdav", "master"],
-			["fr.wseduc~mod-sms-proxy", "modSmsproxyVersion", "edificeio/mod-sms-sender"],
-			["fr.wseduc~mod-pdf-generator", "modPdfgenerator", "edificeio/mod-pdf-generator"],
-			["org.entcore~infra", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~app-registry", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~audience", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~session", "entCoreLibsVersion", "edificeio/entcore"],
-			["org.entcore~auth", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~directory", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~workspace", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~communication", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~portal", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~conversation", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~feeder", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~timeline", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~broker", "entCoreLibsVersion", "edificeio/entcore"],
-			["org.entcore~cas", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~archive", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~admin", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~probes", "entCoreLibsVersion", "edificeio/edifice-entcore-libs"]
-		]
-
-		def defaultBranch = project.hasProperty("modsDefaultBranch") ? project.property("modsDefaultBranch") : "dev"
-		
-		// Parse default mods and resolve version properties
-		def defaultMods = defaultModsSpecs.collect { spec ->
-			def groupArtifact = spec[0].split('~')
-			def versionProperty = spec[1]
-			
-			def version = project.hasProperty(versionProperty) ? project.property(versionProperty) : null
-			if (version == null && spec.size() >= 3) {
-				def githubRepoPath = spec[2]
-				def branch = defaultBranch
-				if (spec.size() >= 4) {
-					branch = spec[3]
-				}
-				version = fetchVersionFromGitHub(project, branch, githubRepoPath)
-			}
-			if (version == null) {
-				project.logger.warn("Version property ${versionProperty} not found and could not fetch from GitHub for ${groupArtifact[0]}:${groupArtifact[1]}")
-				return null
-			} else {
-				project.logger.info("Resolved version for ${groupArtifact[0]}:${groupArtifact[1]}: ${version}")
-			}
-			return [group: groupArtifact[0], name: groupArtifact[1], version: version]
-		}.findAll { it != null }
-		
-		// Get all deployment dependencies
-		def deploymentDeps = project.configurations.deployment.dependencies.collect { 
-			[group: it.group, name: it.name, version: it.version]
-		}
-		
-		// Combine default mods and deployment dependencies (avoid duplicates)
-		def allDeps = (defaultMods + deploymentDeps).unique { "${it.group}:${it.name}" }
+		def allDeps = resolveMods(project)
 		
 		// Use thread pool for parallel processing
 		def threadPool = Executors.newFixedThreadPool(Math.min(Runtime.runtime.availableProcessors(), allDeps.size()))
@@ -628,6 +573,75 @@ class SpringboardPlugin implements Plugin<Project> {
 		if (firstFailure != null) {
 			throw firstFailure
 		}
+	}
+
+	/**
+	 * Resolves the mods (group, name, version) that must be part of the springboard, without downloading them.
+	 */
+	private List resolveMods(Project project) {
+		// Define default mods that should always be included
+		// Format: [groupId~artifactId, versionProperty, githubRepoPath]
+		def defaultModsSpecs = [
+			["io.vertx~mod-mongo-persistor", "modMongoPersistorVersion", "edificeio/mod-mongo-persistor"],
+			["fr.wseduc~mod-zip", "modZipVersion", "edificeio/mod-zip"],
+			["fr.wseduc~mod-postgresql", "modPostgresVersion", "edificeio/mod-postgresql"],
+			["com.opendigitaleducation~mod-json-schema-validator", "modJsonschemavalidatorVersion", "edificeio/mod-json-schema-validator"],
+			["fr.cgi~mod-sftp", "modSftpVersion", "OPEN-ENT-NG/mod-sftp", "dev"],
+			["fr.wseduc~mod-webdav", "modWebdavVersion", "OPEN-ENT-NG/mod-webdav", "master"],
+			["fr.wseduc~mod-sms-proxy", "modSmsproxyVersion", "edificeio/mod-sms-sender"],
+			["fr.wseduc~mod-pdf-generator", "modPdfgenerator", "edificeio/mod-pdf-generator"],
+			["org.entcore~infra", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~app-registry", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~audience", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~session", "entCoreLibsVersion", "edificeio/entcore"],
+			["org.entcore~auth", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~directory", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~workspace", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~communication", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~portal", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~conversation", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~feeder", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~timeline", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~broker", "entCoreLibsVersion", "edificeio/entcore"],
+			["org.entcore~cas", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~archive", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~admin", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~probes", "entCoreLibsVersion", "edificeio/edifice-entcore-libs"]
+		]
+
+		def defaultBranch = project.hasProperty("modsDefaultBranch") ? project.property("modsDefaultBranch") : "dev"
+
+		// Parse default mods and resolve version properties
+		def defaultMods = defaultModsSpecs.collect { spec ->
+			def groupArtifact = spec[0].split('~')
+			def versionProperty = spec[1]
+
+			def version = project.hasProperty(versionProperty) ? project.property(versionProperty) : null
+			if (version == null && spec.size() >= 3) {
+				def githubRepoPath = spec[2]
+				def branch = defaultBranch
+				if (spec.size() >= 4) {
+					branch = spec[3]
+				}
+				version = fetchVersionFromGitHub(project, branch, githubRepoPath)
+			}
+			if (version == null) {
+				project.logger.warn("Version property ${versionProperty} not found and could not fetch from GitHub for ${groupArtifact[0]}:${groupArtifact[1]}")
+				return null
+			} else {
+				project.logger.info("Resolved version for ${groupArtifact[0]}:${groupArtifact[1]}: ${version}")
+			}
+			return [group: groupArtifact[0], name: groupArtifact[1], version: version]
+		}.findAll { it != null }
+
+		// Get all deployment dependencies
+		def deploymentDeps = project.configurations.deployment.dependencies.collect {
+			[group: it.group, name: it.name, version: it.version]
+		}
+
+		// Combine default mods and deployment dependencies (avoid duplicates)
+		def allDeps = (defaultMods + deploymentDeps).unique { "${it.group}:${it.name}" }
+		return allDeps
 	}
 
 	/**
