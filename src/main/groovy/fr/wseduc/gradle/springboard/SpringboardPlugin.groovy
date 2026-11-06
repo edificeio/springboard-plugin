@@ -590,22 +590,22 @@ class SpringboardPlugin implements Plugin<Project> {
 			["fr.wseduc~mod-webdav", "modWebdavVersion", "OPEN-ENT-NG/mod-webdav", "master"],
 			["fr.wseduc~mod-sms-proxy", "modSmsproxyVersion", "edificeio/mod-sms-sender"],
 			["fr.wseduc~mod-pdf-generator", "modPdfgenerator", "edificeio/mod-pdf-generator"],
-			["org.entcore~infra", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~app-registry", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~audience", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~infra", ["infraVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~app-registry", ["appRegistryVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~audience", ["audienceVersion", "entCoreVersion"], "edificeio/entcore"],
 			["org.entcore~session", "entCoreLibsVersion", "edificeio/entcore"],
-			["org.entcore~auth", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~directory", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~workspace", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~communication", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~portal", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~conversation", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~feeder", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~timeline", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~auth", ["authVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~directory", ["directoryVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~workspace", ["workspaceVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~communication", ["communicationVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~portal", ["portalVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~conversation", ["conversationVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~feeder", ["feederVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~timeline", ["timelineVersion", "entCoreVersion"], "edificeio/entcore"],
 			["org.entcore~broker", "entCoreLibsVersion", "edificeio/entcore"],
-			["org.entcore~cas", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~archive", "entCoreVersion", "edificeio/entcore"],
-			["org.entcore~admin", "entCoreVersion", "edificeio/entcore"],
+			["org.entcore~cas", ["casVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~archive", ["archiveVersion", "entCoreVersion"], "edificeio/entcore"],
+			["org.entcore~admin", ["adminVersion", "entCoreVersion"], "edificeio/entcore"],
 			["org.entcore~probes", "entCoreLibsVersion", "edificeio/edifice-entcore-libs"]
 		]
 
@@ -614,9 +614,11 @@ class SpringboardPlugin implements Plugin<Project> {
 		// Parse default mods and resolve version properties
 		def defaultMods = defaultModsSpecs.collect { spec ->
 			def groupArtifact = spec[0].split('~')
-			def versionProperty = spec[1]
+			// spec[1] is either a property name or an ordered list of property names (first defined wins)
+			def versionProperties = spec[1] instanceof List ? spec[1] : [spec[1]]
+			def versionProperty = versionProperties.find { project.hasProperty(it) }
 
-			def version = project.hasProperty(versionProperty) ? project.property(versionProperty) : null
+			def version = versionProperty != null ? project.property(versionProperty) : null
 			if (version == null && spec.size() >= 3) {
 				def githubRepoPath = spec[2]
 				def branch = defaultBranch
@@ -626,7 +628,7 @@ class SpringboardPlugin implements Plugin<Project> {
 				version = fetchVersionFromGitHub(project, branch, githubRepoPath)
 			}
 			if (version == null) {
-				project.logger.warn("Version property ${versionProperty} not found and could not fetch from GitHub for ${groupArtifact[0]}:${groupArtifact[1]}")
+				project.logger.warn("Version property ${versionProperties.join(" / ")} not found and could not fetch from GitHub for ${groupArtifact[0]}:${groupArtifact[1]}")
 				return null
 			} else {
 				project.logger.info("Resolved version for ${groupArtifact[0]}:${groupArtifact[1]}: ${version}")
